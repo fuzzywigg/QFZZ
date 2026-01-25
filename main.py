@@ -47,6 +47,9 @@ def main():
     api_key = os.environ.get("GEMINI_API_KEY")
     dj = PersonalizedDJ(llm_model="llama3", api_key=api_key)
     
+    # CONNECT components: Allow Server to talk to DJ and Player
+    player.server.attach_instances(dj, player)
+    
     # 2. Content Ingestion (Deep Scan)
     logger.info("Scanning library for content...")
     scanned_tracks = dj.scanner.scan_directory()

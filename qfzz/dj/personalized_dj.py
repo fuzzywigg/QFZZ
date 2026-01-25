@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 from qfzz.library import ContentScanner
 from qfzz.blockchain import SovereignLedger
+from qfzz.library.fetcher import ContentFetcher
 
 class PersonalizedDJ:
     """
@@ -39,6 +40,7 @@ class PersonalizedDJ:
         self.kg = QFZZKnowledgeGraph() # Initialize Knowledge Graph
         self.scanner = ContentScanner(library_path="./qfzz_audio_content") # Initialize Scanner
         self.ledger = SovereignLedger() # Initialize Blockchain Ledger
+        self.fetcher = ContentFetcher(download_dir="./qfzz_audio_content") # Initialize Fetcher
         
         # Initialize LLM
         # Priority 1: Gemini (if key provided)
@@ -62,6 +64,18 @@ class PersonalizedDJ:
             self.llm = MockLLMClient()
             
         logger.info("Personalized DJ initialized with Knowledge Graph")
+
+    def request_track(self, url: str) -> Optional[Dict[str, Any]]:
+        """Download and register a track from a URL."""
+        track = self.fetcher.fetch_from_url(url)
+        if track:
+             # Scan it for deep features immediately?
+             # For now, just trust fetcher metadata
+             self.kg.add_track_node(track['filename'], track)
+             if self.ledger:
+                 self.ledger.record_event("TRACK_INGESTED", {"url": url, "filename": track['filename']})
+             return track
+        return None
 
     def interact(self, user_id: str, message: str) -> str:
         """

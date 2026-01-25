@@ -97,6 +97,21 @@ class MusicPlayer:
         
         logger.info(f"Loaded playlist with {len(tracks)} tracks")
         
+    def add_track(self, track: Dict[str, Any]) -> None:
+        """Add a single track to the playlist."""
+        self._playlist.append(track)
+        
+        # Update Server
+        t = track.copy()
+        t['url'] = self.get_stream_url(track['filename'])
+        
+        # Retrieve current payload and append to avoid full reload issues
+        current = self.server.httpd.RequestHandlerClass.PAYLOAD if self.server.httpd else []
+        current.append(t)
+        self.server.set_playlist(current)
+        
+        logger.info(f"Added track to playlist: {track['title']}")
+
     def set_dj_message(self, message: str):
         """Update DJ message on server."""
         self.server.set_dj_message(message)
