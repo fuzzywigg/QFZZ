@@ -238,7 +238,7 @@ export default function AudioPlayer() {
         {/* Audio Element */}
         <audio
           ref={audioRef}
-          src={currentTrack.url}
+          src={currentTrack.url || undefined}
           onTimeUpdate={handleTimeUpdate}
           onEnded={handleNext}
         />
