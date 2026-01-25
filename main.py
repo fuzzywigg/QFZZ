@@ -115,6 +115,61 @@ def demo_personalized_dj():
             logger.info(f"New top recommendation: {new_recs[0]['title']}")
 
 
+from qfzz.streaming import MusicPlayer
+import webbrowser
+import time
+
+# ... (logging config) ...
+
+# ... (Previous demos are fine) ...
+
+def demo_music_player():
+    """Demonstrate music player and streaming"""
+    logger.info("\n" + "=" * 60)
+    logger.info("QFZZ Music Player & Streaming - Demo")
+    logger.info("=" * 60)
+    
+    # Create player (starts HTTP server)
+    player = MusicPlayer(content_dir="./qfzz_audio_content")
+    
+    # Create a playlist of local tracks
+    playlist = [
+        {'title': 'Station Intro', 'artist': 'QFZZ AI', 'filename': 'intro.wav', 'duration': 3},
+        {'title': 'Test Tone 440Hz', 'artist': 'Physics', 'filename': 'test_tone.wav', 'duration': 5}
+    ]
+    
+    player.load_playlist(playlist)
+    
+    # Start playback
+    player.play()
+    track = player.get_current_track()
+    
+    if track:
+        url = player.get_stream_url(track['filename'])
+        logger.info(f"Now Playing: {track['title']}")
+        logger.info(f"Stream URL: {url}")
+        
+        # In a real app, this URL would go to a frontend audio player.
+        # For demo, we can open it in the browser!
+        logger.info("Opening stream in browser...")
+        webbrowser.open(url)
+        
+        # Simulate listening
+        time.sleep(2)
+        
+        # Next track
+        player.next_track()
+        track = player.get_current_track()
+        if track:
+             url = player.get_stream_url(track['filename'])
+             logger.info(f"Skipped to: {track['title']}")
+             logger.info(f"Stream URL: {url}")
+             webbrowser.open(url)
+
+    # Cleanup happens automatically on exit, but good practice
+    # player.server.stop() # (MusicPlayer destructor handles this)
+
+
 def demo_dataset_management():
     """Demonstrate dataset management"""
     logger.info("\n" + "=" * 60)
@@ -254,6 +309,7 @@ def main():
     try:
         demo_basic_station()
         demo_personalized_dj()
+        demo_music_player() # New!
         demo_dataset_management()
         demo_blockchain()
         demo_edge_device()

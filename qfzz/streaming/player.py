@@ -4,9 +4,12 @@ Music player for streaming playback.
 
 from typing import Dict, List, Any, Optional
 import logging
+import os
 from datetime import datetime
 from enum import Enum
 
+from .server import StreamingServer
+from .audio_tools import generate_tone
 
 logger = logging.getLogger(__name__)
 
@@ -21,14 +24,19 @@ class PlayerState(Enum):
 
 class MusicPlayer:
     """
-    Music player stub for streaming playback.
+    Music player for streaming playback.
     
-    This is a basic implementation that simulates music playback.
-    In a real implementation, this would interface with audio libraries.
+    Manages a local streaming server and playlist state.
     """
     
-    def __init__(self):
-        """Initialize music player."""
+    def __init__(self, content_dir: str = "./audio_content", port: int = 8000):
+        """
+        Initialize music player.
+        
+        Args:
+            content_dir: Directory to serve audio from
+            port: Streaming port
+        """
         self._state = PlayerState.STOPPED
         self._current_track: Optional[Dict[str, Any]] = None
         self._playlist: List[Dict[str, Any]] = []
@@ -36,9 +44,37 @@ class MusicPlayer:
         self._volume = 0.8
         self._position_seconds = 0
         self._playback_history: List[Dict[str, Any]] = []
-        logger.info("Music Player initialized")
+        
+        # Setup content directory
+        self.content_dir = os.path.abspath(content_dir)
+        os.makedirs(self.content_dir, exist_ok=True)
+        
+        # Initialize streaming server
+        self.server = StreamingServer(self.content_dir, port)
+        self.server.start()
+        
+        # Ensure we have at least one test track
+        self._ensure_test_content()
+        
+        logger.info(f"Music Player initialized. Streaming at http://localhost:{port}")
     
-    def load_playlist(self, tracks: List[Dict[str, Any]]) -> None:
+    def _ensure_test_content(self):
+        """Generate test audio files if they don't exist."""
+        test_file = os.path.join(self.content_dir, "test_tone.wav")
+        if not os.path.exists(test_file):
+            generate_tone(test_file, duration_sec=5, freq_hz=440)
+            generate_tone(os.path.join(self.content_dir, "intro.wav"), duration_sec=3, freq_hz=554) # C#5
+            logger.info("Generated test audio content")
+
+    def get_stream_url(self, filename: str) -> str:
+        """Get the streaming URL for a file."""
+        return f"http://localhost:{self.server.port}/{filename}"
+        
+    def __del__(self):
+        """Cleanup on deletion."""
+        if hasattr(self, 'server'):
+            self.server.stop()
+
         """
         Load a playlist.
         

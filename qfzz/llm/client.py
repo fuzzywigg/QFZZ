@@ -87,7 +87,7 @@ class OllamaClient(LLMProvider):
 class GeminiClient(LLMProvider):
     """Client for Google's Gemini API (Free Tier)."""
     
-    def __init__(self, api_key: str, model: str = "gemini-1.5-flash"):
+    def __init__(self, api_key: str, model: str = "gemini-pro"):
         self.api_key = api_key
         self.model_name = model
         self._available = False
