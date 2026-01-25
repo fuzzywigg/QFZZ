@@ -75,6 +75,7 @@ class MusicPlayer:
         if hasattr(self, 'server'):
             self.server.stop()
 
+    def load_playlist(self, tracks: List[Dict[str, Any]]) -> None:
         """
         Load a playlist.
         
