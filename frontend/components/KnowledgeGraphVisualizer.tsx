@@ -17,11 +17,14 @@ export default function KnowledgeGraphVisualizer() {
             });
         }
 
-        fetch('http://localhost:8000/graph.json')
+        fetch('http://localhost:8001/graph.json')
             .then(res => res.json())
             .then(data => {
-                if (data.nodes) {
-                    setGraphData(data);
+                if (data) {
+                    setGraphData({
+                        nodes: data.nodes || [],
+                        links: data.links || []
+                    });
                 }
             })
             .catch(err => console.error("Failed to load knowledge graph", err));

@@ -65,7 +65,8 @@ class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def log_message(self, format, *args):
         # Suppress default logging to keep console clean
-        pass
+        # pass # Enable for Debugging
+        super().log_message(format, *args)
         
 class StreamingServer:
     """

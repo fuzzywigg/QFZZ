@@ -1,0 +1,82 @@
+[
+  {
+    "index": 0,
+    "timestamp": "2026-01-25T13:38:04.389662",
+    "event_type": "GENESIS",
+    "data": {},
+    "prev_hash": "0",
+    "hash": "4b6141a44349a600dcf7dc5e82ede04aa1dea97ab84261fa35779ef9ef8e7068"
+  },
+  {
+    "index": 1,
+    "timestamp": "2026-01-25T13:38:30.462963",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "Station Intro",
+      "next_track": "test_tone",
+      "prompt_hash": -3680754532741554151
+    },
+    "prev_hash": "4b6141a44349a600dcf7dc5e82ede04aa1dea97ab84261fa35779ef9ef8e7068",
+    "hash": "07fe7e6261a3ac7874936534e3e4ff9ce1dd7f3576639f1a8bf5e8ba4effbfd3"
+  },
+  {
+    "index": 2,
+    "timestamp": "2026-01-25T13:42:03.023308",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "Station Intro",
+      "next_track": "test_tone",
+      "prompt_hash": 4728334349606733248
+    },
+    "prev_hash": "07fe7e6261a3ac7874936534e3e4ff9ce1dd7f3576639f1a8bf5e8ba4effbfd3",
+    "hash": "c8508a7a8aa2971bdb3bee073077f13704b9946de426eca9460c6958b3b7089f"
+  },
+  {
+    "index": 3,
+    "timestamp": "2026-01-25T13:50:31.682822",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "Station Intro",
+      "next_track": "test_tone",
+      "prompt_hash": -8567320175872262303
+    },
+    "prev_hash": "c8508a7a8aa2971bdb3bee073077f13704b9946de426eca9460c6958b3b7089f",
+    "hash": "cd71b2a941a3cf42b895bcd1c5356740d6d6073b3a3d331c4e499615db6b67ae"
+  },
+  {
+    "index": 4,
+    "timestamp": "2026-01-25T13:56:19.385231",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "Station Intro",
+      "next_track": "test_tone",
+      "prompt_hash": 4370565247132566350
+    },
+    "prev_hash": "cd71b2a941a3cf42b895bcd1c5356740d6d6073b3a3d331c4e499615db6b67ae",
+    "hash": "c1f95fb8d6c9c4ff0049e9fd4d65330b18648270ce76220d306bbafc6ca7bea9"
+  },
+  {
+    "index": 5,
+    "timestamp": "2026-01-25T13:57:05.812272",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "Station Intro",
+      "next_track": "test_tone",
+      "prompt_hash": -6956771228351886933
+    },
+    "prev_hash": "c1f95fb8d6c9c4ff0049e9fd4d65330b18648270ce76220d306bbafc6ca7bea9",
+    "hash": "626e6bec4a115ce2dde2fb5714d3347969182387e17e1b1215a4baa517a30259"
+  },
+  {
+    "index": 6,
+    "timestamp": "2026-01-25T13:58:34.965958",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "Station Intro",
+      "next_track": "test_tone",
+      "prompt_hash": 6620825723261351039
+    },
+    "prev_hash": "626e6bec4a115ce2dde2fb5714d3347969182387e17e1b1215a4baa517a30259",
+    "hash": "264ed938a31390d2801ef250d0c768dae3c2ff1d15c0154000f3b5706bd9c163"
+  }
+]

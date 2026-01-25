@@ -33,8 +33,8 @@ def main():
     
     # 1. Initialize Components
     
-    # Music Player (Port 8000)
-    player = MusicPlayer(content_dir=AUDIO_DIR, port=8000)
+    # Music Player (Port 8001)
+    player = MusicPlayer(content_dir=AUDIO_DIR, port=8001)
     
     # Initialize Playlist
     playlist = [

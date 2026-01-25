@@ -25,7 +25,7 @@ export default function AudioPlayer() {
 
   useEffect(() => {
     // 1. Fetch playlist
-    fetch('http://localhost:8000/playlist.json')
+    fetch('http://localhost:8001/playlist.json')
       .then(res => res.json())
       .then(data => {
         if (data && data.length > 0) {
@@ -37,7 +37,7 @@ export default function AudioPlayer() {
 
     // 2. Poll for DJ Messages (every 5 seconds)
     const pollDJ = setInterval(() => {
-      fetch('http://localhost:8000/dj_message.json')
+      fetch('http://localhost:8001/dj_message.json')
         .then(res => res.json())
         .then(data => {
           if (data && data.message) {
@@ -47,7 +47,7 @@ export default function AudioPlayer() {
         })
         .catch(e => console.error("DJ poll failed", e));
 
-      fetch('http://localhost:8000/ledger.json')
+      fetch('http://localhost:8001/ledger.json')
         .then(res => res.json())
         .then(data => {
           if (data) setLedgerStats(data);
