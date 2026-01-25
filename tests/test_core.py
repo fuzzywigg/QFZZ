@@ -9,17 +9,17 @@ def test_station_initialization():
     config = StationConfig(station_name="Test Station")
     station = QFZZStation(config)
     assert station.config.station_name == "Test Station"
-    assert station.is_running == False
+    assert not station.is_running
 
 
 def test_station_start_stop():
     """Test station start and stop"""
     station = QFZZStation()
     station.start()
-    assert station.is_running == True
+    assert station.is_running
     
     station.stop()
-    assert station.is_running == False
+    assert not station.is_running
 
 
 def test_station_status():
@@ -30,5 +30,5 @@ def test_station_status():
     
     status = station.get_status()
     assert status['name'] == "QFZZ"
-    assert status['edge_mode'] == True
-    assert status['blockchain_enabled'] == True
+    assert status['edge_mode']
+    assert status['blockchain_enabled']

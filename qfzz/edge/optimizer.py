@@ -7,6 +7,10 @@ from .device_config import EdgeDeviceConfig
 
 logger = logging.getLogger(__name__)
 
+# Constants
+BANDWIDTH_SAFETY_FACTOR = 0.7  # Use 70% of available bandwidth
+STORAGE_USAGE_LIMIT = 0.8  # Use up to 80% of available storage
+
 
 class EdgeOptimizer:
     """Optimizes QFZZ for edge device deployment
@@ -68,7 +72,7 @@ class EdgeOptimizer:
         Returns:
             Streaming configuration
         """
-        max_bitrate = self.config.network_bandwidth_mbps * 1000 * 0.7
+        max_bitrate = self.config.network_bandwidth_mbps * 1000 * BANDWIDTH_SAFETY_FACTOR
         
         if self.config.enable_6g:
             # 6G provides high bandwidth and low latency
@@ -101,7 +105,7 @@ class EdgeOptimizer:
         
         available_space_mb = self.config.storage_available_gb * 1024
         
-        return (current_cache_size + size_mb) < available_space_mb * 0.8
+        return (current_cache_size + size_mb) < available_space_mb * STORAGE_USAGE_LIMIT
         
     def add_to_cache(self, key: str, data: Any, size_mb: float) -> None:
         """Add content to local cache
