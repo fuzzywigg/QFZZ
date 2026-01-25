@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, SkipForward, Radio, Volume2, Mic } from 'lucide-react';
+import { Play, Pause, SkipForward, Radio, Volume2, Mic, Menu, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 const KnowledgeGraphVisualizer = dynamic(() => import('../components/KnowledgeGraphVisualizer'), {
@@ -22,6 +22,7 @@ export default function AudioPlayer() {
   const [duration, setDuration] = useState(0);
   const [djMessage, setDjMessage] = useState("Welcome to QFZZ, the Pulse of the Quantum Realm.");
   const [ledgerStats, setLedgerStats] = useState({ height: 0, status: "Init" });
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -155,11 +156,37 @@ export default function AudioPlayer() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-900/20 rounded-full blur-[100px] -z-10 animate-pulse"></div>
 
       {/* Header */}
-      <div className="text-center space-y-2 z-10">
-        <h1 className="text-4xl font-bold tracking-tighter text-white flex items-center justify-center gap-3">
-          <Radio className="w-8 h-8 text-purple-400" />
-          QFZZ Prime
-        </h1>
+      <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-50">
+        <div className="flex items-center gap-3">
+          <Radio className="w-6 h-6 text-purple-400" />
+          <h1 className="text-xl font-bold tracking-tighter text-white">
+            QFZZ Prime
+          </h1>
+        </div>
+
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors z-50"
+        >
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Navigation Overlay */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-40 flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-200">
+          <nav className="flex flex-col items-center gap-6 text-2xl font-light tracking-widest text-white/80">
+            <a href="#" className="hover:text-purple-400 hover:scale-110 transition-all">Music Library</a>
+            <a href="#" className="hover:text-purple-400 hover:scale-110 transition-all">Listener Guide</a>
+            <a href="#" className="hover:text-purple-400 hover:scale-110 transition-all">About QFZZ</a>
+            <a href="#" className="hover:text-purple-400 hover:scale-110 transition-all">Contact</a>
+          </nav>
+          <div className="w-16 h-[1px] bg-white/20"></div>
+          <p className="text-sm text-white/40 font-mono">v0.9.1 Beta // Quantum Stream</p>
+        </div>
+      )}
+
+      <div className="text-center space-y-2 z-10 mt-12">
         <p className="text-slate-400 text-sm tracking-widest uppercase">The Pulse of the Quantum Realm</p>
       </div>
 
