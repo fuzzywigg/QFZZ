@@ -8,7 +8,8 @@ import logging
 from datetime import datetime
 
 from .profiles import UserProfile
-from qfzz.llm import LLMProvider, MockLLMClient, OllamaClient
+from qfzz.llm import LLMProvider, MockLLMClient, OllamaClient, GeminiClient
+import os
 
 
 logger = logging.getLogger(__name__)
@@ -20,25 +21,38 @@ class PersonalizedDJ:
     tailored playlists with trust-based content filtering.
     """
     
-    def __init__(self, llm_model: str = "llama3"):
+    def __init__(self, llm_model: str = "llama3", api_key: Optional[str] = None):
         """
         Initialize the Personalized DJ.
         
         Args:
             llm_model: Name of the LLM model to use (default: llama3)
+            api_key: Optional API key for cloud providers (like Gemini)
         """
         self._user_profiles: Dict[str, UserProfile] = {}
         self._content_catalog: List[Dict[str, Any]] = []
         self._genre_similarity: Dict[str, List[str]] = self._init_genre_similarity()
         
         # Initialize LLM
-        # Try Ollama first, fall back to Mock
-        self.llm: LLMProvider = OllamaClient(model=llm_model)
-        if not self.llm.is_available():
-            logger.info("Ollama not detected, using Mock DJ")
+        # Priority 1: Gemini (if key provided)
+        # Priority 2: Ollama (local)
+        # Priority 3: Mock (fallback)
+        
+        self.llm: Optional[LLMProvider] = None
+        
+        if api_key:
+             self.llm = GeminiClient(api_key=api_key)
+             if self.llm.is_available():
+                 logger.info("Connected to Gemini API")
+        
+        if not self.llm or not self.llm.is_available():
+            self.llm = OllamaClient(model=llm_model)
+            if self.llm.is_available():
+                logger.info(f"Connected to local Ollama: {llm_model}")
+
+        if not self.llm or not self.llm.is_available():
+            logger.info("No LLM detected, using Mock DJ")
             self.llm = MockLLMClient()
-        else:
-            logger.info(f"Connected to real LLM: {llm_model}")
             
         logger.info("Personalized DJ initialized")
 

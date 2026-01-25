@@ -82,3 +82,46 @@ class OllamaClient(LLMProvider):
         except Exception as e:
             logger.error(f"Ollama generation failed: {e}")
             return f"Error generating response: {e}"
+
+
+class GeminiClient(LLMProvider):
+    """Client for Google's Gemini API (Free Tier)."""
+    
+    def __init__(self, api_key: str, model: str = "gemini-1.5-flash"):
+        self.api_key = api_key
+        self.model_name = model
+        self._available = False
+        
+        try:
+            import google.generativeai as genai
+            genai.configure(api_key=self.api_key)
+            self.model = genai.GenerativeModel(self.model_name)
+            self._available = True
+            logger.info(f"Gemini API configured with model: {self.model_name}")
+        except Exception as e:
+            logger.error(f"Failed to configure Gemini API: {e}")
+            self._available = False
+
+    def is_available(self) -> bool:
+        return self._available
+
+    def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
+        if not self._available:
+            return "Gemini API is not available."
+            
+        try:
+            # Combine system prompt with user prompt since regular generate_content
+            # doesn't always support system instructions purely in 1.0 versions cleanly
+            # or keep it simple for now. 1.5 supports system instructions better during model init
+            # but for 100% compatibility, we can just prepend.
+            full_prompt = prompt
+            if system_prompt:
+                # Re-configure model with system prompt if possible, or just prepend
+                # For this simple client, prepending is safer and universally working
+                full_prompt = f"System: {system_prompt}\n\nUser: {prompt}"
+
+            response = self.model.generate_content(full_prompt)
+            return response.text
+        except Exception as e:
+            logger.error(f"Gemini generation failed: {e}")
+            return f"Error generating response: {e}"

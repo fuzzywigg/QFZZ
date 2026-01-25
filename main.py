@@ -7,6 +7,7 @@ Starts the AI radio station with personalized DJ
 import logging
 import sys
 import uuid
+import os
 from qfzz import (
     QFZZStation, 
     StationConfig, 
@@ -67,15 +68,20 @@ def demo_personalized_dj():
     
     # Create DJ
     # By default, it will try to use local Ollama, or fall back to Mock
-    dj = PersonalizedDJ(llm_model="llama3")
+    # If GEMINI_API_KEY is present, it will try connecting to that!
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if api_key:
+        logger.info("Found GEMINI_API_KEY, attempting to use Gemini...")
+    
+    dj = PersonalizedDJ(llm_model="llama3", api_key=api_key)
     
     # Simulate user interaction
     user_id = "user_001"
     
     # Chat with DJ (New Feature!)
     logger.info("\n--- Chatting with DJ ---")
-    greeting = dj.interact(user_id, "Yo DJ, what's good?")
-    logger.info(f"User: Yo DJ, what's good?")
+    greeting = dj.interact(user_id, "Yo DJ, write me a super short intro for a jazz show!")
+    logger.info(f"User: Yo DJ, write me a super short intro for a jazz show!")
     logger.info(f"DJ: {greeting}")
     
     logger.info("\n--- Building Profile ---")
