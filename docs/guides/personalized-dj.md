@@ -674,8 +674,9 @@ station_config = StationConfig(
 station = QFZZStation(config=station_config)
 station.start()
 
-# Get DJ (runs locally)
-dj = station.get_dj()
+# Create DJ (runs locally on device)
+from qfzz.dj import PersonalizedDJ
+dj = PersonalizedDJ(name="DJ Quantum", edge_mode=station_config.edge_mode)
 
 # All interactions happen on-device (private)
 greeting = dj.greet_user("user_001", "Alex")

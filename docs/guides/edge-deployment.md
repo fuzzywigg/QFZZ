@@ -552,8 +552,9 @@ station_config = StationConfig(
 station = QFZZStation(config=station_config)
 station.start()
 
-# 6. Get your personalized DJ
-dj = station.get_dj()
+# 6. Create your personalized DJ
+from qfzz.dj import PersonalizedDJ
+dj = PersonalizedDJ(name="DJ Quantum", edge_mode=station_config.edge_mode)
 
 # 7. Start interacting
 greeting = dj.greet_user("user_001", "Alex")
