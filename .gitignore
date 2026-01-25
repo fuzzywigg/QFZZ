@@ -129,6 +129,19 @@ dmypy.json
 *.swo
 *~
 
+# MkDocs
+site/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
 # OS
 .DS_Store
 Thumbs.db
