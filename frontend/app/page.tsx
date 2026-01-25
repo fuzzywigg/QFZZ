@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, SkipForward, Radio, Volume2, Mic, Menu, X } from 'lucide-react';
+import { Play, Pause, SkipForward, Radio, Volume2, Menu, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 const KnowledgeGraphVisualizer = dynamic(() => import('../components/KnowledgeGraphVisualizer'), {
@@ -17,10 +17,17 @@ const RequestTrack = dynamic(() => import('../components/RequestTrack'), {
   ssr: false
 });
 
+interface Track {
+  title: string;
+  artist: string;
+  url: string;
+  genre: string;
+}
+
 export default function AudioPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.8);
-  const [playlist, setPlaylist] = useState<any[]>([]);
+  const [playlist, setPlaylist] = useState<Track[]>([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -218,6 +225,8 @@ export default function AudioPlayer() {
             step="0.01"
             value={volume}
             onChange={(e) => setVolume(parseFloat(e.target.value))}
+            aria-label="Volume Control"
+            title="Volume Control"
             className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
           />
         </div>

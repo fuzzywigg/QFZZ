@@ -81,10 +81,10 @@ export default function HiveTerminal() {
                 {messages.map((msg, i) => (
                     <div key={i} className={`flex gap-3 ${msg.sender === 'USER' ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[80%] px-3 py-1.5 rounded ${msg.sender === 'USER'
-                                ? 'bg-amber-500/10 text-amber-100 border border-amber-500/20'
-                                : msg.sender === 'SYSTEM'
-                                    ? 'text-green-500 italic text-xs'
-                                    : 'text-amber-400'
+                            ? 'bg-amber-500/10 text-amber-100 border border-amber-500/20'
+                            : msg.sender === 'SYSTEM'
+                                ? 'text-green-500 italic text-xs'
+                                : 'text-amber-400'
                             }`}>
                             <span className="text-[10px] opacity-50 block mb-0.5">
                                 {msg.sender === 'AI' ? 'QUEEN' : msg.sender}
@@ -110,6 +110,8 @@ export default function HiveTerminal() {
                 </div>
                 <button
                     type="submit"
+                    title="Send"
+                    aria-label="Send Message"
                     className="bg-amber-600 hover:bg-amber-500 text-black font-bold p-2 rounded-md transition-colors"
                 >
                     <Send size={16} />

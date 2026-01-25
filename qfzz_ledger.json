@@ -243,5 +243,29 @@
     },
     "prev_hash": "7872b9ffaa6c481ea0f775ffe6071e3e321d9b5c30bbe1cc74b108fa43d05fe1",
     "hash": "47c210cc9d0d4e16380df70828eb6470f143f88dc5b3ada7265e15922c39db4e"
+  },
+  {
+    "index": 21,
+    "timestamp": "2026-01-25T15:14:08.798369",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": -896806345737308856
+    },
+    "prev_hash": "47c210cc9d0d4e16380df70828eb6470f143f88dc5b3ada7265e15922c39db4e",
+    "hash": "db111c36b45334d9a0472705eeb773870cac3c5befe82502e73ef548fb598a35"
+  },
+  {
+    "index": 22,
+    "timestamp": "2026-01-25T15:21:07.038891",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": -706795898648197370
+    },
+    "prev_hash": "db111c36b45334d9a0472705eeb773870cac3c5befe82502e73ef548fb598a35",
+    "hash": "c6fe8c01a6dc8ccc6d6fcda80c454955cf80f8f4bf844798ddeee818a371ad09"
   }
 ]
