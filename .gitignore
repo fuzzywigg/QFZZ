@@ -145,3 +145,24 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+
+# QFZZ specific
+# Debug and error files
+*.err
+
+# Audio cache and content directories
+qfzz_audio_content/
+audio_content/
+
+# Model cache
+models/
+*.gguf
+*.bin
+
+# Knowledge graph and ledger state
+qfzz_knowledge_graph.json
+qfzz_ledger.json
+
+# Temporary test files
+tribe_test.html
+test_*.html

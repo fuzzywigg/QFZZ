@@ -1,0 +1,93 @@
+# LLM Provider Configuration for QFZZ
+# This file documents available LLM providers and their settings
+
+providers:
+  # Primary: Ollama (Local, Free, Privacy-Preserving)
+  ollama:
+    priority: 1
+    type: local
+    description: "Run LLMs locally on your machine. No API key required."
+    models:
+      - llama3
+      - llama2
+      - mistral
+      - mixtral
+    setup_url: "https://ollama.ai/"
+    free: true
+    privacy: excellent
+    
+  # Secondary: Groq (Free Tier API)
+  groq:
+    priority: 2
+    type: api
+    description: "Fast inference with free tier. Requires API key."
+    models:
+      - mixtral-8x7b-32768
+      - llama2-70b-4096
+    signup_url: "https://console.groq.com"
+    free_tier:
+      requests_per_day: "High limits"
+      rate_limit: "50 requests/minute"
+    privacy: good
+    
+  # Tertiary: Together.ai (Free Tier)
+  together:
+    priority: 3
+    type: api
+    description: "Open-source model hosting with free tier."
+    models:
+      - mistralai/Mixtral-8x7B-Instruct-v0.1
+      - togethercomputer/llama-2-70b-chat
+    signup_url: "https://api.together.xyz/signup"
+    free_tier:
+      credits: "$25 free credits"
+      rate_limit: "Varies by model"
+    privacy: good
+    
+  # Quaternary: HuggingFace Inference API (Free Tier)
+  huggingface:
+    priority: 4
+    type: api
+    description: "Access thousands of models via Inference API."
+    models:
+      - mistralai/Mixtral-8x7B-Instruct-v0.1
+      - meta-llama/Llama-2-70b-chat-hf
+    signup_url: "https://huggingface.co/settings/tokens"
+    free_tier:
+      rate_limit: "Varies by model, may have cold starts"
+    privacy: good
+    
+  # Optional: Google Gemini (Free Tier Available)
+  gemini:
+    priority: 5
+    type: api
+    description: "Google's Gemini models with generous free tier."
+    models:
+      - gemini-pro
+      - gemini-pro-vision
+    signup_url: "https://makersuite.google.com/app/apikey"
+    free_tier:
+      requests_per_minute: 60
+      requests_per_day: 1500
+    privacy: moderate
+
+# Fallback Strategy
+fallback:
+  enabled: true
+  description: "Router automatically falls back to next available provider"
+  mock_provider:
+    description: "Returns placeholder text when all providers fail"
+    always_available: true
+
+# Health Check Settings
+health_check:
+  enabled: true
+  cache_ttl_seconds: 60
+  retry_failed_after_seconds: 300
+
+# Usage Recommendations
+recommendations:
+  privacy_focused: "Use Ollama only"
+  best_performance: "Groq + Ollama"
+  no_api_keys: "Ollama only"
+  maximum_availability: "Enable all providers"
