@@ -65,9 +65,40 @@ class ContentFetcher:
                     'source_url': url
                 }
                 
-                logger.info(f"Successfully downloaded: {track_meta['title']}")
+                logger.info(f"Successfully downloaded via yt-dlp: {track_meta['title']}")
                 return track_meta
                 
         except Exception as e:
-            logger.error(f"Failed to fetch content: {e}")
+            logger.warning(f"yt-dlp failed: {e}. Attempting direct download fallback...")
+            
+            # Fallback for direct files
+            if url.lower().endswith(('.mp3', '.wav', '.ogg')):
+                try:
+                    import requests
+                    import uuid
+                    filename = f"direct_{uuid.uuid4().hex[:8]}.mp3"
+                    filepath = os.path.join(self.download_dir, filename)
+                    
+                    response = requests.get(url, stream=True)
+                    response.raise_for_status()
+                    
+                    with open(filepath, 'wb') as f:
+                        for chunk in response.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                            
+                    track_meta = {
+                        'title': os.path.basename(url),
+                        'artist': 'Unknown (Direct)',
+                        'filename': filename,
+                        'genre': 'External_Direct',
+                        'duration': 0, # Cannot determine without mutagen
+                        'source_url': url
+                    }
+                    logger.info(f"Successfully downloaded via direct link: {filename}")
+                    return track_meta
+                    
+                except Exception as direct_e:
+                    logger.error(f"Direct download also failed: {direct_e}")
+                    return None
+            
             return None

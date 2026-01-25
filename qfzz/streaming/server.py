@@ -123,6 +123,11 @@ class StreamingServer:
         """Attach DJ and Player instances."""
         self.dj = dj
         self.player = player
+        # Fix: Update the RequestHandler class directly so running server sees them
+        # (This works because Handler inherits/mixes in, or we just patch the base)
+        AudioRequestHandler.DJ_INSTANCE = dj
+        AudioRequestHandler.PLAYER_INSTANCE = player
+        logger.info("Attached DJ and Player to Streaming Server")
         
     def set_playlist(self, playlist):
         """Update the playlist served by the API."""

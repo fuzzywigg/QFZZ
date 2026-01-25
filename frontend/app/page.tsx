@@ -9,6 +9,10 @@ const KnowledgeGraphVisualizer = dynamic(() => import('../components/KnowledgeGr
   loading: () => <div className="h-[400px] w-full animate-pulse bg-white/5 rounded-xl"></div>
 });
 
+const RequestTrack = dynamic(() => import('../components/RequestTrack'), {
+  ssr: false
+});
+
 export default function AudioPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.8);
@@ -256,6 +260,9 @@ export default function AudioPlayer() {
           </div>
         </div>
         <KnowledgeGraphVisualizer />
+
+        {/* Request Track */}
+        <RequestTrack />
       </div>
     </div>
   );

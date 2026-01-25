@@ -55,6 +55,122 @@
       "type": "concept",
       "name": "440Hz",
       "id": "concept:440hz"
+    },
+    {
+      "type": "track",
+      "filename": "direct_0b2c6a88.mp3",
+      "title": "Sentinel",
+      "artist": "Kai Engel",
+      "album": "Satin",
+      "genre": "Classical",
+      "fingerprint": {
+        "bpm": 99.4,
+        "duration": 183.06,
+        "key": "C#",
+        "energy": 0.1502,
+        "danceability": 0.9092,
+        "loudness": 0.1502
+      },
+      "ingested_at": "2026-01-25T14:32:23.515401",
+      "id": "direct_0b2c6a88.mp3"
+    },
+    {
+      "type": "artist",
+      "name": "Kai Engel",
+      "id": "artist:kai_engel"
+    },
+    {
+      "type": "genre",
+      "name": "Classical",
+      "id": "genre:classical"
+    },
+    {
+      "type": "concept",
+      "name": "Sentinel",
+      "id": "concept:sentinel"
+    },
+    {
+      "type": "tempo",
+      "name": "90s BPM",
+      "id": "tempo:90s BPM"
+    },
+    {
+      "type": "musical_key",
+      "name": "C#",
+      "id": "key:C#"
+    },
+    {
+      "type": "track",
+      "filename": "Kai_Engel_-_04_-_Sentinel.mp3",
+      "title": "Sentinel",
+      "artist": "Kai Engel",
+      "album": "Satin",
+      "genre": "Classical",
+      "fingerprint": {
+        "bpm": 99.4,
+        "duration": 183.06,
+        "key": "C#",
+        "energy": 0.1502,
+        "danceability": 0.9092,
+        "loudness": 0.1502
+      },
+      "ingested_at": "2026-01-25T14:32:24.552964",
+      "id": "Kai_Engel_-_04_-_Sentinel.mp3"
+    },
+    {
+      "type": "track",
+      "title": "Kai_Engel_-_04_-_Sentinel.mp3",
+      "artist": "Unknown (Direct)",
+      "filename": "direct_d1940ce4.mp3",
+      "genre": "External_Direct",
+      "duration": 0,
+      "source_url": "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Kai_Engel/Satin/Kai_Engel_-_04_-_Sentinel.mp3",
+      "id": "direct_d1940ce4.mp3"
+    },
+    {
+      "type": "artist",
+      "name": "Unknown (Direct)",
+      "id": "artist:unknown_(direct)"
+    },
+    {
+      "type": "genre",
+      "name": "External_Direct",
+      "id": "genre:external_direct"
+    },
+    {
+      "type": "concept",
+      "name": "Kai_Engel_-_04_-_Sentinel.mp3",
+      "id": "concept:kai_engel_-_04_-_sentinel.mp3"
+    },
+    {
+      "type": "track",
+      "title": "Tours_-_01_-_Enthusiast.mp3",
+      "artist": "Unknown (Direct)",
+      "filename": "direct_ce000632.mp3",
+      "genre": "External_Direct",
+      "duration": 0,
+      "source_url": "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3",
+      "id": "direct_ce000632.mp3"
+    },
+    {
+      "type": "concept",
+      "name": "Tours_-_01_-_Enthusiast.mp3",
+      "id": "concept:tours_-_01_-_enthusiast.mp3"
+    },
+    {
+      "type": "track",
+      "title": "Broke_For_Free_-_01_-_Night_Owl.mp3",
+      "artist": "Unknown (Direct)",
+      "filename": "direct_d49a65a3.mp3",
+      "genre": "External_Direct",
+      "duration": 0,
+      "source_url": "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/WFMU/Broke_For_Free/Directionless_EP/Broke_For_Free_-_01_-_Night_Owl.mp3",
+      "id": "direct_d49a65a3.mp3"
+    },
+    {
+      "type": "concept",
+      "name": "Broke_For_Free_-_01_-_Night_Owl.mp3",
+      "id": "concept:broke_for_free_-_01_-_night_owl.mp3"
     }
   ],
   "edges": [
@@ -105,6 +221,139 @@
       "weight": 1.0,
       "source": "test_tone.wav",
       "target": "concept:440hz",
+      "key": 0
+    },
+    {
+      "relationship": "PERFORMED_BY",
+      "weight": 1.0,
+      "source": "direct_0b2c6a88.mp3",
+      "target": "artist:kai_engel",
+      "key": 0
+    },
+    {
+      "relationship": "BELONGS_TO",
+      "weight": 1.0,
+      "source": "direct_0b2c6a88.mp3",
+      "target": "genre:classical",
+      "key": 0
+    },
+    {
+      "relationship": "EVOKES",
+      "weight": 1.0,
+      "source": "direct_0b2c6a88.mp3",
+      "target": "concept:sentinel",
+      "key": 0
+    },
+    {
+      "relationship": "HAS_TEMPO",
+      "weight": 0.8,
+      "source": "direct_0b2c6a88.mp3",
+      "target": "tempo:90s BPM",
+      "key": 0
+    },
+    {
+      "relationship": "IN_KEY",
+      "weight": 0.9,
+      "source": "direct_0b2c6a88.mp3",
+      "target": "key:C#",
+      "key": 0
+    },
+    {
+      "relationship": "PERFORMED_BY",
+      "weight": 1.0,
+      "source": "Kai_Engel_-_04_-_Sentinel.mp3",
+      "target": "artist:kai_engel",
+      "key": 0
+    },
+    {
+      "relationship": "BELONGS_TO",
+      "weight": 1.0,
+      "source": "Kai_Engel_-_04_-_Sentinel.mp3",
+      "target": "genre:classical",
+      "key": 0
+    },
+    {
+      "relationship": "EVOKES",
+      "weight": 1.0,
+      "source": "Kai_Engel_-_04_-_Sentinel.mp3",
+      "target": "concept:sentinel",
+      "key": 0
+    },
+    {
+      "relationship": "HAS_TEMPO",
+      "weight": 0.8,
+      "source": "Kai_Engel_-_04_-_Sentinel.mp3",
+      "target": "tempo:90s BPM",
+      "key": 0
+    },
+    {
+      "relationship": "IN_KEY",
+      "weight": 0.9,
+      "source": "Kai_Engel_-_04_-_Sentinel.mp3",
+      "target": "key:C#",
+      "key": 0
+    },
+    {
+      "relationship": "PERFORMED_BY",
+      "weight": 1.0,
+      "source": "direct_d1940ce4.mp3",
+      "target": "artist:unknown_(direct)",
+      "key": 0
+    },
+    {
+      "relationship": "BELONGS_TO",
+      "weight": 1.0,
+      "source": "direct_d1940ce4.mp3",
+      "target": "genre:external_direct",
+      "key": 0
+    },
+    {
+      "relationship": "EVOKES",
+      "weight": 1.0,
+      "source": "direct_d1940ce4.mp3",
+      "target": "concept:kai_engel_-_04_-_sentinel.mp3",
+      "key": 0
+    },
+    {
+      "relationship": "PERFORMED_BY",
+      "weight": 1.0,
+      "source": "direct_ce000632.mp3",
+      "target": "artist:unknown_(direct)",
+      "key": 0
+    },
+    {
+      "relationship": "BELONGS_TO",
+      "weight": 1.0,
+      "source": "direct_ce000632.mp3",
+      "target": "genre:external_direct",
+      "key": 0
+    },
+    {
+      "relationship": "EVOKES",
+      "weight": 1.0,
+      "source": "direct_ce000632.mp3",
+      "target": "concept:tours_-_01_-_enthusiast.mp3",
+      "key": 0
+    },
+    {
+      "relationship": "PERFORMED_BY",
+      "weight": 1.0,
+      "source": "direct_d49a65a3.mp3",
+      "target": "artist:unknown_(direct)",
+      "key": 0
+    },
+    {
+      "relationship": "BELONGS_TO",
+      "weight": 1.0,
+      "source": "direct_d49a65a3.mp3",
+      "target": "genre:external_direct",
+      "key": 0
+    },
+    {
+      "relationship": "EVOKES",
+      "weight": 1.0,
+      "source": "direct_d49a65a3.mp3",
+      "target": "concept:broke_for_free_-_01_-_night_owl.mp3",
       "key": 0
     }
   ]
