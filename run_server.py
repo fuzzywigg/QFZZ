@@ -47,11 +47,39 @@ def main():
     api_key = os.environ.get("GEMINI_API_KEY")
     dj = PersonalizedDJ(llm_model="llama3", api_key=api_key)
     
-    # Populate Knowledge Graph with initial tracks
+    # 2. Content Ingestion (Deep Scan)
+    logger.info("Scanning library for content...")
+    scanned_tracks = dj.scanner.scan_directory()
+    
+    # Merge scanned tracks with basic playlist
+    # (If scanned tracks exist, prefer them over basic test tones if matched)
+    if scanned_tracks:
+        logger.info(f"Ingested {len(scanned_tracks)} tracks from local library")
+        # Update playlist with scanned tracks (converting to player format)
+        new_playlist = []
+        for track in scanned_tracks:
+            # Map scanner metadata to player format
+            p_track = {
+                'title': track['title'],
+                'artist': track['artist'],
+                'filename': track['filename'],
+                'genre': track['genre'],
+                'duration': track['fingerprint']['duration'] if track['fingerprint'] else 0
+            }
+            new_playlist.append(p_track)
+        
+        # Merge or replace? Let's just append for now to keep Intro
+        playlist.extend(new_playlist)
+        player.load_playlist(playlist)
+
+    # Populate Knowledge Graph with ALL tracks (including deep features)
     for track in playlist:
+        # Check if we have deep metadata in scanned_tracks
+        deep_meta = next((t for t in scanned_tracks if t['filename'] == track['filename']), None)
+        
         dj.kg.add_track_node(
             track_id=track['filename'], # unique id
-            metadata=track
+            metadata=deep_meta if deep_meta else track
         )
         
     if api_key:

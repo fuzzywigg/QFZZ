@@ -79,6 +79,24 @@ class QFZZKnowledgeGraph:
                 self.add_entity_node(concept_id, "concept", {"name": kw})
                 self.add_relationship(track_id, concept_id, "EVOKES")
                 
+            # Deep Sonic Features (if available)
+            fingerprint = metadata.get('fingerprint')
+            if fingerprint:
+                # Discretize Tempo (e.g., '120-130 BPM')
+                bpm = fingerprint.get('bpm')
+                if bpm:
+                    tempo_range = f"{int(bpm // 10 * 10)}s BPM" # e.g. "120s BPM"
+                    tempo_id = f"tempo:{tempo_range}"
+                    self.add_entity_node(tempo_id, "tempo", {"name": tempo_range})
+                    self.add_relationship(track_id, tempo_id, "HAS_TEMPO", weight=0.8)
+                
+                # Musical Key
+                key = fingerprint.get('key')
+                if key:
+                    key_id = f"key:{key}"
+                    self.add_entity_node(key_id, "musical_key", {"name": key})
+                    self.add_relationship(track_id, key_id, "IN_KEY", weight=0.9)
+                
             self.save_graph()
 
     def add_entity_node(self, node_id: str, node_type: str, props: Dict[str, Any]):

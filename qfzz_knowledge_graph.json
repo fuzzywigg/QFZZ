@@ -1,0 +1,111 @@
+{
+  "directed": true,
+  "multigraph": true,
+  "graph": {},
+  "nodes": [
+    {
+      "type": "track",
+      "title": "Station Intro",
+      "artist": "QFZZ AI",
+      "filename": "intro.wav",
+      "genre": "Station ID",
+      "duration": 3,
+      "id": "intro.wav"
+    },
+    {
+      "type": "artist",
+      "name": "QFZZ AI",
+      "id": "artist:qfzz_ai"
+    },
+    {
+      "type": "genre",
+      "name": "Station ID",
+      "id": "genre:station_id"
+    },
+    {
+      "type": "concept",
+      "name": "Station",
+      "id": "concept:station"
+    },
+    {
+      "type": "concept",
+      "name": "Intro",
+      "id": "concept:intro"
+    },
+    {
+      "type": "track",
+      "title": "Test Tone 440Hz",
+      "artist": "Physics",
+      "filename": "test_tone.wav",
+      "genre": "Test",
+      "duration": 5,
+      "id": "test_tone.wav"
+    },
+    {
+      "type": "artist",
+      "name": "Physics",
+      "id": "artist:physics"
+    },
+    {
+      "type": "genre",
+      "name": "Test",
+      "id": "genre:test"
+    },
+    {
+      "type": "concept",
+      "name": "440Hz",
+      "id": "concept:440hz"
+    }
+  ],
+  "edges": [
+    {
+      "relationship": "PERFORMED_BY",
+      "weight": 1.0,
+      "source": "intro.wav",
+      "target": "artist:qfzz_ai",
+      "key": 0
+    },
+    {
+      "relationship": "BELONGS_TO",
+      "weight": 1.0,
+      "source": "intro.wav",
+      "target": "genre:station_id",
+      "key": 0
+    },
+    {
+      "relationship": "EVOKES",
+      "weight": 1.0,
+      "source": "intro.wav",
+      "target": "concept:station",
+      "key": 0
+    },
+    {
+      "relationship": "EVOKES",
+      "weight": 1.0,
+      "source": "intro.wav",
+      "target": "concept:intro",
+      "key": 0
+    },
+    {
+      "relationship": "PERFORMED_BY",
+      "weight": 1.0,
+      "source": "test_tone.wav",
+      "target": "artist:physics",
+      "key": 0
+    },
+    {
+      "relationship": "BELONGS_TO",
+      "weight": 1.0,
+      "source": "test_tone.wav",
+      "target": "genre:test",
+      "key": 0
+    },
+    {
+      "relationship": "EVOKES",
+      "weight": 1.0,
+      "source": "test_tone.wav",
+      "target": "concept:440hz",
+      "key": 0
+    }
+  ]
+}

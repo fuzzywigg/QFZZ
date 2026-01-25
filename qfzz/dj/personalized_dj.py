@@ -16,6 +16,8 @@ import os
 logger = logging.getLogger(__name__)
 
 
+from qfzz.library import ContentScanner
+
 class PersonalizedDJ:
     """
     AI-powered personalized DJ that learns user preferences and creates
@@ -34,6 +36,7 @@ class PersonalizedDJ:
         self._content_catalog: List[Dict[str, Any]] = []
         self._genre_similarity: Dict[str, List[str]] = self._init_genre_similarity()
         self.kg = QFZZKnowledgeGraph() # Initialize Knowledge Graph
+        self.scanner = ContentScanner(library_path="./qfzz_audio_content") # Initialize Scanner
         
         # Initialize LLM
         # Priority 1: Gemini (if key provided)
