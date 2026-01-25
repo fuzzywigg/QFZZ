@@ -66,11 +66,19 @@ def demo_personalized_dj():
     logger.info("=" * 60)
     
     # Create DJ
-    dj = PersonalizedDJ()
+    # By default, it will try to use local Ollama, or fall back to Mock
+    dj = PersonalizedDJ(llm_model="llama3")
     
     # Simulate user interaction
     user_id = "user_001"
     
+    # Chat with DJ (New Feature!)
+    logger.info("\n--- Chatting with DJ ---")
+    greeting = dj.interact(user_id, "Yo DJ, what's good?")
+    logger.info(f"User: Yo DJ, what's good?")
+    logger.info(f"DJ: {greeting}")
+    
+    logger.info("\n--- Building Profile ---")
     # Initial preferences
     initial_prefs = {
         "genres": {"jazz": 0.8, "electronic": 0.7},

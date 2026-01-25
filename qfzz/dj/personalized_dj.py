@@ -8,6 +8,7 @@ import logging
 from datetime import datetime
 
 from .profiles import UserProfile
+from qfzz.llm import LLMProvider, MockLLMClient, OllamaClient
 
 
 logger = logging.getLogger(__name__)
@@ -19,12 +20,51 @@ class PersonalizedDJ:
     tailored playlists with trust-based content filtering.
     """
     
-    def __init__(self):
-        """Initialize the Personalized DJ."""
+    def __init__(self, llm_model: str = "llama3"):
+        """
+        Initialize the Personalized DJ.
+        
+        Args:
+            llm_model: Name of the LLM model to use (default: llama3)
+        """
         self._user_profiles: Dict[str, UserProfile] = {}
         self._content_catalog: List[Dict[str, Any]] = []
         self._genre_similarity: Dict[str, List[str]] = self._init_genre_similarity()
+        
+        # Initialize LLM
+        # Try Ollama first, fall back to Mock
+        self.llm: LLMProvider = OllamaClient(model=llm_model)
+        if not self.llm.is_available():
+            logger.info("Ollama not detected, using Mock DJ")
+            self.llm = MockLLMClient()
+        else:
+            logger.info(f"Connected to real LLM: {llm_model}")
+            
         logger.info("Personalized DJ initialized")
+
+    def interact(self, user_id: str, message: str) -> str:
+        """
+        Chat with the DJ.
+        
+        Args:
+            user_id: User identifier
+            message: User message
+            
+        Returns:
+            DJ response
+        """
+        profile = self.get_or_create_profile(user_id)
+        
+        # Construct system prompt with user context
+        context = f"""You are a personalized AI Radio DJ named QFZZ. 
+        User: {user_id}
+        Preferences: {profile.genres if hasattr(profile, 'genres') else 'Unknown'}
+        
+        Keep it brief (under 50 words), cool, and radio-friendly."""
+        
+        # Get response from LLM
+        response = self.llm.generate(message, system_prompt=context)
+        return response
     
     def _init_genre_similarity(self) -> Dict[str, List[str]]:
         """
