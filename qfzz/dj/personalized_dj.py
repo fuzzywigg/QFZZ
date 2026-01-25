@@ -9,6 +9,7 @@ from datetime import datetime
 
 from .profiles import UserProfile
 from qfzz.llm import LLMProvider, MockLLMClient, OllamaClient, GeminiClient
+from qfzz.knowledge import QFZZKnowledgeGraph
 import os
 
 
@@ -32,6 +33,7 @@ class PersonalizedDJ:
         self._user_profiles: Dict[str, UserProfile] = {}
         self._content_catalog: List[Dict[str, Any]] = []
         self._genre_similarity: Dict[str, List[str]] = self._init_genre_similarity()
+        self.kg = QFZZKnowledgeGraph() # Initialize Knowledge Graph
         
         # Initialize LLM
         # Priority 1: Gemini (if key provided)
@@ -54,7 +56,7 @@ class PersonalizedDJ:
             logger.info("No LLM detected, using Mock DJ")
             self.llm = MockLLMClient()
             
-        logger.info("Personalized DJ initialized")
+        logger.info("Personalized DJ initialized with Knowledge Graph")
 
     def interact(self, user_id: str, message: str) -> str:
         """

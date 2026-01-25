@@ -2,7 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, SkipForward, Radio, Volume2, Mic } from 'lucide-react';
+import dynamic from 'next/dynamic';
 
+const KnowledgeGraphVisualizer = dynamic(() => import('../components/KnowledgeGraphVisualizer'), {
+  ssr: false,
+  loading: () => <div className="h-[400px] w-full animate-pulse bg-white/5 rounded-xl"></div>
+});
 
 export default function AudioPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -214,6 +219,14 @@ export default function AudioPlayer() {
           onTimeUpdate={handleTimeUpdate}
           onEnded={handleNext}
         />
+      </div>
+
+      {/* Knowledge Graph Visualization */}
+      <div className="w-full max-w-4xl space-y-4">
+        <h3 className="text-xl font-bold text-white/50 text-center uppercase tracking-widest">
+          Semantic Knowledge Graph
+        </h3>
+        <KnowledgeGraphVisualizer />
       </div>
     </div>
   );

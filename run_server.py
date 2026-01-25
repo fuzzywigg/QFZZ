@@ -46,10 +46,22 @@ def main():
     # DJ
     api_key = os.environ.get("GEMINI_API_KEY")
     dj = PersonalizedDJ(llm_model="llama3", api_key=api_key)
+    
+    # Populate Knowledge Graph with initial tracks
+    for track in playlist:
+        dj.kg.add_track_node(
+            track_id=track['filename'], # unique id
+            metadata=track
+        )
+        
     if api_key:
         logger.info("DJ connected to Gemini Cloud")
     else:
         logger.info("DJ using local fallback")
+        
+    # Expose Knowledge Graph
+    player.server.set_graph(dj.kg.export_d3_json())
+    logger.info("Knowledge Graph API enabled")
 
     # Station Core
     config = StationConfig(

@@ -20,19 +20,23 @@ class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
     # This needs access to the player instance, but we are inside the handler
     # For now, we'll hardcode or use a class variable
     PAYLOAD = []
+    GRAPH_PAYLOAD = {}
 
     def do_GET(self):
         if self.path == '/playlist.json':
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            
-            # Serve the current playlist from the server class (or player)
-            # Since handler is instantiated per request, we need a shared state.
-            # We can use the server object which is passed to the handler? 
-            # Actually, let's just use the class variable for this MVP
             response = json.dumps(AudioRequestHandler.PAYLOAD)
             self.wfile.write(response.encode('utf-8'))
+            
+        elif self.path == '/graph.json':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            response = json.dumps(AudioRequestHandler.GRAPH_PAYLOAD)
+            self.wfile.write(response.encode('utf-8'))
+            
         else:
             # Fallback to serving files
             super().do_GET()
@@ -61,6 +65,10 @@ class StreamingServer:
     def set_playlist(self, playlist):
         """Update the playlist served by the API."""
         AudioRequestHandler.PAYLOAD = playlist
+        
+    def set_graph(self, graph_data):
+        """Update the graph served by the API."""
+        AudioRequestHandler.GRAPH_PAYLOAD = graph_data
         
     def start(self):
         """Start the streaming server in a background thread."""
