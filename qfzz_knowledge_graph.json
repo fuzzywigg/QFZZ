@@ -171,6 +171,87 @@
       "type": "concept",
       "name": "Broke_For_Free_-_01_-_Night_Owl.mp3",
       "id": "concept:broke_for_free_-_01_-_night_owl.mp3"
+    },
+    {
+      "type": "track",
+      "id": "Broke_For_Free_-_01_-_Night_Owl.mp3",
+      "filename": "Broke_For_Free_-_01_-_Night_Owl.mp3",
+      "title": "Night Owl",
+      "artist": "Broke For Free",
+      "album": "Directionless EP",
+      "genre": "Electronic",
+      "fingerprint": {
+        "bpm": 129.2,
+        "duration": 194.07,
+        "key": "G",
+        "energy": 0.1884,
+        "danceability": 3.1034,
+        "loudness": 0.1884
+      },
+      "ingested_at": "2026-01-25T15:02:38.272343"
+    },
+    {
+      "type": "artist",
+      "name": "Broke For Free",
+      "id": "artist:broke_for_free"
+    },
+    {
+      "type": "genre",
+      "name": "Electronic",
+      "id": "genre:electronic"
+    },
+    {
+      "type": "concept",
+      "name": "Night",
+      "id": "concept:night"
+    },
+    {
+      "type": "tempo",
+      "name": "120s BPM",
+      "id": "tempo:120s BPM"
+    },
+    {
+      "type": "musical_key",
+      "name": "G",
+      "id": "key:G"
+    },
+    {
+      "type": "track",
+      "id": "Tours_-_01_-_Enthusiast.mp3",
+      "filename": "Tours_-_01_-_Enthusiast.mp3",
+      "title": "Enthusiast",
+      "artist": "Tours",
+      "album": "Enthusiast",
+      "genre": "Electronic",
+      "fingerprint": {
+        "bpm": 107.7,
+        "duration": 171.0,
+        "key": "A",
+        "energy": 0.1706,
+        "danceability": 0.7479,
+        "loudness": 0.1706
+      },
+      "ingested_at": "2026-01-25T15:02:44.553142"
+    },
+    {
+      "type": "artist",
+      "name": "Tours",
+      "id": "artist:tours"
+    },
+    {
+      "type": "concept",
+      "name": "Enthusiast",
+      "id": "concept:enthusiast"
+    },
+    {
+      "type": "tempo",
+      "name": "100s BPM",
+      "id": "tempo:100s BPM"
+    },
+    {
+      "type": "musical_key",
+      "name": "A",
+      "id": "key:A"
     }
   ],
   "edges": [
@@ -354,6 +435,76 @@
       "weight": 1.0,
       "source": "direct_d49a65a3.mp3",
       "target": "concept:broke_for_free_-_01_-_night_owl.mp3",
+      "key": 0
+    },
+    {
+      "relationship": "PERFORMED_BY",
+      "weight": 1.0,
+      "source": "Broke_For_Free_-_01_-_Night_Owl.mp3",
+      "target": "artist:broke_for_free",
+      "key": 0
+    },
+    {
+      "relationship": "BELONGS_TO",
+      "weight": 1.0,
+      "source": "Broke_For_Free_-_01_-_Night_Owl.mp3",
+      "target": "genre:electronic",
+      "key": 0
+    },
+    {
+      "relationship": "EVOKES",
+      "weight": 1.0,
+      "source": "Broke_For_Free_-_01_-_Night_Owl.mp3",
+      "target": "concept:night",
+      "key": 0
+    },
+    {
+      "relationship": "HAS_TEMPO",
+      "weight": 0.8,
+      "source": "Broke_For_Free_-_01_-_Night_Owl.mp3",
+      "target": "tempo:120s BPM",
+      "key": 0
+    },
+    {
+      "relationship": "IN_KEY",
+      "weight": 0.9,
+      "source": "Broke_For_Free_-_01_-_Night_Owl.mp3",
+      "target": "key:G",
+      "key": 0
+    },
+    {
+      "relationship": "PERFORMED_BY",
+      "weight": 1.0,
+      "source": "Tours_-_01_-_Enthusiast.mp3",
+      "target": "artist:tours",
+      "key": 0
+    },
+    {
+      "relationship": "BELONGS_TO",
+      "weight": 1.0,
+      "source": "Tours_-_01_-_Enthusiast.mp3",
+      "target": "genre:electronic",
+      "key": 0
+    },
+    {
+      "relationship": "EVOKES",
+      "weight": 1.0,
+      "source": "Tours_-_01_-_Enthusiast.mp3",
+      "target": "concept:enthusiast",
+      "key": 0
+    },
+    {
+      "relationship": "HAS_TEMPO",
+      "weight": 0.8,
+      "source": "Tours_-_01_-_Enthusiast.mp3",
+      "target": "tempo:100s BPM",
+      "key": 0
+    },
+    {
+      "relationship": "IN_KEY",
+      "weight": 0.9,
+      "source": "Tours_-_01_-_Enthusiast.mp3",
+      "target": "key:A",
       "key": 0
     }
   ]

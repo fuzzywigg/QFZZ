@@ -9,6 +9,10 @@ const KnowledgeGraphVisualizer = dynamic(() => import('../components/KnowledgeGr
   loading: () => <div className="h-[400px] w-full animate-pulse bg-white/5 rounded-xl"></div>
 });
 
+const HiveTerminal = dynamic(() => import('../components/HiveTerminal'), {
+  ssr: false
+});
+
 const RequestTrack = dynamic(() => import('../components/RequestTrack'), {
   ssr: false
 });
@@ -20,13 +24,12 @@ export default function AudioPlayer() {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [djMessage, setDjMessage] = useState("Welcome to QFZZ, the Pulse of the Quantum Realm.");
+  // DJ Message is now handled by HiveTerminal, but we might want to keep track of "Now Playing" context if needed.
+  // We'll keep the poller for playlist updates/ledger.
   const [ledgerStats, setLedgerStats] = useState({ height: 0, status: "Init" });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number | null>(null);
 
   useEffect(() => {
     // 1. Fetch playlist
@@ -40,18 +43,8 @@ export default function AudioPlayer() {
       })
       .catch(err => console.error("Failed to load playlist:", err));
 
-    // 2. Poll for DJ Messages (every 5 seconds)
-    const pollDJ = setInterval(() => {
-      fetch('http://localhost:8001/dj_message.json')
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.message) {
-            // Only update if different (to avoid re-typing animation reset if we had one)
-            setDjMessage(prev => data.message !== prev ? data.message : prev);
-          }
-        })
-        .catch(e => console.error("DJ poll failed", e));
-
+    // 2. Poll for Ledger (every 5 seconds)
+    const pollStats = setInterval(() => {
       fetch('http://localhost:8001/ledger.json')
         .then(res => res.json())
         .then(data => {
@@ -60,7 +53,7 @@ export default function AudioPlayer() {
         .catch(e => console.error("Ledger poll failed", e));
     }, 5000);
 
-    return () => clearInterval(pollDJ);
+    return () => clearInterval(pollStats);
   }, []);
 
   const currentTrack = playlist[currentTrackIndex] || {
@@ -76,39 +69,7 @@ export default function AudioPlayer() {
     }
   }, [volume]);
 
-  // Visualizer Animation
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw fake visualizer bars
-      const barWidth = 4;
-      const gap = 2;
-      const barCount = Math.floor(canvas.width / (barWidth + gap));
-
-      for (let i = 0; i < barCount; i++) {
-        // Random height based on playing state
-        const height = isPlaying ? Math.random() * 40 + 5 : 2;
-
-        ctx.fillStyle = '#8b5cf6';
-        ctx.fillRect(i * (barWidth + gap), canvas.height / 2 - height / 2, barWidth, height);
-      }
-
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    };
-  }, [isPlaying]);
+  // Removed Canvas Visualizer logic (waste of resources, replaced with CSS bars)
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -140,7 +101,6 @@ export default function AudioPlayer() {
         setIsPlaying(true);
       }
     }, 100);
-    setDjMessage("Switching tracks... Quantum tunnel engaged.");
   };
 
   const formatTime = (time: number) => {
@@ -176,13 +136,13 @@ export default function AudioPlayer() {
       {isMenuOpen && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-40 flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-200">
           <nav className="flex flex-col items-center gap-6 text-2xl font-light tracking-widest text-white/80">
-            <a href="#" className="hover:text-purple-400 hover:scale-110 transition-all">Music Library</a>
-            <a href="#" className="hover:text-purple-400 hover:scale-110 transition-all">Listener Guide</a>
-            <a href="#" className="hover:text-purple-400 hover:scale-110 transition-all">About QFZZ</a>
-            <a href="#" className="hover:text-purple-400 hover:scale-110 transition-all">Contact</a>
+            <a href="/library" className="hover:text-purple-400 hover:scale-110 transition-all">Music Library</a>
+            <a href="/guide" className="hover:text-purple-400 hover:scale-110 transition-all">Listener Guide</a>
+            <a href="/about" className="hover:text-purple-400 hover:scale-110 transition-all">About QFZZ</a>
+            <a href="/contact" className="hover:text-purple-400 hover:scale-110 transition-all">Contact</a>
           </nav>
           <div className="w-16 h-[1px] bg-white/20"></div>
-          <p className="text-sm text-white/40 font-mono">v0.9.1 Beta // Quantum Stream</p>
+          <p className="text-sm text-white/40 font-mono">v0.9.2 Beta // Quantum Stream</p>
         </div>
       )}
 
@@ -193,17 +153,13 @@ export default function AudioPlayer() {
       {/* Main Player Card */}
       <div className="w-full max-w-md bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl relative">
 
-        {/* DJ Message Area */}
-        <div className="bg-black/40 rounded-xl p-4 mb-6 border border-white/5 flex gap-3 items-start">
-          <Mic className="w-5 h-5 text-green-400 mt-1 shrink-0" />
-          <p className="text-green-400/90 text-sm leading-relaxed typing-effect">
-            {djMessage}
-          </p>
-        </div>
-
-        {/* Visualizer */}
-        <div className="h-16 w-full mb-6 bg-black/20 rounded-lg overflow-hidden flex items-center justify-center">
-          <canvas ref={canvasRef} width={360} height={64} className="w-full h-full opacity-80" />
+        {/* Minimal Visualizer (replaces canvas) */}
+        <div className="h-4 w-full mb-6 bg-transparent flex items-end justify-center gap-1 opacity-50">
+          <div className={`w-1 h-3 bg-purple-500 rounded-full ${isPlaying ? 'animate-pulse' : ''}`}></div>
+          <div className={`w-1 h-5 bg-purple-500 rounded-full ${isPlaying ? 'animate-pulse' : ''} delay-75`}></div>
+          <div className={`w-1 h-2 bg-purple-500 rounded-full ${isPlaying ? 'animate-pulse' : ''} delay-150`}></div>
+          <div className={`w-1 h-4 bg-purple-500 rounded-full ${isPlaying ? 'animate-pulse' : ''} delay-100`}></div>
+          <div className={`w-1 h-2 bg-purple-500 rounded-full ${isPlaying ? 'animate-pulse' : ''} delay-200`}></div>
         </div>
 
         {/* Track Info */}
@@ -275,6 +231,9 @@ export default function AudioPlayer() {
         />
       </div>
 
+      {/* Hive Terminal (Replaces old static DJ message) */}
+      <HiveTerminal />
+
       {/* Knowledge Graph Visualization */}
       <div className="w-full max-w-4xl space-y-4">
         <div className="flex justify-between items-center">
@@ -287,10 +246,10 @@ export default function AudioPlayer() {
           </div>
         </div>
         <KnowledgeGraphVisualizer />
-
-        {/* Request Track */}
-        <RequestTrack />
       </div>
+
+      {/* Request Track */}
+      <RequestTrack />
     </div>
   );
 }

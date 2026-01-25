@@ -23,11 +23,31 @@ class ContentFetcher:
         STRICT MODE: Only whitelisted domains allowed to prevent liability.
         """
         # Trusted Public Domain / CC Sources
+        # Trusted Public Domain / CC Sources
         WHITELIST = [
+            # Archives
             "archive.org",
             "freemusicarchive.org",
             "musopen.org",
-            "librivox.org"
+            "librivox.org",
+            "wikipedia.org",
+            "wikimedia.org",
+            "gutenberg.org",
+            
+            # CC / Open Content
+            "jamendo.com",
+            "cctrax.com",
+            "filmmusic.io",
+            "incompetech.com",
+            "audionautix.com",
+            "purple-planet.com",
+            "bensound.com",
+            "free-stock-music.com",
+            
+            # Gov / Edu
+            "loc.gov",
+            "nasa.gov",
+            "esa.int"
         ]
         
         # Check domain whitelist
@@ -86,15 +106,45 @@ class ContentFetcher:
                         for chunk in response.iter_content(chunk_size=8192):
                             f.write(chunk)
                             
+                    # Smart Metadata Parsing
+                    original_name = os.path.basename(url)
+                    # Decode URL encoding
+                    try:
+                        from urllib.parse import unquote
+                        clean_name = unquote(original_name)
+                    except:
+                        clean_name = original_name
+
+                    # Remove extension
+                    clean_name = os.path.splitext(clean_name)[0]
+                    
+                    # Heuristics for Artist - Title
+                    # separators: " - ", " _ ", "-", "_"
+                    artist = "Unknown (Direct)"
+                    title = clean_name
+                    
+                    for sep in [" - ", "_-_", " _ "]:
+                        if sep in clean_name:
+                            parts = clean_name.split(sep, 1)
+                            if len(parts) == 2:
+                                # Start Case
+                                artist = parts[0].replace("_", " ").strip().title()
+                                title = parts[1].replace("_", " ").strip().title()
+                                break
+                    
+                    # Cleanup title if it still has underscores
+                    if "_" in title:
+                        title = title.replace("_", " ").title()
+
                     track_meta = {
-                        'title': os.path.basename(url),
-                        'artist': 'Unknown (Direct)',
+                        'title': title,
+                        'artist': artist,
                         'filename': filename,
                         'genre': 'External_Direct',
-                        'duration': 0, # Cannot determine without mutagen
+                        'duration': 0, 
                         'source_url': url
                     }
-                    logger.info(f"Successfully downloaded via direct link: {filename}")
+                    logger.info(f"Successfully downloaded via direct link: {title} by {artist}")
                     return track_meta
                     
                 except Exception as direct_e:
