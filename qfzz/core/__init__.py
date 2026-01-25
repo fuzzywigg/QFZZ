@@ -1,6 +1,10 @@
-"""Core QFZZ station components"""
+"""
+QFZZ Core Module
 
-from .station import QFZZStation
+Core components for the QFZZ Radio Station platform.
+"""
+
 from .config import StationConfig
+from .station import QFZZStation
 
-__all__ = ["QFZZStation", "StationConfig"]
+__all__ = ['StationConfig', 'QFZZStation']

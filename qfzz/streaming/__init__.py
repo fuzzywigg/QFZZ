@@ -1,5 +1,9 @@
-"""Audio streaming components (placeholder)"""
+"""
+QFZZ Streaming Module
+
+Music streaming and playback functionality.
+"""
 
 from .player import MusicPlayer
 
-__all__ = ["MusicPlayer"]
+__all__ = ['MusicPlayer']

@@ -1,6 +1,10 @@
-"""Personalized DJ system components"""
+"""
+QFZZ Personalized DJ Module
+
+AI-powered personalized DJ functionality.
+"""
 
 from .personalized_dj import PersonalizedDJ
-from .user_profile import UserProfile
+from .profiles import UserProfile
 
-__all__ = ["PersonalizedDJ", "UserProfile"]
+__all__ = ['PersonalizedDJ', 'UserProfile']

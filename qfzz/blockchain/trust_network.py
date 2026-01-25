@@ -1,172 +1,272 @@
-"""Blockchain Trust Network Implementation"""
+"""
+Blockchain-based trust network for content verification.
+"""
 
-import logging
 from typing import Dict, List, Optional, Any
+import logging
 from datetime import datetime
 
-from .trust_record import Block, TrustRecord
+from .models import Block, TrustRecord
+
 
 logger = logging.getLogger(__name__)
 
 
 class BlockchainTrustNetwork:
-    """Blockchain-based trust network for QFZZ
+    """
+    Blockchain-based trust network for immutable content verification.
     
-    Features:
-    - Immutable trust records
-    - Dataset verification
-    - User identity security
-    - Community trust scoring
-    
-    Examples:
-        >>> blockchain = BlockchainTrustNetwork()
-        >>> record = TrustRecord("user_001", "interaction", "dj", 0.05)
-        >>> blockchain.add_trust_record(record)
-        >>> block = blockchain.mine_block()
-        >>> is_valid = blockchain.verify_chain()
+    Creates tamper-proof records of trust scores for content and creators.
     """
     
-    def __init__(self):
-        self.chain: List[Block] = []
-        self.pending_records: List[TrustRecord] = []
-        self.trust_scores: Dict[str, float] = {}
+    def __init__(self, difficulty: int = 2):
+        """
+        Initialize blockchain trust network.
+        
+        Args:
+            difficulty: Mining difficulty (number of leading zeros)
+        """
+        self._chain: List[Block] = []
+        self._pending_records: List[TrustRecord] = []
+        self._difficulty = difficulty
+        self._trust_index: Dict[str, TrustRecord] = {}
         
         # Create genesis block
         self._create_genesis_block()
-        
-        logger.info("Blockchain trust network initialized")
-        
+        logger.info(f"Blockchain trust network initialized (difficulty: {difficulty})")
+    
     def _create_genesis_block(self) -> None:
-        """Create the first block in the chain"""
-        genesis_block = Block(
+        """Create the genesis block."""
+        genesis = Block(
             index=0,
-            timestamp=datetime.now(),
-            data={"message": "QFZZ Trust Network Genesis Block"},
+            timestamp=datetime.now().isoformat(),
+            records=[],
             previous_hash="0"
         )
-        genesis_block.hash = genesis_block.calculate_hash()
-        self.chain.append(genesis_block)
-        
-    def add_trust_record(self, record: TrustRecord) -> None:
-        """Add a trust record to pending transactions
+        genesis.mine_block(self._difficulty)
+        self._chain.append(genesis)
+        logger.info("Genesis block created")
+    
+    def add_trust_record(self, content_id: str, creator_id: str, 
+                        initial_score: float = 0.5,
+                        metadata: Optional[Dict[str, Any]] = None) -> TrustRecord:
+        """
+        Add a new trust record to pending records.
         
         Args:
-            record: Trust record to add
-        """
-        self.pending_records.append(record)
-        
-        # Update trust score immediately
-        if record.user_id not in self.trust_scores:
-            self.trust_scores[record.user_id] = 0.5
+            content_id: Content identifier
+            creator_id: Creator identifier
+            initial_score: Initial trust score (default: 0.5)
+            metadata: Optional metadata
             
-        self.trust_scores[record.user_id] += record.trust_delta
-        self.trust_scores[record.user_id] = max(0.0, min(1.0, self.trust_scores[record.user_id]))
+        Returns:
+            Created TrustRecord
+        """
+        record_id = f"{content_id}_{creator_id}_{len(self._pending_records)}"
         
-        logger.debug(f"Trust record added for {record.user_id}: {record.action}")
+        record = TrustRecord(
+            record_id=record_id,
+            content_id=content_id,
+            creator_id=creator_id,
+            trust_score=initial_score,
+            metadata=metadata or {}
+        )
         
-    def mine_block(self) -> Optional[Block]:
-        """Mine a new block with pending trust records
+        self._pending_records.append(record)
+        self._trust_index[f"{content_id}:{creator_id}"] = record
+        
+        logger.debug(f"Added trust record: {record_id}")
+        return record
+    
+    def verify_content(self, content_id: str, creator_id: str) -> None:
+        """
+        Add verification to content.
+        
+        Args:
+            content_id: Content identifier
+            creator_id: Creator identifier
+        """
+        key = f"{content_id}:{creator_id}"
+        
+        if key not in self._trust_index:
+            # Create new record if doesn't exist
+            self.add_trust_record(content_id, creator_id)
+        
+        record = self._trust_index[key]
+        record.add_verification()
+        logger.debug(f"Verified content: {content_id}")
+    
+    def report_content(self, content_id: str, creator_id: str) -> None:
+        """
+        Add report to content.
+        
+        Args:
+            content_id: Content identifier
+            creator_id: Creator identifier
+        """
+        key = f"{content_id}:{creator_id}"
+        
+        if key not in self._trust_index:
+            # Create new record if doesn't exist
+            self.add_trust_record(content_id, creator_id)
+        
+        record = self._trust_index[key]
+        record.add_report()
+        logger.debug(f"Reported content: {content_id}")
+    
+    def mine_pending_records(self) -> Optional[Block]:
+        """
+        Mine pending records into a new block.
         
         Returns:
-            The newly mined block, or None if no pending records
+            Newly mined block, or None if no pending records
         """
-        if not self.pending_records:
+        if not self._pending_records:
+            logger.debug("No pending records to mine")
             return None
-            
-        last_block = self.chain[-1]
+        
+        previous_block = self._chain[-1]
         
         new_block = Block(
-            index=len(self.chain),
-            timestamp=datetime.now(),
-            data={
-                'records': [
-                    {
-                        'user_id': r.user_id,
-                        'action': r.action,
-                        'target': r.target,
-                        'trust_delta': r.trust_delta,
-                        'timestamp': r.timestamp.isoformat()
-                    }
-                    for r in self.pending_records
-                ]
-            },
-            previous_hash=last_block.hash
+            index=len(self._chain),
+            timestamp=datetime.now().isoformat(),
+            records=self._pending_records.copy(),
+            previous_hash=previous_block.hash
         )
         
-        new_block.hash = new_block.calculate_hash()
-        self.chain.append(new_block)
+        # Mine the block
+        new_block.mine_block(self._difficulty)
         
-        logger.info(f"Mined block #{new_block.index} with {len(self.pending_records)} records")
+        # Add to chain
+        self._chain.append(new_block)
         
         # Clear pending records
-        self.pending_records = []
+        self._pending_records.clear()
         
+        logger.info(f"Mined block {new_block.index} with {len(new_block.records)} records")
         return new_block
+    
+    def get_trust_score(self, content_id: str, creator_id: str) -> float:
+        """
+        Get trust score for content.
         
-    def verify_chain(self) -> bool:
-        """Verify the integrity of the blockchain
+        Args:
+            content_id: Content identifier
+            creator_id: Creator identifier
+            
+        Returns:
+            Trust score (0.0-1.0), default 0.5 if not found
+        """
+        key = f"{content_id}:{creator_id}"
+        
+        if key in self._trust_index:
+            return self._trust_index[key].trust_score
+        
+        return 0.5  # Default neutral score
+    
+    def get_trust_record(self, content_id: str, creator_id: str) -> Optional[TrustRecord]:
+        """
+        Get trust record for content.
+        
+        Args:
+            content_id: Content identifier
+            creator_id: Creator identifier
+            
+        Returns:
+            TrustRecord if found, None otherwise
+        """
+        key = f"{content_id}:{creator_id}"
+        return self._trust_index.get(key)
+    
+    def get_creator_trust(self, creator_id: str) -> float:
+        """
+        Get average trust score for a creator across all content.
+        
+        Args:
+            creator_id: Creator identifier
+            
+        Returns:
+            Average trust score
+        """
+        creator_records = [
+            record for record in self._trust_index.values()
+            if record.creator_id == creator_id
+        ]
+        
+        if not creator_records:
+            return 0.5  # Default neutral score
+        
+        total_score = sum(record.trust_score for record in creator_records)
+        return total_score / len(creator_records)
+    
+    def is_chain_valid(self) -> bool:
+        """
+        Validate the entire blockchain.
         
         Returns:
-            True if chain is valid, False otherwise
+            True if valid, False otherwise
         """
-        for i in range(1, len(self.chain)):
-            current_block = self.chain[i]
-            previous_block = self.chain[i - 1]
+        for i in range(1, len(self._chain)):
+            current_block = self._chain[i]
+            previous_block = self._chain[i - 1]
             
-            # Verify hash
-            if current_block.hash != current_block.calculate_hash():
+            # Verify block hash
+            if not current_block.is_valid():
                 logger.error(f"Block {i} has invalid hash")
                 return False
-                
+            
             # Verify chain linkage
             if current_block.previous_hash != previous_block.hash:
-                logger.error(f"Block {i} is not properly linked")
+                logger.error(f"Block {i} has invalid previous_hash")
                 return False
-                
-        return True
         
-    def get_trust_score(self, user_id: str) -> float:
-        """Get trust score for a user
+        return True
+    
+    def get_chain_length(self) -> int:
+        """Get length of the blockchain."""
+        return len(self._chain)
+    
+    def get_block(self, index: int) -> Optional[Block]:
+        """
+        Get block by index.
         
         Args:
-            user_id: User identifier
+            index: Block index
             
         Returns:
-            Trust score (0.0 to 1.0)
+            Block if found, None otherwise
         """
-        return self.trust_scores.get(user_id, 0.5)
-        
-    def verify_dataset(self, dataset_id: str, dataset_hash: str) -> bool:
-        """Verify a dataset's authenticity
-        
-        Args:
-            dataset_id: Dataset identifier
-            dataset_hash: Hash of dataset content
-            
-        Returns:
-            True if verified
+        if 0 <= index < len(self._chain):
+            return self._chain[index]
+        return None
+    
+    def get_latest_block(self) -> Block:
+        """Get the latest block in the chain."""
+        return self._chain[-1]
+    
+    def get_statistics(self) -> Dict[str, Any]:
         """
-        # Record verification on blockchain
-        record = TrustRecord(
-            user_id="system",
-            action="dataset_verification",
-            target=dataset_id,
-            trust_delta=0.0
-        )
-        self.add_trust_record(record)
-        
-        logger.info(f"Dataset {dataset_id} verified and recorded on blockchain")
-        return True
-        
-    def get_chain_stats(self) -> Dict[str, Any]:
-        """Get blockchain statistics
+        Get blockchain statistics.
         
         Returns:
-            Dictionary containing chain statistics
+            Dictionary of statistics
         """
+        total_records = sum(len(block.records) for block in self._chain)
+        
         return {
-            'chain_length': len(self.chain),
-            'pending_records': len(self.pending_records),
-            'total_users': len(self.trust_scores),
-            'chain_valid': self.verify_chain()
+            'chain_length': len(self._chain),
+            'total_records': total_records,
+            'pending_records': len(self._pending_records),
+            'difficulty': self._difficulty,
+            'is_valid': self.is_chain_valid(),
+            'indexed_records': len(self._trust_index)
         }
+    
+    def export_chain(self) -> List[Dict[str, Any]]:
+        """
+        Export entire blockchain as list of dictionaries.
+        
+        Returns:
+            List of block dictionaries
+        """
+        return [block.to_dict() for block in self._chain]

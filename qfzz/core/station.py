@@ -1,119 +1,211 @@
-"""Core QFZZ Station Implementation"""
+"""
+Main QFZZ Station orchestrator.
+"""
 
+from typing import List, Dict, Any, Optional
 import logging
-from typing import Dict, Any, Optional
+from datetime import datetime
 
 from .config import StationConfig
+
 
 logger = logging.getLogger(__name__)
 
 
 class QFZZStation:
-    """Main QFZZ Radio Station class
+    """
+    Main orchestrator for a QFZZ Radio Station.
     
-    Orchestrates all components of the AI radio station including:
-    - Personalized DJ interactions
-    - Music streaming and curation
-    - Dataset management and quality scoring
-    - Blockchain-secured trust network
-    - Edge device optimization for 6G
-    
-    Args:
-        config: Station configuration object
-        
-    Examples:
-        >>> config = StationConfig(station_name="QFZZ", edge_mode=True)
-        >>> station = QFZZStation(config)
-        >>> station.initialize()
-        >>> station.start()
+    Coordinates personalized DJ, dataset management, blockchain trust,
+    edge optimization, and streaming capabilities.
     """
     
-    def __init__(self, config: Optional[StationConfig] = None):
-        self.config = config or StationConfig()
-        self.is_running = False
-        self._components: Dict[str, Any] = {}
+    def __init__(self, config: StationConfig):
+        """
+        Initialize QFZZ Station.
         
-        logger.info(f"Initializing {self.config.station_name} - {self.config.station_tagline}")
+        Args:
+            config: Station configuration
+        """
+        self.config = config
+        self._running = False
+        self._current_playlist: List[Dict[str, Any]] = []
+        self._listeners: Dict[str, Any] = {}
         
-    def initialize(self) -> None:
-        """Initialize all station components"""
-        logger.info("Initializing station components...")
+        # Components will be initialized lazily
+        self._dj = None
+        self._dataset_manager = None
+        self._trust_network = None
+        self._edge_optimizer = None
+        self._player = None
         
-        # Initialize blockchain trust network
-        if self.config.blockchain_enabled:
-            self._init_blockchain()
-            
-        # Initialize dataset manager
-        self._init_dataset_manager()
-        
-        # Initialize music player
-        self._init_music_player()
-        
-        # Initialize DJ system
-        self._init_dj_system()
-        
-        logger.info("Station initialization complete")
-        
-    def _init_blockchain(self) -> None:
-        """Initialize blockchain trust network for secure data verification"""
-        logger.info("Initializing blockchain trust network...")
-        self._components['blockchain'] = {
-            'type': self.config.chain_type,
-            'status': 'initialized'
-        }
-        
-    def _init_dataset_manager(self) -> None:
-        """Initialize GNU/OPENSOURCE dataset manager"""
-        logger.info("Initializing dataset manager...")
-        self._components['dataset_manager'] = {
-            'opensource_only': self.config.opensource_datasets_only,
-            'min_quality': self.config.min_dataset_quality_score,
-            'status': 'ready'
-        }
-        
-    def _init_music_player(self) -> None:
-        """Initialize music streaming and playback system"""
-        logger.info("Initializing music player...")
-        self._components['music_player'] = {
-            'status': 'ready',
-            'current_track': None
-        }
-        
-    def _init_dj_system(self) -> None:
-        """Initialize personalized DJ system"""
-        logger.info("Initializing DJ system...")
-        self._components['dj_system'] = {
-            'personalization': self.config.enable_personalization,
-            'trust_threshold': self.config.community_trust_threshold,
-            'status': 'ready'
-        }
-        
+        logger.info(f"Initialized QFZZ Station: {config.station_name} ({config.station_id})")
+    
     def start(self) -> None:
-        """Start the radio station"""
-        if not self._components:
-            self.initialize()
-            
-        logger.info(f"Starting {self.config.station_name}...")
-        self.is_running = True
-        logger.info("Station is now live!")
+        """Start the radio station."""
+        if self._running:
+            logger.warning("Station is already running")
+            return
         
+        logger.info(f"Starting station: {self.config.station_name}")
+        self._running = True
+        self._initialize_components()
+        logger.info("Station started successfully")
+    
     def stop(self) -> None:
-        """Stop the radio station"""
-        logger.info("Stopping station...")
-        self.is_running = False
-        logger.info("Station stopped")
+        """Stop the radio station."""
+        if not self._running:
+            logger.warning("Station is not running")
+            return
         
-    def get_status(self) -> Dict[str, Any]:
-        """Get current station status
+        logger.info(f"Stopping station: {self.config.station_name}")
+        self._running = False
+        self._cleanup_components()
+        logger.info("Station stopped successfully")
+    
+    def _initialize_components(self) -> None:
+        """Initialize station components based on configuration."""
+        # Import here to avoid circular dependencies
+        from qfzz.dj.personalized_dj import PersonalizedDJ
+        from qfzz.datasets.manager import DatasetManager
+        from qfzz.streaming.player import MusicPlayer
+        
+        self._dj = PersonalizedDJ()
+        self._dataset_manager = DatasetManager(
+            allowed_licenses=self.config.allowed_licenses
+        )
+        self._player = MusicPlayer()
+        
+        if self.config.enable_blockchain:
+            from qfzz.blockchain.trust_network import BlockchainTrustNetwork
+            self._trust_network = BlockchainTrustNetwork()
+            logger.info("Blockchain trust network enabled")
+        
+        if self.config.enable_edge_optimization:
+            from qfzz.edge.optimizer import EdgeOptimizer
+            self._edge_optimizer = EdgeOptimizer()
+            logger.info("Edge optimization enabled")
+    
+    def _cleanup_components(self) -> None:
+        """Cleanup station components."""
+        self._dj = None
+        self._dataset_manager = None
+        self._trust_network = None
+        self._edge_optimizer = None
+        self._player = None
+    
+    def add_listener(self, user_id: str, preferences: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Add a listener to the station.
+        
+        Args:
+            user_id: Unique user identifier
+            preferences: Optional user preferences
+        """
+        if not self._running:
+            raise RuntimeError("Station is not running")
+        
+        self._listeners[user_id] = {
+            'user_id': user_id,
+            'preferences': preferences or {},
+            'connected_at': datetime.now().isoformat(),
+            'playlist': []
+        }
+        
+        logger.info(f"Added listener: {user_id}")
+    
+    def remove_listener(self, user_id: str) -> None:
+        """
+        Remove a listener from the station.
+        
+        Args:
+            user_id: User identifier to remove
+        """
+        if user_id in self._listeners:
+            del self._listeners[user_id]
+            logger.info(f"Removed listener: {user_id}")
+    
+    def generate_playlist(self, user_id: str) -> List[Dict[str, Any]]:
+        """
+        Generate personalized playlist for a user.
+        
+        Args:
+            user_id: User identifier
+            
+        Returns:
+            List of track dictionaries
+        """
+        if not self._running:
+            raise RuntimeError("Station is not running")
+        
+        if user_id not in self._listeners:
+            raise ValueError(f"User {user_id} is not a listener")
+        
+        user_data = self._listeners[user_id]
+        preferences = user_data.get('preferences', {})
+        
+        # Get recommendations from DJ
+        recommendations = self._dj.recommend(user_id, preferences)
+        
+        # Filter by trust threshold if blockchain is enabled
+        if self._trust_network:
+            recommendations = [
+                track for track in recommendations
+                if self._trust_network.get_trust_score(
+                    track.get('content_id', ''),
+                    track.get('creator_id', '')
+                ) >= self.config.trust_threshold
+            ]
+        
+        # Limit playlist size
+        playlist = recommendations[:self.config.max_playlist_size]
+        
+        # Store playlist for user
+        self._listeners[user_id]['playlist'] = playlist
+        
+        logger.info(f"Generated playlist for {user_id}: {len(playlist)} tracks")
+        return playlist
+    
+    def record_interaction(self, user_id: str, track_id: str, 
+                          interaction_type: str, rating: Optional[float] = None) -> None:
+        """
+        Record user interaction with a track.
+        
+        Args:
+            user_id: User identifier
+            track_id: Track identifier
+            interaction_type: Type of interaction (play, skip, like, etc.)
+            rating: Optional rating value
+        """
+        if not self._running:
+            raise RuntimeError("Station is not running")
+        
+        if user_id not in self._listeners:
+            raise ValueError(f"User {user_id} is not a listener")
+        
+        # Record with DJ for learning
+        self._dj.record_feedback(user_id, track_id, interaction_type, rating)
+        
+        logger.debug(f"Recorded {interaction_type} for user {user_id} on track {track_id}")
+    
+    def get_station_stats(self) -> Dict[str, Any]:
+        """
+        Get current station statistics.
         
         Returns:
-            Dictionary containing station status information
+            Dictionary of station statistics
         """
         return {
-            'name': self.config.station_name,
-            'tagline': self.config.station_tagline,
-            'running': self.is_running,
-            'edge_mode': self.config.edge_mode,
-            'blockchain_enabled': self.config.blockchain_enabled,
-            'components': self._components
+            'station_id': self.config.station_id,
+            'station_name': self.config.station_name,
+            'running': self._running,
+            'listener_count': len(self._listeners),
+            'blockchain_enabled': self.config.enable_blockchain,
+            'edge_optimization_enabled': self.config.enable_edge_optimization,
+            'trust_threshold': self.config.trust_threshold,
+            'streaming_quality': self.config.streaming_quality
         }
+    
+    def is_running(self) -> bool:
+        """Check if station is running."""
+        return self._running

@@ -1,6 +1,10 @@
-"""Edge device optimization components"""
+"""
+QFZZ Edge Computing Module
+
+Edge device optimization for efficient streaming.
+"""
 
 from .optimizer import EdgeOptimizer
-from .device_config import EdgeDeviceConfig
+from .config import EdgeDeviceConfig
 
-__all__ = ["EdgeOptimizer", "EdgeDeviceConfig"]
+__all__ = ['EdgeOptimizer', 'EdgeDeviceConfig']

@@ -1,174 +1,230 @@
 # QFZZ: The Pulse of the Quantum Realm 🎵🤖
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Documentation](https://img.shields.io/badge/docs-qfzz--radio.web.app-green.svg)](https://qfzz-radio.web.app)
+**AI Radio for the Individual** - A next-generation radio station powered by AI, running on edge devices, secured with blockchain, and built on open source datasets.
 
-**AI Radio for the Individual** - A next-generation agentic radio station powered by AI, running on edge devices, secured with blockchain, and built on open source datasets.
+## 🌟 Vision
 
----
+QFZZ is an AI radio station inspired by projects like Andon Labs Radio Eval, designed to create a personalized music experience where:
 
-## ✨ Vision
+- **Individualized LLMs** run on edge devices for personalized DJ interactions
+- **GNU/OPENSOURCE datasets** power high-quality music curation and conversation
+- **6G-ready infrastructure** enables ultra-low latency streaming
+- **Blockchain security** ensures trust and data authenticity
+- **Community-driven** discovery of quality datasets and music
+- **Personal DJ** that knows you and is part of your community of trust
 
-QFZZ is not just another radio app - it's a revolution in personalized audio experiences:
+## 🏗️ Architecture
 
-- 🤖 **Individualized LLMs** run on your edge device for truly personal DJ interactions
-- 📊 **GNU/OPENSOURCE** datasets ensure quality, transparency, and community trust
-- 🚀 **6G-ready** infrastructure for ultra-low latency streaming
-- 🔒 **Blockchain security** provides immutable trust and verification
-- 🌍 **Community-driven** discovery of quality music and datasets
-- 🎧 **Personal DJ** that learns, adapts, and becomes part of your trust community
+### Core Components
+
+1. **QFZZStation** - Main radio station orchestrator
+   - Manages all station components
+   - Configurable for edge deployment
+   - Blockchain-enabled trust network
+   - Dataset quality management
+
+2. **PersonalizedDJ** - AI DJ that learns and adapts
+   - Conversational interaction
+   - Music curation based on preferences and mood
+   - Community trust building
+   - Edge device optimized
+
+3. **DatasetManager** - GNU/OPENSOURCE dataset handling
+   - Quality scoring and visibility
+   - Blockchain verification
+   - Community ratings
+   - Edge device optimization
+
+4. **BlockchainTrustNetwork** - Security and trust layer
+   - Immutable trust records
+   - Dataset verification
+   - User identity security
+   - Community trust scoring
+
+5. **EdgeOptimizer** - Edge device deployment
+   - Model size optimization
+   - 6G network support
+   - Bandwidth-aware streaming
+   - Local caching
 
 ## 🚀 Quick Start
+
+### Installation
 
 ```bash
 # Clone the repository
 git clone https://github.com/fuzzywigg/QFZZ.git
 cd QFZZ
 
-# Install
-pip install -e .
+# Install dependencies
+pip install -r requirements.txt
 
-# Run demos
+# Run the demo
 python main.py
+```
+
+### Basic Usage
+
+```python
+from qfzz import QFZZStation, PersonalizedDJ
+from qfzz.core import StationConfig
+
+# Create and start a station
+config = StationConfig(
+    station_name="QFZZ",
+    edge_mode=True,
+    enable_6g=False,
+    blockchain_enabled=True
+)
+
+station = QFZZStation(config)
+station.initialize()
+station.start()
+
+# Create a personalized DJ
+dj = PersonalizedDJ(name="DJ Quantum", edge_mode=True)
+
+# Interact with the DJ
+greeting = dj.greet_user("user_001", "Alex")
+print(greeting)
+
+response = dj.interact("user_001", "Can you recommend some music?")
+print(response)
 ```
 
 ## 💡 Key Features
 
 ### 🎧 Personalized DJ Experience
-Your AI DJ learns your music preferences over time, provides contextual responses based on mood and history, and builds trust through continuous interaction.
-
-```python
-from qfzz import PersonalizedDJ
-
-dj = PersonalizedDJ(name="DJ Quantum", edge_mode=True)
-greeting = dj.greet_user("user_001", "Alex")
-response = dj.interact("user_001", "Play something chill")
-```
+- AI-powered DJ that learns your music preferences
+- Contextual responses based on mood and history
+- Community connection features
+- Trust-building over time
 
 ### 📊 Dataset Quality & Transparency
-Only GNU/OPENSOURCE licensed datasets, with quality scoring (0.0-1.0), community ratings, and blockchain verification.
+- Only GNU/OPENSOURCE licensed datasets
+- Quality scoring (0.0 to 1.0)
+- Community ratings and reviews
+- Blockchain verification for authenticity
+
+### 🔒 Blockchain Security
+- Immutable trust records
+- Dataset authenticity verification
+- User identity security
+- Community trust scoring
+
+### 📱 Edge Device Ready
+- Optimized for resource-constrained devices
+- Model quantization and pruning
+- Smart caching strategies
+- 6G network optimization
+
+### 🌐 6G Network Support
+- High bandwidth, low latency streaming
+- Adaptive quality based on network conditions
+- Future-ready infrastructure
+- Optimized buffer management
+
+## 📖 Examples
+
+### Dataset Management
 
 ```python
-from qfzz import DatasetManager, Dataset, DatasetLicense
+from qfzz.datasets import DatasetManager, Dataset, DatasetLicense
 
+# Create dataset manager
 manager = DatasetManager(opensource_only=True, min_quality=0.7)
+
+# Register a dataset
 dataset = Dataset(
     id="ds_001",
     name="OpenMusic Dataset",
+    description="High-quality open source music samples",
     license=DatasetLicense.CC_BY,
+    source_url="https://example.com/openmusic",
     quality_score=0.9,
-    # ...
+    category="music",
+    size_mb=150.0
 )
+
 manager.register_dataset(dataset)
 manager.verify_dataset_blockchain(dataset.id)
+
+# Get high quality datasets
+high_quality = manager.get_high_quality_datasets()
+
+# Get edge-optimized datasets
+edge_datasets = manager.get_edge_optimized_datasets(max_size_mb=100)
 ```
 
-### 🔒 Blockchain Security
-Immutable trust records, dataset authenticity verification, and community trust scoring.
+### Edge Device Optimization
 
 ```python
-from qfzz import BlockchainTrustNetwork, TrustRecord
+from qfzz.edge import EdgeOptimizer, EdgeDeviceConfig
 
-blockchain = BlockchainTrustNetwork()
-record = TrustRecord("user_001", "interaction", "dj", 0.05)
-blockchain.add_trust_record(record)
-blockchain.mine_block()
-```
-
-### 📱 Edge Device Ready
-Optimized for resource-constrained devices with model quantization, smart caching, and 6G optimization.
-
-```python
-from qfzz import EdgeOptimizer, EdgeDeviceConfig
-
+# Configure edge device
 config = EdgeDeviceConfig(
+    device_id="edge_001",
     device_type="smartphone",
     max_memory_mb=512,
-    enable_6g=True
+    max_model_size_mb=100,
+    enable_6g=True,
+    network_bandwidth_mbps=1000
 )
+
+# Create optimizer
 optimizer = EdgeOptimizer(config)
+
+# Optimize model for edge deployment
+optimization = optimizer.optimize_model(250.0)
+
+# Get streaming configuration
+streaming = optimizer.optimize_streaming(320)
 ```
 
-## 🏗️ Architecture
+### Blockchain Trust Network
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      QFZZ Station                           │
-│                                                             │
-│  ┌───────────────┐  ┌──────────────┐  ┌─────────────────┐ │
-│  │ Personalized  │  │   Dataset    │  │   Blockchain    │ │
-│  │      DJ       │◄─┤   Manager    │◄─┤  Trust Network  │ │
-│  └───────────────┘  └──────────────┘  └─────────────────┘ │
-│         │                   │                    │          │
-│         ▼                   ▼                    ▼          │
-│  ┌───────────────┐  ┌──────────────┐  ┌─────────────────┐ │
-│  │     Music     │  │     Edge     │  │    Network      │ │
-│  │    Player     │  │  Optimizer   │  │   Protocol      │ │
-│  └───────────────┘  └──────────────┘  └─────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-                    ┌─────────────┐
-                    │   6G Network│
-                    └─────────────┘
-```
+```python
+from qfzz.blockchain import BlockchainTrustNetwork, TrustRecord
 
-## 📖 Documentation
+# Create blockchain
+blockchain = BlockchainTrustNetwork()
 
-Comprehensive documentation is available at [qfzz-radio.web.app](https://qfzz-radio.web.app):
+# Add trust records
+record = TrustRecord("user_001", "interaction", "dj", 0.05)
+blockchain.add_trust_record(record)
 
-- 📘 [Getting Started](https://qfzz-radio.web.app/getting-started/) - Installation and quick start
-- 🏗️ [Architecture](https://qfzz-radio.web.app/architecture/) - System design and components
-- 📚 [API Reference](https://qfzz-radio.web.app/api/core/) - Complete API documentation
-- 🎓 [Guides](https://qfzz-radio.web.app/guides/quantum-security/) - In-depth tutorials
-- 🚀 [Deployment](https://qfzz-radio.web.app/deployment/) - Production deployment guide
+# Mine a block
+block = blockchain.mine_block()
 
-## 🧪 Examples
+# Verify chain integrity
+is_valid = blockchain.verify_chain()
 
-Explore working examples in the `examples/` directory:
-
-- `basic_station.py` - Basic station setup and operation
-- `personalized_dj_demo.py` - AI DJ interaction and personalization
-- `dataset_management.py` - Dataset registration and verification
-- `blockchain_demo.py` - Blockchain trust network demonstration
-- `edge_optimization.py` - Edge device optimization
-
-Run all examples:
-```bash
-python main.py
-```
-
-## 🧪 Testing
-
-```bash
-# Run tests
-pytest tests/
-
-# With coverage
-pytest --cov=qfzz tests/
+# Get trust score
+score = blockchain.get_trust_score("user_001")
 ```
 
 ## 🛠️ Technology Stack
 
 - **Python 3.8+** - Core implementation
-- **Dataclasses** - Data structures
+- **Dataclasses** - Data structure definitions
+- **Logging** - Comprehensive logging
+- **Hashlib** - Blockchain hashing
 - **Type Hints** - Full type safety
-- **MkDocs** - Documentation (Material theme)
-- **Firebase** - Documentation hosting
-- **GitHub Actions** - CI/CD
 
 ## 🤝 Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](docs/contributing.md) for guidelines.
+We welcome contributions! This is an open source project aimed at democratizing AI radio technology.
 
-Areas where we need help:
-- 🔥 LLM integration (Llama, Mistral, Gemma)
-- 🎵 Music streaming implementation
-- ⛓️ Real blockchain integration
-- 📱 Mobile app development
-- 📝 Documentation improvements
-- ✅ Test coverage
+### Areas for Contribution
+
+1. **LLM Integration** - Connect real LLM models for DJ interactions
+2. **Music Player** - Implement actual audio streaming
+3. **Blockchain Integration** - Connect to real blockchain networks
+4. **Dataset Loaders** - Add loaders for popular open datasets
+5. **6G Protocol** - Implement 6G network protocols
+6. **UI/Frontend** - Build user interfaces
+7. **Testing** - Add comprehensive test coverage
+8. **Documentation** - Improve and expand docs
 
 ## 📋 Roadmap
 
@@ -177,18 +233,35 @@ Areas where we need help:
 - [x] Dataset management with quality scoring
 - [x] Blockchain trust network
 - [x] Edge device optimization
-- [x] Comprehensive documentation
-- [ ] Real LLM integration
-- [ ] Actual music streaming
-- [ ] Web UI
-- [ ] Mobile apps
-- [ ] Public blockchain integration
+- [ ] Real LLM integration (e.g., Llama, Mistral)
+- [ ] Actual music streaming implementation
+- [ ] Web UI for user interaction
+- [ ] Mobile app for edge devices
+- [ ] Integration with public blockchains
 - [ ] Community dataset marketplace
-- [ ] Federation support
+- [ ] 6G protocol implementation
+- [ ] Federation with other QFZZ nodes
+
+## 🔐 Security
+
+QFZZ takes security seriously:
+- Blockchain-verified datasets
+- Trust-based community system
+- Secure user identity management
+- No proprietary data collection
+- Open source transparency
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is open source and available under the MIT License.
+
+## 🌍 Community
+
+Join the QFZZ community to help build the future of personalized AI radio!
+
+- **GitHub**: [fuzzywigg/QFZZ](https://github.com/fuzzywigg/QFZZ)
+- **Issues**: Report bugs and request features
+- **Discussions**: Share ideas and ask questions
 
 ## 🙏 Acknowledgments
 
@@ -199,15 +272,6 @@ Inspired by:
 - Blockchain innovators
 - The future of 6G networks
 
-## 🔗 Links
-
-- **Repository**: [github.com/fuzzywigg/QFZZ](https://github.com/fuzzywigg/QFZZ)
-- **Documentation**: [qfzz-radio.web.app](https://qfzz-radio.web.app)
-- **Issues**: [Report bugs](https://github.com/fuzzywigg/QFZZ/issues)
-- **Discussions**: [Ask questions](https://github.com/fuzzywigg/QFZZ/discussions)
-
 ---
 
-**QFZZ** - *The Pulse of the Quantum Realm* 🎵✨
-
-Built with ❤️ by the QFZZ community
+**QFZZ** - *The Pulse of the Quantum Realm* 🎵✨ 

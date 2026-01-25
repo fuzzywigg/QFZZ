@@ -1,6 +1,10 @@
-"""Dataset management components"""
+"""
+QFZZ Datasets Module
+
+Dataset management with quality scoring and license validation.
+"""
 
 from .manager import DatasetManager
-from .dataset import Dataset, DatasetLicense
+from .models import Dataset, DatasetLicense
 
-__all__ = ["DatasetManager", "Dataset", "DatasetLicense"]
+__all__ = ['DatasetManager', 'Dataset', 'DatasetLicense']

@@ -1,6 +1,10 @@
-"""Blockchain trust network components"""
+"""
+QFZZ Blockchain Module
+
+Blockchain-based trust network for content verification.
+"""
 
 from .trust_network import BlockchainTrustNetwork
-from .trust_record import TrustRecord, Block
+from .models import Block, TrustRecord
 
-__all__ = ["BlockchainTrustNetwork", "TrustRecord", "Block"]
+__all__ = ['BlockchainTrustNetwork', 'Block', 'TrustRecord']

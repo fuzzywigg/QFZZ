@@ -1,323 +1,411 @@
-# Getting Started
+# Getting Started with QFZZ
 
-This guide will help you get started with QFZZ, from installation to running your first AI radio station.
-
-## Prerequisites
-
-- Python 3.8 or higher
-- pip package manager
-- Git (for cloning the repository)
+This guide will walk you through installing QFZZ and creating your first personalized radio station.
 
 ## Installation
 
-### Clone the Repository
+### Requirements
 
-```bash
-git clone https://github.com/fuzzywigg/QFZZ.git
-cd QFZZ
-```
+- Python 3.8 or higher
+- pip or conda package manager
+- (Optional) Firebase account for deployment
 
-### Install the Package
+### Install from PyPI
 
-Install QFZZ in editable mode for development:
-
-```bash
-pip install -e .
-```
-
-Or install from PyPI (when available):
+The easiest way to install QFZZ:
 
 ```bash
 pip install qfzz
 ```
 
-### Install Development Dependencies
+### Install from Source
 
-If you want to contribute or build documentation:
+For the latest development version:
 
 ```bash
-pip install -r requirements-dev.txt
+# Clone the repository
+git clone https://github.com/yourusername/qfzz.git
+cd qfzz
+
+# Install in development mode
+pip install -e .
+
+# Or with optional dependencies
+pip install -e ".[dev,firebase]"
 ```
 
-## First Steps
+### Verify Installation
 
-### 1. Basic Radio Station
+```python
+import qfzz
+print(qfzz.__version__)
+```
 
-Create your first QFZZ radio station:
+## Your First Station
+
+Let's create a basic QFZZ station with personalized recommendations.
+
+### Step 1: Create a Station
 
 ```python
 from qfzz import QFZZStation, StationConfig
 
 # Create configuration
 config = StationConfig(
-    station_name="My First Station",
-    edge_mode=True,
-    blockchain_enabled=True
+    station_name="My First QFZZ Station",
+    station_id="qfzz_001"
 )
 
-# Initialize and start station
+# Initialize station
 station = QFZZStation(config)
-station.initialize()
+
+# Start the station
+station.start()
+```
+
+!!! success "Station Started!"
+    Your QFZZ station is now running and ready to serve personalized content.
+
+### Step 2: Add a Listener
+
+```python
+# Add yourself as a listener with preferences
+station.add_listener(
+    user_id="alice",
+    preferences={
+        'genres': {
+            'rock': 0.8,
+            'indie': 0.7,
+            'electronic': 0.5
+        },
+        'energy_level': 0.7,  # 0.0 = calm, 1.0 = energetic
+        'discovery_factor': 0.2  # 20% exploration
+    }
+)
+```
+
+### Step 3: Generate a Playlist
+
+```python
+# Generate personalized playlist
+playlist = station.generate_playlist("alice")
+
+# Display the playlist
+for i, track in enumerate(playlist, 1):
+    print(f"{i}. {track['title']} by {track['artist']} ({track['genre']})")
+```
+
+### Step 4: Record Feedback
+
+```python
+# User likes a track
+station.record_interaction(
+    user_id="alice",
+    track_id=playlist[0]['track_id'],
+    interaction_type="like",
+    rating=0.9
+)
+
+# User skips a track
+station.record_interaction(
+    user_id="alice",
+    track_id=playlist[1]['track_id'],
+    interaction_type="skip"
+)
+```
+
+### Step 5: Get Station Statistics
+
+```python
+# View station stats
+stats = station.get_station_stats()
+print(f"Station: {stats['station_name']}")
+print(f"Listeners: {stats['listener_count']}")
+print(f"Running: {stats['running']}")
+```
+
+## Complete Example
+
+Here's a complete working example:
+
+```python
+from qfzz import QFZZStation, StationConfig
+
+def main():
+    # Configure station
+    config = StationConfig(
+        station_name="My Quantum Radio",
+        station_id="qr_001",
+        enable_blockchain=True,
+        enable_edge_optimization=True,
+        max_playlist_size=20,
+        trust_threshold=0.5
+    )
+    
+    # Create and start station
+    station = QFZZStation(config)
+    station.start()
+    
+    # Add multiple listeners
+    listeners = [
+        {
+            'user_id': 'alice',
+            'preferences': {
+                'genres': {'rock': 0.8, 'indie': 0.6},
+                'energy_level': 0.7
+            }
+        },
+        {
+            'user_id': 'bob',
+            'preferences': {
+                'genres': {'jazz': 0.9, 'blues': 0.7},
+                'energy_level': 0.4
+            }
+        }
+    ]
+    
+    for listener in listeners:
+        station.add_listener(**listener)
+        print(f"Added listener: {listener['user_id']}")
+    
+    # Generate playlists for each listener
+    for listener in listeners:
+        user_id = listener['user_id']
+        playlist = station.generate_playlist(user_id)
+        
+        print(f"\n🎵 Playlist for {user_id}:")
+        for i, track in enumerate(playlist[:5], 1):
+            print(f"  {i}. {track['title']} - {track['artist']}")
+    
+    # Stop station when done
+    station.stop()
+
+if __name__ == "__main__":
+    main()
+```
+
+## Enabling Advanced Features
+
+### Blockchain Trust Network
+
+Enable blockchain-based content verification:
+
+```python
+config = StationConfig(
+    station_name="Secure Station",
+    enable_blockchain=True,
+    trust_threshold=0.6  # Only play content with trust >= 0.6
+)
+
+station = QFZZStation(config)
 station.start()
 
-# Get station status
-status = station.get_status()
-print(f"Station {status['name']} is running: {status['running']}")
+# Access the trust network
+trust_network = station._trust_network
 
-# Stop station
-station.stop()
-```
+# Add trust record
+trust_network.add_trust_record(
+    content_id="track_001",
+    creator_id="artist_001",
+    initial_score=0.8
+)
 
-Run the example:
-
-```bash
-python examples/basic_station.py
-```
-
-### 2. Personalized DJ Interaction
-
-Create an AI DJ that learns your preferences:
-
-```python
-from qfzz import PersonalizedDJ
-
-# Create DJ
-dj = PersonalizedDJ(name="DJ Quantum", edge_mode=True)
-
-# Greet user
-greeting = dj.greet_user("user_001", "Alex")
-print(greeting)
-
-# Interact with DJ
-response = dj.interact("user_001", "Can you recommend some music?")
-print(response)
-
-# Update preferences
-dj.update_preferences("user_001", ["jazz", "electronic", "ambient"])
-
-# Ask for music again
-response = dj.interact("user_001", "Play something for me")
-print(response)
+# Verify content
+trust_network.verify_content("track_001", "artist_001")
 
 # Check trust score
-trust_score = dj.get_trust_score("user_001")
-print(f"Trust score: {trust_score:.2f}")
+score = trust_network.get_trust_score("track_001", "artist_001")
+print(f"Trust score: {score}")
 ```
 
-Run the example:
+### Edge Optimization
 
-```bash
-python examples/personalized_dj_demo.py
-```
-
-### 3. Dataset Management
-
-Register and manage opensource datasets:
+Enable device-aware streaming optimization:
 
 ```python
-from qfzz import DatasetManager, Dataset, DatasetLicense
+from qfzz.edge import EdgeOptimizer, EdgeDeviceConfig, DeviceType, NetworkType
+
+config = StationConfig(
+    station_name="Optimized Station",
+    enable_edge_optimization=True
+)
+
+station = QFZZStation(config)
+station.start()
+
+# Access the edge optimizer
+optimizer = station._edge_optimizer
+
+# Register a mobile device
+device_config = EdgeDeviceConfig(
+    device_id="mobile_001",
+    device_type=DeviceType.SMARTPHONE,
+    network_type=NetworkType.WIFI,
+    bandwidth_mbps=5.0,
+    battery_powered=True,
+    battery_level=0.3
+)
+
+optimizer.register_device(device_config)
+
+# Get optimized streaming parameters
+params = optimizer.optimize_streaming("mobile_001")
+print(f"Quality: {params['quality']}")
+print(f"Bitrate: {params['bitrate_kbps']} kbps")
+print(f"Buffer: {params['buffer_size_seconds']} seconds")
+```
+
+### Dataset Management
+
+Add and manage your music datasets:
+
+```python
+from qfzz.datasets import DatasetManager, Dataset, DatasetLicense
 
 # Create dataset manager
-manager = DatasetManager(opensource_only=True, min_quality=0.7)
+manager = DatasetManager(
+    allowed_licenses=['CC-BY', 'CC-BY-SA', 'CC0']
+)
 
-# Register a dataset
+# Create a dataset
 dataset = Dataset(
-    id="ds_001",
-    name="OpenMusic Dataset",
-    description="High-quality open source music samples",
-    license=DatasetLicense.CC_BY,
-    source_url="https://example.com/openmusic",
-    quality_score=0.9,
-    category="music",
-    size_mb=150.0
+    dataset_id="indie_collection",
+    name="Indie Rock Collection",
+    description="Curated indie rock tracks",
+    source="Local Library",
+    license=DatasetLicense(
+        license_type="CC-BY",
+        commercial_use=True,
+        derivative_works=True,
+        share_alike=False
+    )
 )
 
-# Register and verify
-success = manager.register_dataset(dataset)
-if success:
-    manager.verify_dataset_blockchain(dataset.id)
-    manager.rate_dataset(dataset.id, 0.85)
+# Add tracks to dataset
+tracks = [
+    {
+        'track_id': 'indie_001',
+        'title': 'Summer Nights',
+        'artist': 'The Dreamers',
+        'genre': 'indie',
+        'duration': 234,
+        'energy': 0.7
+    },
+    # ... more tracks
+]
 
-# Get high quality datasets
-high_quality = manager.get_high_quality_datasets()
-print(f"Found {len(high_quality)} high quality datasets")
+for track in tracks:
+    dataset.add_track(track)
 
-# Get edge-optimized datasets
-edge_datasets = manager.get_edge_optimized_datasets(max_size_mb=100)
-print(f"Found {len(edge_datasets)} edge-optimized datasets")
-```
-
-Run the example:
-
-```bash
-python examples/dataset_management.py
-```
-
-### 4. Blockchain Trust Network
-
-Use blockchain for trust and verification:
-
-```python
-from qfzz import BlockchainTrustNetwork, TrustRecord
-
-# Create blockchain
-blockchain = BlockchainTrustNetwork()
-
-# Add trust records
-record = TrustRecord("user_001", "interaction", "dj", 0.05)
-blockchain.add_trust_record(record)
-
-# Mine a block
-block = blockchain.mine_block()
-print(f"Mined block #{block.index}")
-
-# Verify chain integrity
-is_valid = blockchain.verify_chain()
-print(f"Blockchain valid: {is_valid}")
-
-# Get trust score
-score = blockchain.get_trust_score("user_001")
-print(f"Trust score: {score:.2f}")
-```
-
-Run the example:
-
-```bash
-python examples/blockchain_demo.py
-```
-
-### 5. Edge Device Optimization
-
-Optimize for edge devices:
-
-```python
-from qfzz import EdgeOptimizer, EdgeDeviceConfig
-
-# Configure edge device
-config = EdgeDeviceConfig(
-    device_id="edge_001",
-    device_type="smartphone",
-    max_memory_mb=512,
-    max_model_size_mb=100,
-    enable_6g=True,
-    network_bandwidth_mbps=1000
-)
-
-# Create optimizer
-optimizer = EdgeOptimizer(config)
-
-# Optimize model
-model_opt = optimizer.optimize_model(250.0)
-print(f"Model optimization: {model_opt}")
-
-# Optimize streaming
-streaming_config = optimizer.optimize_streaming(320)
-print(f"Streaming config: {streaming_config}")
-
-# Use local caching
-optimizer.add_to_cache("track_001", {"title": "Test Track"}, 5.0)
-cached = optimizer.get_from_cache("track_001")
-print(f"Cached data: {cached}")
-```
-
-Run the example:
-
-```bash
-python examples/edge_optimization.py
-```
-
-## Run All Demos
-
-To run all demonstration scripts at once:
-
-```bash
-python main.py
-```
-
-## Testing Your Installation
-
-Run the test suite to ensure everything is working:
-
-```bash
-pytest tests/
+# Add to manager
+if manager.add_dataset(dataset):
+    print(f"Dataset added! Quality score: {dataset.quality_score}")
+    
+# List datasets
+datasets = manager.list_datasets(min_quality=0.5)
+for ds in datasets:
+    print(f"{ds.name}: {ds.quality_score:.2f}")
 ```
 
 ## Configuration Options
 
-### Station Configuration
+### StationConfig
 
-The `StationConfig` class provides various configuration options:
-
-```python
-StationConfig(
-    station_name="QFZZ",                    # Station name
-    station_tagline="The Pulse...",         # Tagline
-    edge_mode=True,                         # Edge device optimization
-    max_model_size_mb=500,                  # Max model size
-    enable_6g=False,                        # 6G network support
-    network_protocol="http",                # Network protocol
-    blockchain_enabled=True,                # Enable blockchain
-    chain_type="trust_network",             # Blockchain type
-    opensource_datasets_only=True,          # Only opensource datasets
-    min_dataset_quality_score=0.7,          # Min quality score
-    enable_personalization=True,            # Enable DJ personalization
-    community_trust_threshold=0.8           # Trust threshold
-)
-```
-
-### Edge Device Configuration
-
-The `EdgeDeviceConfig` class configures edge deployment:
+Complete configuration reference:
 
 ```python
-EdgeDeviceConfig(
-    device_id="edge_001",                   # Device identifier
-    device_type="smartphone",               # Device type
-    max_memory_mb=512,                      # Max memory
-    max_model_size_mb=100,                  # Max model size
-    enable_6g=False,                        # 6G support
-    network_bandwidth_mbps=100,             # Bandwidth
-    storage_available_gb=1.0                # Storage
+config = StationConfig(
+    # Basic settings
+    station_name="My Station",           # Station display name
+    station_id="station_001",            # Unique identifier
+    
+    # Feature toggles
+    enable_blockchain=True,               # Enable trust network
+    enable_edge_optimization=True,        # Enable device optimization
+    
+    # Playlist settings
+    max_playlist_size=20,                 # Max tracks per playlist
+    trust_threshold=0.5,                  # Min trust score (0.0-1.0)
+    
+    # Quality settings
+    streaming_quality="high",             # low, medium, high, lossless
+    
+    # Licensing
+    allowed_licenses=[                    # Allowed license types
+        'CC-BY',
+        'CC-BY-SA',
+        'CC0'
+    ]
 )
 ```
 
 ## Next Steps
 
-Now that you have QFZZ installed and running, explore:
+Now that you have a basic station running, explore:
 
-- 🏗️ [Architecture](architecture.md) - Learn about the system design
-- 📚 [API Reference](api/core.md) - Detailed API documentation
-- 🎓 [Guides](guides/quantum-security.md) - Advanced usage guides
-- 🚀 [Deployment](deployment.md) - Deploy to production
+1. **[Configuration Guide](guides/configuration.md)** - Detailed configuration options
+2. **[Architecture Overview](architecture/overview.md)** - Understand how QFZZ works
+3. **[PersonalizedDJ Deep Dive](features/personalized-dj.md)** - Master the AI DJ
+4. **[Blockchain Trust](features/quantum-security.md)** - Secure your content
+5. **[Edge Optimization](features/edge-optimization.md)** - Optimize for devices
+6. **[Deployment Guide](guides/deployment.md)** - Deploy to production
 
 ## Troubleshooting
 
-### Import Errors
+### Station won't start
 
-If you encounter import errors, make sure you installed the package:
+```python
+# Check if station is already running
+if station.is_running():
+    print("Station is already running!")
+    station.stop()  # Stop first, then restart
+    
+station.start()
+```
+
+### Playlist is empty
+
+```python
+# Ensure listener is added
+station.add_listener("user_id")
+
+# Check if content catalog exists
+# The DJ generates sample tracks by default
+# but you can add your own content
+from qfzz.dj import PersonalizedDJ
+
+dj = station._dj
+dj.add_content(my_tracks)  # Add your tracks
+```
+
+### Import errors
 
 ```bash
+# Ensure QFZZ is properly installed
+pip install --upgrade qfzz
+
+# Or reinstall in development mode
 pip install -e .
 ```
 
-### Python Version
+## Examples Repository
 
-Ensure you're using Python 3.8 or higher:
+Find complete examples in the `examples/` directory:
 
-```bash
-python --version
-```
-
-### Dependencies
-
-Install all development dependencies:
-
-```bash
-pip install -r requirements-dev.txt
-```
+- `basic_station.py` - Simple station setup
+- `advanced_features.py` - All features enabled
+- `multi_user.py` - Multiple listeners
+- `dataset_management.py` - Working with datasets
+- `blockchain_demo.py` - Trust network usage
+- `edge_optimization.py` - Device optimization
 
 ## Getting Help
 
-- 📖 Check the [documentation](index.md)
-- 🐛 [Report issues](https://github.com/fuzzywigg/QFZZ/issues)
-- 💬 Start a [discussion](https://github.com/fuzzywigg/QFZZ/discussions)
+- **Documentation**: Browse the complete docs
+- **GitHub Issues**: Report bugs or request features
+- **Discussions**: Ask questions and share ideas
+- **Discord**: Chat with the community
+
+---
+
+**Next**: [Architecture Overview →](architecture/overview.md)
