@@ -12,8 +12,14 @@ import contextlib
 logger = logging.getLogger(__name__)
 
 class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
-    """Custom request handler for audio streaming."""
+    """Custom request handler for audio streaming with CORS."""
     
+    def end_headers(self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET')
+        self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate')
+        return super().end_headers()
+
     def log_message(self, format, *args):
         # Suppress default logging to keep console clean
         pass
