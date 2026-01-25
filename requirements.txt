@@ -1,0 +1,5 @@
+# Core dependencies (currently using stdlib only)
+# Future additions:
+# torch>=2.0.0  # For LLM integration
+# transformers>=4.30.0  # For model loading
+# web3>=6.0.0  # For real blockchain integration
