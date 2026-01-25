@@ -78,5 +78,17 @@
     },
     "prev_hash": "626e6bec4a115ce2dde2fb5714d3347969182387e17e1b1215a4baa517a30259",
     "hash": "264ed938a31390d2801ef250d0c768dae3c2ff1d15c0154000f3b5706bd9c163"
+  },
+  {
+    "index": 7,
+    "timestamp": "2026-01-25T14:06:49.420895",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": -2860916956294809863
+    },
+    "prev_hash": "264ed938a31390d2801ef250d0c768dae3c2ff1d15c0154000f3b5706bd9c163",
+    "hash": "dd524a4e7ee32ab2218285ba12eb9cfdb72e549c2a3de78f12661708595c5e87"
   }
 ]

@@ -20,8 +20,24 @@ class ContentFetcher:
     def fetch_from_url(self, url: str) -> Optional[Dict[str, Any]]:
         """
         Download audio from a URL.
-        Returns metadata of the downloaded track.
+        STRICT MODE: Only whitelisted domains allowed to prevent liability.
         """
+        # Trusted Public Domain / CC Sources
+        WHITELIST = [
+            "archive.org",
+            "freemusicarchive.org",
+            "musopen.org",
+            "librivox.org"
+        ]
+        
+        # Check domain whitelist
+        valid_domain = any(domain in url for domain in WHITELIST)
+        
+        if not valid_domain:
+            logger.warning(f"BLOCKED: {url} is not in the trusted domain whitelist (Copyright Safety).")
+            # In a real app, we would return a specific error code
+            return None
+
         ydl_opts = {
             'format': 'bestaudio/best',
             'postprocessors': [{
@@ -36,7 +52,7 @@ class ContentFetcher:
         
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                logger.info(f"Fetching content from: {url}")
+                logger.info(f"Fetching content from SAFE source: {url}")
                 info = ydl.extract_info(url, download=True)
                 
                 # Metadata mapping
