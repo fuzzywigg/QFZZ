@@ -11,9 +11,32 @@ import contextlib
 
 logger = logging.getLogger(__name__)
 
+import json
+
 class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
     """Custom request handler for audio streaming with CORS."""
     
+    # Static playlist for now - will be dynamic later
+    # This needs access to the player instance, but we are inside the handler
+    # For now, we'll hardcode or use a class variable
+    PAYLOAD = []
+
+    def do_GET(self):
+        if self.path == '/playlist.json':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            
+            # Serve the current playlist from the server class (or player)
+            # Since handler is instantiated per request, we need a shared state.
+            # We can use the server object which is passed to the handler? 
+            # Actually, let's just use the class variable for this MVP
+            response = json.dumps(AudioRequestHandler.PAYLOAD)
+            self.wfile.write(response.encode('utf-8'))
+        else:
+            # Fallback to serving files
+            super().do_GET()
+
     def end_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET')
@@ -23,7 +46,7 @@ class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
         # Suppress default logging to keep console clean
         pass
-
+        
 class StreamingServer:
     """
     Simple HTTP server to stream audio files.
@@ -34,6 +57,10 @@ class StreamingServer:
         self.port = port
         self.httpd = None
         self.thread = None
+        
+    def set_playlist(self, playlist):
+        """Update the playlist served by the API."""
+        AudioRequestHandler.PAYLOAD = playlist
         
     def start(self):
         """Start the streaming server in a background thread."""

@@ -3,14 +3,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, SkipForward, Radio, Volume2, Mic } from 'lucide-react';
 
-const TRACKS = [
-  { id: 1, title: "Station Intro", artist: "QFZZ AI", url: "http://localhost:8000/intro.wav", genre: "Station ID" },
-  { id: 2, title: "Test Tone 440Hz", artist: "Physics", url: "http://localhost:8000/test_tone.wav", genre: "Test" }
-];
 
 export default function AudioPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.8);
+  const [playlist, setPlaylist] = useState<any[]>([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -20,7 +17,25 @@ export default function AudioPlayer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | null>(null);
 
-  const currentTrack = TRACKS[currentTrackIndex];
+  useEffect(() => {
+    // Fetch playlist from backend
+    fetch('http://localhost:8000/playlist.json')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          setPlaylist(data);
+          console.log("Loaded playlist:", data);
+        }
+      })
+      .catch(err => console.error("Failed to load playlist:", err));
+  }, []);
+
+  const currentTrack = playlist[currentTrackIndex] || {
+    title: "Connecting to Quantum Stream...",
+    artist: "QFZZ System",
+    url: "",
+    genre: "System"
+  };
 
   useEffect(() => {
     if (audioRef.current) {
@@ -67,7 +82,7 @@ export default function AudioPlayer() {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        audioRef.current.play().catch(e => console.error("Play failed:", e));
       }
       setIsPlaying(!isPlaying);
     }
@@ -81,12 +96,14 @@ export default function AudioPlayer() {
   };
 
   const handleNext = () => {
-    setCurrentTrackIndex((prev) => (prev + 1) % TRACKS.length);
+    if (playlist.length === 0) return;
+
+    setCurrentTrackIndex((prev) => (prev + 1) % playlist.length);
     setIsPlaying(false);
     setTimeout(() => {
       if (audioRef.current) {
         audioRef.current.load();
-        audioRef.current.play();
+        audioRef.current.play().catch(e => console.error("Play next failed:", e));
         setIsPlaying(true);
       }
     }, 100);
@@ -135,7 +152,7 @@ export default function AudioPlayer() {
           <h2 className="text-xl font-bold text-white truncate">{currentTrack.title}</h2>
           <p className="text-purple-300 text-sm">{currentTrack.artist}</p>
           <span className="inline-block px-2 py-0.5 mt-2 bg-purple-500/10 border border-purple-500/20 rounded text-[10px] text-purple-300 uppercase tracking-wider">
-            {currentTrack.genre}
+            {currentTrack.genre || 'Unknown'}
           </span>
         </div>
 
@@ -154,6 +171,8 @@ export default function AudioPlayer() {
         {/* Controls */}
         <div className="flex items-center justify-center gap-8 mb-6">
           <button
+            type="button"
+            title="Toggle Play/Pause"
             onClick={togglePlay}
             className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-slate-900 hover:scale-105 transition-transform active:scale-95 shadow-lg shadow-purple-500/20"
           >
@@ -165,6 +184,8 @@ export default function AudioPlayer() {
           </button>
 
           <button
+            type="button"
+            title="Next Track"
             onClick={handleNext}
             className="text-slate-400 hover:text-white transition-colors"
           >

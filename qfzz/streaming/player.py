@@ -84,6 +84,17 @@ class MusicPlayer:
         """
         self._playlist = tracks.copy()
         self._current_index = -1
+        
+        # Update server payload for dynamic API
+        # Enrich tracks with full URLs
+        api_playlist = []
+        for track in self._playlist:
+            t = track.copy()
+            t['url'] = self.get_stream_url(track['filename'])
+            api_playlist.append(t)
+            
+        self.server.set_playlist(api_playlist)
+        
         logger.info(f"Loaded playlist with {len(tracks)} tracks")
     
     def play(self, track_index: Optional[int] = None) -> bool:
