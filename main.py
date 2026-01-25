@@ -6,11 +6,18 @@ Starts the AI radio station with personalized DJ
 
 import logging
 import sys
-from qfzz import QFZZStation, PersonalizedDJ
-from qfzz.core import StationConfig
-from qfzz.datasets import DatasetManager, Dataset, DatasetLicense
-from qfzz.blockchain import BlockchainTrustNetwork, TrustRecord
-from qfzz.edge import EdgeOptimizer, EdgeDeviceConfig
+import uuid
+from qfzz import (
+    QFZZStation, 
+    StationConfig, 
+    PersonalizedDJ, 
+    DatasetManager,
+    BlockchainTrustNetwork,
+    EdgeOptimizer
+)
+from qfzz.datasets.models import Dataset, DatasetLicense, LicenseType
+from qfzz.blockchain.models import TrustRecord
+from qfzz.edge.config import EdgeDeviceConfig, DeviceType, NetworkType
 
 # Configure logging
 logging.basicConfig(
@@ -29,23 +36,24 @@ def demo_basic_station():
     
     # Create and start station
     config = StationConfig(
-        station_name="QFZZ",
-        edge_mode=True,
-        enable_6g=False,
-        blockchain_enabled=True
+        station_id="station_001",
+        station_name="QFZZ Prime",
+        enable_edge_optimization=True,
+        enable_blockchain=True,
+        trust_threshold=0.6,
+        metadata={"tagline": "The Pulse of the Quantum Realm"}
     )
     
     station = QFZZStation(config)
-    station.initialize()
     station.start()
     
     # Display status
-    status = station.get_status()
+    status = station.get_station_stats()
     logger.info(f"\nStation Status:")
-    logger.info(f"  Name: {status['name']}")
-    logger.info(f"  Tagline: {status['tagline']}")
+    logger.info(f"  Name: {status['station_name']}")
+    logger.info(f"  ID: {status['station_id']}")
     logger.info(f"  Running: {status['running']}")
-    logger.info(f"  Edge Mode: {status['edge_mode']}")
+    logger.info(f"  Edge Mode: {status['edge_optimization_enabled']}")
     logger.info(f"  Blockchain: {status['blockchain_enabled']}")
     
     station.stop()
@@ -58,31 +66,39 @@ def demo_personalized_dj():
     logger.info("=" * 60)
     
     # Create DJ
-    dj = PersonalizedDJ(name="DJ Quantum", edge_mode=True)
+    dj = PersonalizedDJ()
     
     # Simulate user interaction
     user_id = "user_001"
     
-    # First interaction
-    greeting = dj.greet_user(user_id, "Alex")
-    logger.info(f"\nDJ: {greeting}")
+    # Initial preferences
+    initial_prefs = {
+        "genres": {"jazz": 0.8, "electronic": 0.7},
+        "energy_level": 0.6,
+        "discovery_factor": 0.3
+    }
     
-    # User asks for music
-    response = dj.interact(user_id, "Can you recommend some music?")
-    logger.info(f"\nUser: Can you recommend some music?")
-    logger.info(f"DJ: {response}")
+    # Get/Create profile
+    profile = dj.get_or_create_profile(user_id, initial_preferences=initial_prefs)
+    logger.info(f"Created profile for {user_id}")
     
-    # Update preferences
-    dj.update_preferences(user_id, ["jazz", "electronic", "ambient"])
+    # Get recommendations
+    recommendations = dj.recommend(user_id)
     
-    # Ask again
-    response = dj.interact(user_id, "Play something for me")
-    logger.info(f"\nUser: Play something for me")
-    logger.info(f"DJ: {response}")
-    
-    # Check trust score
-    trust = dj.get_trust_score(user_id)
-    logger.info(f"\nUser Trust Score: {trust:.2f}")
+    logger.info(f"\nDJ Recommendations for {user_id}:")
+    for rec in recommendations[:3]:
+        logger.info(f"  - {rec['title']} by {rec['artist']} ({rec['genre']})")
+
+    # Simulate feedback
+    if recommendations:
+        track = recommendations[0]
+        dj.record_feedback(user_id, track['track_id'], 'like', rating=0.9)
+        logger.info(f"\nUser liked: {track['title']}")
+        
+        # Get updated recommendations
+        new_recs = dj.recommend(user_id)
+        if new_recs:
+            logger.info(f"New top recommendation: {new_recs[0]['title']}")
 
 
 def demo_dataset_management():
@@ -92,64 +108,51 @@ def demo_dataset_management():
     logger.info("=" * 60)
     
     # Create dataset manager
-    manager = DatasetManager(opensource_only=True, min_quality=0.7)
+    manager = DatasetManager(allowed_licenses=['CC-BY', 'MIT', 'Public-Domain'])
     
     # Register some datasets
     datasets = [
         Dataset(
-            id="ds_001",
+            dataset_id="ds_001",
             name="OpenMusic Dataset",
             description="High-quality open source music samples",
-            license=DatasetLicense.CC_BY,
-            source_url="https://example.com/openmusic",
-            quality_score=0.9,
-            category="music",
-            size_mb=150.0
+            version="1.0",
+            creator_id="creator_A",
+            license=DatasetLicense(
+                license_type=LicenseType.CC_BY.value,
+                license_url="https://creativecommons.org/licenses/by/4.0/"
+            ),
+            tracks=[{'title': 'Track 1', 'artist': 'Artist A', 'genre': 'Rock', 'duration': 180}], # Dummy tracks for scoring
+            quality_score=0.9
         ),
         Dataset(
-            id="ds_002",
+            dataset_id="ds_002",
             name="Conversation AI Dataset",
             description="Natural conversation training data",
-            license=DatasetLicense.MIT,
-            source_url="https://example.com/convai",
-            quality_score=0.85,
-            category="conversation",
-            size_mb=75.0
-        ),
-        Dataset(
-            id="ds_003",
-            name="Music Knowledge Base",
-            description="Music theory and artist information",
-            license=DatasetLicense.CC_BY_SA,
-            source_url="https://example.com/musicknowledge",
-            quality_score=0.8,
-            category="knowledge",
-            size_mb=50.0
+            version="1.0",
+            creator_id="creator_B",
+            license=DatasetLicense(
+                 license_type=LicenseType.MIT.value,
+                 license_url="https://opensource.org/licenses/MIT"
+            ),
+            tracks=[{'title': 'Conv 1', 'artist': 'Speaker A', 'genre': 'Speech', 'duration': 60}],
+            quality_score=0.85
         )
     ]
     
     for dataset in datasets:
-        success = manager.register_dataset(dataset)
+        success = manager.add_dataset(dataset)
         if success:
-            # Verify on blockchain
-            manager.verify_dataset_blockchain(dataset.id)
-            # Add community rating
-            manager.rate_dataset(dataset.id, 0.85)
+             logger.info(f"Added {dataset.name}")
     
     # Show high quality datasets
-    high_quality = manager.get_high_quality_datasets()
-    logger.info(f"\nHigh Quality Datasets ({len(high_quality)}):")
-    for ds in high_quality:
-        logger.info(f"  - {ds.name} (Score: {ds.quality_score}, Verified: {ds.verified})")
-    
-    # Show edge-optimized datasets
-    edge_datasets = manager.get_edge_optimized_datasets(max_size_mb=100)
-    logger.info(f"\nEdge-Optimized Datasets ({len(edge_datasets)}):")
-    for ds in edge_datasets:
-        logger.info(f"  - {ds.name} ({ds.size_mb}MB)")
+    all_datasets = manager.list_datasets(min_quality=0.0) # Show all for demo
+    logger.info(f"\nAll Datasets ({len(all_datasets)}):")
+    for ds in all_datasets:
+        logger.info(f"  - {ds.name} (Score: {ds.quality_score:.2f})")
     
     # Show stats
-    stats = manager.get_stats()
+    stats = manager.get_statistics()
     logger.info(f"\nDataset Statistics:")
     for key, value in stats.items():
         logger.info(f"  {key}: {value}")
@@ -162,38 +165,29 @@ def demo_blockchain():
     logger.info("=" * 60)
     
     # Create blockchain
-    blockchain = BlockchainTrustNetwork()
+    blockchain = BlockchainTrustNetwork(difficulty=1) # Low difficulty for demo speed
     
     # Add trust records
-    records = [
-        TrustRecord("user_001", "interaction", "dj", 0.05),
-        TrustRecord("user_001", "rating", "dataset_001", 0.03),
-        TrustRecord("user_002", "interaction", "dj", 0.05),
-        TrustRecord("user_002", "verification", "dataset_002", 0.02),
-    ]
+    blockchain.add_trust_record("content_001", "creator_A", 0.8)
+    blockchain.add_trust_record("content_002", "creator_B", 0.6)
     
-    for record in records:
-        blockchain.add_trust_record(record)
-    
-    logger.info(f"\nAdded {len(records)} trust records")
+    logger.info(f"\nAdded trust records to pending pool")
     
     # Mine a block
-    block = blockchain.mine_block()
+    block = blockchain.mine_pending_records()
     if block:
-        logger.info(f"Mined block #{block.index}")
+        logger.info(f"Mined block #{block.index} with hash: {block.hash[:10]}...")
     
     # Verify chain
-    is_valid = blockchain.verify_chain()
+    is_valid = blockchain.is_chain_valid()
     logger.info(f"Blockchain valid: {is_valid}")
     
     # Show trust scores
-    logger.info(f"\nTrust Scores:")
-    for user_id in ["user_001", "user_002"]:
-        score = blockchain.get_trust_score(user_id)
-        logger.info(f"  {user_id}: {score:.2f}")
+    score = blockchain.get_trust_score("content_001", "creator_A")
+    logger.info(f"Trust Score for content_001: {score}")
     
     # Show stats
-    stats = blockchain.get_chain_stats()
+    stats = blockchain.get_statistics()
     logger.info(f"\nBlockchain Statistics:")
     for key, value in stats.items():
         logger.info(f"  {key}: {value}")
@@ -205,41 +199,40 @@ def demo_edge_device():
     logger.info("QFZZ Edge Device Optimization - Demo")
     logger.info("=" * 60)
     
-    # Create edge device config
+    # Create optimizer
+    optimizer = EdgeOptimizer()
+    
+    # Register a device
     config = EdgeDeviceConfig(
         device_id="edge_001",
-        device_type="smartphone",
-        max_memory_mb=512,
-        max_model_size_mb=100,
-        enable_6g=True,
-        network_bandwidth_mbps=1000,
-        storage_available_gb=2.0
+        device_type=DeviceType.SMARTPHONE,
+        memory_mb=4096,         # Reasonable for modern smartphone
+        storage_mb=2048,        # 2GB available storage
+        battery_powered=True,
+        network_type=NetworkType.WIFI,
+        bandwidth_mbps=50.0,
+        metadata={"enable_6g": True, "max_model_size_mb": 100}
     )
     
-    # Create optimizer
-    optimizer = EdgeOptimizer(config)
-    
-    # Optimize model
-    model_optimization = optimizer.optimize_model(250.0)
-    logger.info(f"\nModel Optimization:")
-    for key, value in model_optimization.items():
-        logger.info(f"  {key}: {value}")
+    optimizer.register_device(config)
     
     # Optimize streaming
-    streaming_config = optimizer.optimize_streaming(320)
-    logger.info(f"\nStreaming Configuration:")
-    for key, value in streaming_config.items():
+    optimization = optimizer.optimize_streaming("edge_001", preferences={'quality': 'high'})
+    
+    logger.info(f"\nStreaming Optimization for edge_001:")
+    for key, value in optimization.items():
         logger.info(f"  {key}: {value}")
     
-    # Test caching
-    optimizer.add_to_cache("track_001", {"title": "Test Track"}, 5.0)
-    optimizer.add_to_cache("track_002", {"title": "Another Track"}, 5.0)
+    # Simulate condition change
+    logger.info("\nSimulating low battery and poor network...")
+    optimizer.update_battery_status("edge_001", 0.15) # 15% battery
+    optimizer.update_network_conditions("edge_001", NetworkType.CELLULAR_3G, 1.5)
     
-    # Get device status
-    status = optimizer.get_device_status()
-    logger.info(f"\nDevice Status:")
-    for key, value in status.items():
-        logger.info(f"  {key}: {value}")
+    # Re-optimize
+    new_opt = optimizer.optimize_streaming("edge_001")
+    logger.info(f"New Profile: {new_opt['profile']}")
+    logger.info(f"New Quality: {new_opt['quality']}")
+    logger.info(f"New Bitrate: {new_opt['bitrate_kbps']} kbps")
 
 
 def main():
