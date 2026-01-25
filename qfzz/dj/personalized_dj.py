@@ -8,7 +8,7 @@ import logging
 from datetime import datetime
 
 from .profiles import UserProfile
-from qfzz.llm import LLMProvider, MockLLMClient, OllamaClient, GeminiClient
+from qfzz.llm.router import LLMRouter
 from qfzz.knowledge import QFZZKnowledgeGraph
 import os
 
@@ -31,8 +31,8 @@ class PersonalizedDJ:
         Initialize the Personalized DJ.
         
         Args:
-            llm_model: Name of the LLM model to use (default: llama3)
-            api_key: Optional API key for cloud providers (like Gemini)
+            llm_model: Name of the LLM model to use (default: llama3) - deprecated
+            api_key: Optional API key for cloud providers - deprecated
         """
         self._user_profiles: Dict[str, UserProfile] = {}
         self._content_catalog: List[Dict[str, Any]] = []
@@ -42,28 +42,15 @@ class PersonalizedDJ:
         self.ledger = SovereignLedger() # Initialize Blockchain Ledger
         self.fetcher = ContentFetcher(download_dir="./qfzz_audio_content") # Initialize Fetcher
         
-        # Initialize LLM
-        # Priority 1: Gemini (if key provided)
-        # Priority 2: Ollama (local)
-        # Priority 3: Mock (fallback)
+        # Initialize LLM Router with automatic provider selection and fallback
+        self.llm_router = LLMRouter()
         
-        self.llm: Optional[LLMProvider] = None
+        # Log available providers
+        available = self.llm_router.get_available_providers()
+        logger.info(f"Personalized DJ initialized with {len(available)} available LLM providers: {', '.join(available)}")
         
-        if api_key:
-             self.llm = GeminiClient(api_key=api_key)
-             if self.llm.is_available():
-                 logger.info("Connected to Gemini API")
-        
-        if not self.llm or not self.llm.is_available():
-            self.llm = OllamaClient(model=llm_model)
-            if self.llm.is_available():
-                logger.info(f"Connected to local Ollama: {llm_model}")
-
-        if not self.llm or not self.llm.is_available():
-            logger.info("No LLM detected, using Mock DJ")
-            self.llm = MockLLMClient()
-            
-        logger.info("Personalized DJ initialized with Knowledge Graph")
+        if llm_model != "llama3" or api_key:
+            logger.warning("llm_model and api_key parameters are deprecated. Use environment variables instead.")
 
     def request_track(self, url: str) -> Optional[Dict[str, Any]]:
         """Download and register a track from a URL."""
@@ -97,9 +84,9 @@ class PersonalizedDJ:
         
         Keep it brief (under 50 words), cool, and radio-friendly."""
         
-        # Get response from LLM
-        response = self.llm.generate(message, system_prompt=context)
-        return response
+        # Get response from LLM router
+        result = self.llm_router.generate(message, system_prompt=context, max_tokens=200)
+        return result['text']
 
     def generate_segue(self, track_prev: Optional[Dict[str, Any]], track_next: Dict[str, Any]) -> str:
         """
@@ -148,8 +135,10 @@ class PersonalizedDJ:
                  "next_track": track_next.get('title'),
                  "prompt_hash": hash(prompt)
              })
-             
-        return self.llm.generate(prompt, system_prompt="You are QFZZ, the Pulse of the Quantum Realm.")
+        
+        # Generate segue using LLM router
+        result = self.llm_router.generate(prompt, system_prompt="You are QFZZ, the Pulse of the Quantum Realm.", max_tokens=100)
+        return result['text']
     
     def _init_genre_similarity(self) -> Dict[str, List[str]]:
         """
