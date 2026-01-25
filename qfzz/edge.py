@@ -20,7 +20,6 @@ class EdgeDeviceConfig:
     enable_6g: bool = False
     network_bandwidth_mbps: int = 100
     storage_available_gb: float = 1.0
-    
 
 class EdgeOptimizer:
     """

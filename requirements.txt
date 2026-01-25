@@ -1,1 +1,3 @@
-python-dateutil>=2.8.0
+# No external dependencies required
+# All functionality uses Python standard library
+
