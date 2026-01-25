@@ -46,7 +46,7 @@ export default function AudioPlayer() {
 
       for (let i = 0; i < barCount; i++) {
         // Random height based on playing state
-        let height = isPlaying ? Math.random() * 40 + 5 : 2;
+        const height = isPlaying ? Math.random() * 40 + 5 : 2;
 
         ctx.fillStyle = '#8b5cf6';
         ctx.fillRect(i * (barWidth + gap), canvas.height / 2 - height / 2, barWidth, height);
@@ -142,7 +142,7 @@ export default function AudioPlayer() {
         {/* Progress */}
         <div className="w-full bg-slate-800 rounded-full h-1.5 mb-2 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-purple-500 to-blue-500"
+            className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-100 ease-linear"
             style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}
           ></div>
         </div>
