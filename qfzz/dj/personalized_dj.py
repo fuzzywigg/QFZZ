@@ -84,6 +84,48 @@ class PersonalizedDJ:
         # Get response from LLM
         response = self.llm.generate(message, system_prompt=context)
         return response
+
+    def generate_segue(self, track_prev: Optional[Dict[str, Any]], track_next: Dict[str, Any]) -> str:
+        """
+        Generate a radio segue connecting two tracks using Knowledge Graph context.
+        """
+        if not track_prev:
+            prompt = f"Introduce the first track: '{track_next['title']}' by {track_next['artist']}."
+        else:
+            # Detect relationships via Knowledge Graph logic (simple heuristic for now)
+            # In a real scenario, we'd query self.kg.graph.get_shortest_path(prev, next)
+            
+            rels = []
+            if track_prev.get('artist') == track_next.get('artist'):
+                rels.append("same artist")
+            if track_prev.get('genre') == track_next.get('genre'):
+                rels.append("same vibe")
+                
+            # Check deep features if available
+            fp_prev = track_prev.get('fingerprint')
+            fp_next = track_next.get('fingerprint')
+            
+            if fp_prev and fp_next:
+                 if fp_prev.get('key') == fp_next.get('key'):
+                     rels.append(f"staying in the key of {fp_prev['key']}")
+                 
+                 bpm_diff = fp_next['bpm'] - fp_prev['bpm']
+                 if bpm_diff > 10:
+                     rels.append("bumping up the energy")
+                 elif bpm_diff < -10:
+                     rels.append("slowing things down")
+            
+            connection = ", ".join(rels) if rels else "switching gears"
+            
+            prompt = (
+                f"You are QFZZ, a hyper-intelligent quantum radio host. \n"
+                f"We just heard '{track_prev['title']}' by {track_prev['artist']}. \n"
+                f"Now playing '{track_next['title']}' by {track_next['artist']}. \n"
+                f"Connection: {connection}. \n"
+                f"Write a 1-sentence segue. Be cool, futuristic, and mention the connection if interesting."
+            )
+            
+        return self.llm.generate(prompt, system_prompt="You are QFZZ, the Pulse of the Quantum Realm.")
     
     def _init_genre_similarity(self) -> Dict[str, List[str]]:
         """

@@ -23,7 +23,7 @@ export default function AudioPlayer() {
   const animationRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // Fetch playlist from backend
+    // 1. Fetch playlist
     fetch('http://localhost:8000/playlist.json')
       .then(res => res.json())
       .then(data => {
@@ -33,6 +33,21 @@ export default function AudioPlayer() {
         }
       })
       .catch(err => console.error("Failed to load playlist:", err));
+
+    // 2. Poll for DJ Messages (every 5 seconds)
+    const pollDJ = setInterval(() => {
+      fetch('http://localhost:8000/dj_message.json')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.message) {
+            // Only update if different (to avoid re-typing animation reset if we had one)
+            setDjMessage(prev => data.message !== prev ? data.message : prev);
+          }
+        })
+        .catch(e => console.error("DJ poll failed", e));
+    }, 5000);
+
+    return () => clearInterval(pollDJ);
   }, []);
 
   const currentTrack = playlist[currentTrackIndex] || {

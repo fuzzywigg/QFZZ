@@ -90,6 +90,27 @@ def main():
     # Expose Knowledge Graph
     player.server.set_graph(dj.kg.export_d3_json())
     logger.info("Knowledge Graph API enabled")
+    
+    # Generate Initial Segue (Test)
+    if len(playlist) >= 2:
+        try:
+            # We need deep metadata for this to be good
+            t1 = playlist[0]
+            t2 = playlist[1]
+            
+            # Find deep meta for t1/t2
+            dm1 = next((t for t in scanned_tracks if t['filename'] == t1['filename']), None) 
+            dm2 = next((t for t in scanned_tracks if t['filename'] == t2['filename']), None)
+            
+            # Use deep meta if available, else basic
+            segue = dj.generate_segue(
+                track_prev=dm1 if dm1 else t1, 
+                track_next=dm2 if dm2 else t2
+            )
+            logger.info(f"DJ Segue: {segue}")
+            player.set_dj_message(segue)
+        except Exception as e:
+            logger.error(f"DJ failed to speak: {e}")
 
     # Station Core
     config = StationConfig(

@@ -21,6 +21,7 @@ class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
     # For now, we'll hardcode or use a class variable
     PAYLOAD = []
     GRAPH_PAYLOAD = {}
+    DJ_MESSAGE = {"message": "Welcome to QFZZ, the Pulse of the Quantum Realm."}
 
     def do_GET(self):
         if self.path == '/playlist.json':
@@ -35,6 +36,13 @@ class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             response = json.dumps(AudioRequestHandler.GRAPH_PAYLOAD)
+            self.wfile.write(response.encode('utf-8'))
+            
+        elif self.path == '/dj_message.json':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            response = json.dumps(AudioRequestHandler.DJ_MESSAGE)
             self.wfile.write(response.encode('utf-8'))
             
         else:
@@ -69,6 +77,10 @@ class StreamingServer:
     def set_graph(self, graph_data):
         """Update the graph served by the API."""
         AudioRequestHandler.GRAPH_PAYLOAD = graph_data
+        
+    def set_dj_message(self, message: str):
+        """Update the live DJ message."""
+        AudioRequestHandler.DJ_MESSAGE = {"message": message}
         
     def start(self):
         """Start the streaming server in a background thread."""

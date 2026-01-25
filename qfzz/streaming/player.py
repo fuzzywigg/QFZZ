@@ -96,6 +96,10 @@ class MusicPlayer:
         self.server.set_playlist(api_playlist)
         
         logger.info(f"Loaded playlist with {len(tracks)} tracks")
+        
+    def set_dj_message(self, message: str):
+        """Update DJ message on server."""
+        self.server.set_dj_message(message)
     
     def play(self, track_index: Optional[int] = None) -> bool:
         """
