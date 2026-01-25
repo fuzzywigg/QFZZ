@@ -1,0 +1,69 @@
+site_name: QFZZ - The Pulse of the Quantum Realm
+site_description: AI Radio for the Individual - Agentic radio station with quantum security
+site_author: fuzzywigg
+repo_url: https://github.com/fuzzywigg/QFZZ
+repo_name: fuzzywigg/QFZZ
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Architecture: architecture.md
+  - API Reference:
+      - Core: api/core.md
+      - Personalized DJ: api/dj.md
+      - Datasets: api/datasets.md
+      - Blockchain: api/blockchain.md
+      - Edge Computing: api/edge.md
+      - Streaming: api/streaming.md
+  - Guides:
+      - Quantum Security: guides/quantum-security.md
+      - Edge Deployment: guides/edge-deployment.md
+      - Personalized DJ: guides/personalized-dj.md
+  - Deployment: deployment.md
+  - Contributing: contributing.md
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            docstring_style: google
