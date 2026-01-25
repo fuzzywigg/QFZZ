@@ -22,6 +22,7 @@ class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
     PAYLOAD = []
     GRAPH_PAYLOAD = {}
     DJ_MESSAGE = {"message": "Welcome to QFZZ, the Pulse of the Quantum Realm."}
+    LEDGER_STATS = {"height": 0, "status": "Waiting"}
 
     def do_GET(self):
         if self.path == '/playlist.json':
@@ -43,6 +44,13 @@ class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             response = json.dumps(AudioRequestHandler.DJ_MESSAGE)
+            self.wfile.write(response.encode('utf-8'))
+            
+        elif self.path == '/ledger.json':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            response = json.dumps(AudioRequestHandler.LEDGER_STATS)
             self.wfile.write(response.encode('utf-8'))
             
         else:
@@ -81,6 +89,10 @@ class StreamingServer:
     def set_dj_message(self, message: str):
         """Update the live DJ message."""
         AudioRequestHandler.DJ_MESSAGE = {"message": message}
+        
+    def set_ledger_stats(self, stats: dict):
+        """Update the ledger stats."""
+        AudioRequestHandler.LEDGER_STATS = stats
         
     def start(self):
         """Start the streaming server in a background thread."""

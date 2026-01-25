@@ -17,6 +17,7 @@ export default function AudioPlayer() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [djMessage, setDjMessage] = useState("Welcome to QFZZ, the Pulse of the Quantum Realm.");
+  const [ledgerStats, setLedgerStats] = useState({ height: 0, status: "Init" });
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -45,6 +46,13 @@ export default function AudioPlayer() {
           }
         })
         .catch(e => console.error("DJ poll failed", e));
+
+      fetch('http://localhost:8000/ledger.json')
+        .then(res => res.json())
+        .then(data => {
+          if (data) setLedgerStats(data);
+        })
+        .catch(e => console.error("Ledger poll failed", e));
     }, 5000);
 
     return () => clearInterval(pollDJ);
@@ -238,9 +246,15 @@ export default function AudioPlayer() {
 
       {/* Knowledge Graph Visualization */}
       <div className="w-full max-w-4xl space-y-4">
-        <h3 className="text-xl font-bold text-white/50 text-center uppercase tracking-widest">
-          Semantic Knowledge Graph
-        </h3>
+        <div className="flex justify-between items-center">
+          <h3 className="text-xl font-bold text-white/50 uppercase tracking-widest">
+            Semantic Knowledge Graph
+          </h3>
+          <div className="text-xs text-green-400 font-mono flex gap-4">
+            <span>Ledger Height: {ledgerStats.height}</span>
+            <span>Trust Status: {ledgerStats.status}</span>
+          </div>
+        </div>
         <KnowledgeGraphVisualizer />
       </div>
     </div>

@@ -135,7 +135,9 @@ def main():
     try:
         while True:
             time.sleep(1)
-            # Here we could process background tasks
+            # Update Ledger Status on Frontend
+            if hasattr(dj, 'ledger'):
+                player.set_ledger_stats(dj.ledger.get_stats())
             
     except KeyboardInterrupt:
         logger.info("Shutting down...")

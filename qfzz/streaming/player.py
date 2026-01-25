@@ -100,6 +100,10 @@ class MusicPlayer:
     def set_dj_message(self, message: str):
         """Update DJ message on server."""
         self.server.set_dj_message(message)
+        
+    def set_ledger_stats(self, stats: dict):
+        """Update ledger stats on server."""
+        self.server.set_ledger_stats(stats)
     
     def play(self, track_index: Optional[int] = None) -> bool:
         """

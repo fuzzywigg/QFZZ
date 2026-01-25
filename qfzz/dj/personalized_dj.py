@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 from qfzz.library import ContentScanner
+from qfzz.blockchain import SovereignLedger
 
 class PersonalizedDJ:
     """
@@ -37,6 +38,7 @@ class PersonalizedDJ:
         self._genre_similarity: Dict[str, List[str]] = self._init_genre_similarity()
         self.kg = QFZZKnowledgeGraph() # Initialize Knowledge Graph
         self.scanner = ContentScanner(library_path="./qfzz_audio_content") # Initialize Scanner
+        self.ledger = SovereignLedger() # Initialize Blockchain Ledger
         
         # Initialize LLM
         # Priority 1: Gemini (if key provided)
@@ -125,6 +127,14 @@ class PersonalizedDJ:
                 f"Write a 1-sentence segue. Be cool, futuristic, and mention the connection if interesting."
             )
             
+        # Record this AI Generation to the Sovereign Ledger
+        if hasattr(self, 'ledger'):
+             self.ledger.record_event("SEGUE_GENERATION", {
+                 "prev_track": track_prev.get('title') if track_prev else "None",
+                 "next_track": track_next.get('title'),
+                 "prompt_hash": hash(prompt)
+             })
+             
         return self.llm.generate(prompt, system_prompt="You are QFZZ, the Pulse of the Quantum Realm.")
     
     def _init_genre_similarity(self) -> Dict[str, List[str]]:
