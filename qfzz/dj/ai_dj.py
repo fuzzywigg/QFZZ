@@ -9,7 +9,7 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from qfzz.core.llm_router import LLMRouter
 from qfzz.core.state import StateManager
@@ -24,7 +24,7 @@ class AIDJ:
     def __init__(
         self,
         persona: str = "energetic",
-        voice_id: Optional[str] = None,
+        voice_id: str | None = None,
         enable_tts: bool = False,
         tts_provider: str = "openai",
         personas_config_path: str = "config/dj-personas.json",
@@ -44,9 +44,7 @@ class AIDJ:
 
         # Load persona configuration
         if persona not in self.personas_config.get("personas", {}):
-            logger.warning(
-                f"Unknown persona '{persona}', defaulting to 'energetic'"
-            )
+            logger.warning(f"Unknown persona '{persona}', defaulting to 'energetic'")
             self.persona = "energetic"
 
         self.persona_config = self.personas_config["personas"][self.persona]
@@ -71,8 +69,7 @@ class AIDJ:
                 self.tts_client = None
 
         logger.info(
-            f"AI DJ initialized with persona '{self.persona}' "
-            f"({self.persona_config['name']})"
+            f"AI DJ initialized with persona '{self.persona}' ({self.persona_config['name']})"
         )
 
     def _load_personas_config(self, config_path: str) -> dict[str, Any]:
@@ -173,9 +170,7 @@ class AIDJ:
         temperature = self.persona_config.get("temperature", 0.7)
 
         try:
-            response = self.llm_router.generate(
-                prompt, temperature=temperature, max_tokens=150
-            )
+            response = self.llm_router.generate(prompt, temperature=temperature, max_tokens=150)
 
             if not response.success:
                 logger.error(f"LLM generation failed: {response.error}")
@@ -206,9 +201,7 @@ class AIDJ:
         temperature = self.persona_config.get("temperature", 0.7)
 
         try:
-            response = self.llm_router.generate(
-                prompt, temperature=temperature, max_tokens=100
-            )
+            response = self.llm_router.generate(prompt, temperature=temperature, max_tokens=100)
 
             if not response.success:
                 logger.error(f"LLM generation failed: {response.error}")
@@ -226,9 +219,7 @@ class AIDJ:
             logger.error(f"Failed to generate listener response: {e}")
             return self._get_fallback_response(listener_request)
 
-    def generate_transition(
-        self, current_track: dict[str, Any], next_track: dict[str, Any]
-    ) -> str:
+    def generate_transition(self, current_track: dict[str, Any], next_track: dict[str, Any]) -> str:
         """
         Generate smooth transition commentary between tracks.
 
@@ -243,9 +234,7 @@ class AIDJ:
         temperature = self.persona_config.get("temperature", 0.7)
 
         try:
-            response = self.llm_router.generate(
-                prompt, temperature=temperature, max_tokens=80
-            )
+            response = self.llm_router.generate(prompt, temperature=temperature, max_tokens=80)
 
             if not response.success:
                 logger.error(f"LLM generation failed: {response.error}")
@@ -277,9 +266,7 @@ class AIDJ:
         temperature = self.persona_config.get("temperature", 0.7)
 
         try:
-            response = self.llm_router.generate(
-                prompt, temperature=temperature, max_tokens=50
-            )
+            response = self.llm_router.generate(prompt, temperature=temperature, max_tokens=50)
 
             if not response.success:
                 logger.error(f"LLM generation failed: {response.error}")
@@ -296,7 +283,7 @@ class AIDJ:
             logger.error(f"Failed to generate station ID: {e}")
             return "You're listening to QFZZ FuzzyRadio!"
 
-    def synthesize_speech(self, text: str) -> Optional[bytes]:
+    def synthesize_speech(self, text: str) -> bytes | None:
         """
         Convert text to speech audio.
 
@@ -333,9 +320,7 @@ class AIDJ:
             "storyteller": "You're a DJ who tells captivating stories about music.",
         }
 
-        system_prompt = persona_prompts.get(
-            self.persona, persona_prompts["energetic"]
-        )
+        system_prompt = persona_prompts.get(self.persona, persona_prompts["energetic"])
 
         title = track.get("title", "Unknown Track")
         artist = track.get("artist", "Unknown Artist")
@@ -365,9 +350,7 @@ class AIDJ:
             f"Respond warmly in 1-2 sentences."
         )
 
-    def _build_transition_prompt(
-        self, current: dict[str, Any], next_track: dict[str, Any]
-    ) -> str:
+    def _build_transition_prompt(self, current: dict[str, Any], next_track: dict[str, Any]) -> str:
         """
         Build prompt for track transition.
 
@@ -396,9 +379,7 @@ class AIDJ:
         """Get fallback response when LLM fails."""
         return "Thanks for tuning in! Keep those requests coming!"
 
-    def _get_fallback_transition(
-        self, current: dict[str, Any], next_track: dict[str, Any]
-    ) -> str:
+    def _get_fallback_transition(self, current: dict[str, Any], next_track: dict[str, Any]) -> str:
         """Get fallback transition when LLM fails."""
         next_title = next_track.get("title", "the next track")
         return f"And now, {next_title}!"

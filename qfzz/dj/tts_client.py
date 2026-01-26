@@ -6,7 +6,6 @@ Supports multiple TTS providers including OpenAI, ElevenLabs, and Google Cloud T
 
 import logging
 import os
-from typing import Optional
 
 from dotenv import load_dotenv
 
@@ -92,7 +91,7 @@ class TTSClient:
             logger.error(f"Failed to initialize Google Cloud TTS: {e}")
             self._client = None
 
-    def synthesize(self, text: str, voice_id: Optional[str] = None) -> Optional[bytes]:
+    def synthesize(self, text: str, voice_id: str | None = None) -> bytes | None:
         """
         Synthesize speech from text.
 
@@ -139,7 +138,7 @@ class TTSClient:
 
         return response.content
 
-    def _synthesize_elevenlabs(self, text: str, voice_id: Optional[str]) -> bytes:
+    def _synthesize_elevenlabs(self, text: str, voice_id: str | None) -> bytes:
         """
         Synthesize speech using ElevenLabs API.
 
@@ -175,7 +174,7 @@ class TTSClient:
 
         return response.content
 
-    def _synthesize_google(self, text: str, voice_id: Optional[str]) -> bytes:
+    def _synthesize_google(self, text: str, voice_id: str | None) -> bytes:
         """
         Synthesize speech using Google Cloud TTS.
 
@@ -193,9 +192,7 @@ class TTSClient:
 
         # Build the voice request
         if voice_id:
-            voice = texttospeech.VoiceSelectionParams(
-                name=voice_id, language_code="en-US"
-            )
+            voice = texttospeech.VoiceSelectionParams(name=voice_id, language_code="en-US")
         else:
             voice = texttospeech.VoiceSelectionParams(
                 language_code="en-US",
@@ -203,9 +200,7 @@ class TTSClient:
             )
 
         # Select the type of audio file
-        audio_config = texttospeech.AudioConfig(
-            audio_encoding=texttospeech.AudioEncoding.MP3
-        )
+        audio_config = texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEncoding.MP3)
 
         # Perform the text-to-speech request
         response = self._client.synthesize_speech(

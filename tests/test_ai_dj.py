@@ -45,9 +45,7 @@ def temp_personas_config():
         }
     }
 
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".json", delete=False
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json.dump(config_data, f)
         temp_path = f.name
 
@@ -87,9 +85,7 @@ def mock_state_manager():
         yield state_instance
 
 
-def test_ai_dj_initialization(
-    temp_personas_config, mock_llm_router_success, mock_state_manager
-):
+def test_ai_dj_initialization(temp_personas_config, mock_llm_router_success, mock_state_manager):
     """Test AI DJ initialization."""
     dj = AIDJ(persona="energetic", personas_config_path=temp_personas_config)
 
@@ -132,14 +128,10 @@ def test_ai_dj_track_introduction(
     mock_llm_router_success.generate.assert_called_once()
 
     # Verify state was updated
-    mock_state_manager.add_conversation.assert_called_with(
-        role="dj", content=intro
-    )
+    mock_state_manager.add_conversation.assert_called_with(role="dj", content=intro)
 
 
-def test_ai_dj_banned_phrases_filtered(
-    temp_personas_config, mock_state_manager
-):
+def test_ai_dj_banned_phrases_filtered(temp_personas_config, mock_state_manager):
     """Test that banned phrases are filtered from responses."""
     with patch("qfzz.dj.ai_dj.LLMRouter") as mock_router:
         router_instance = MagicMock()
@@ -165,9 +157,7 @@ def test_ai_dj_banned_phrases_filtered(
         assert "generated" not in intro
 
 
-def test_ai_dj_listener_response(
-    temp_personas_config, mock_llm_router_success, mock_state_manager
-):
+def test_ai_dj_listener_response(temp_personas_config, mock_llm_router_success, mock_state_manager):
     """Test AI DJ responding to listener."""
     dj = AIDJ(persona="chill", personas_config_path=temp_personas_config)
 
@@ -204,14 +194,10 @@ def test_ai_dj_transition_generation(
     assert isinstance(transition, str)
 
     # Verify state was updated
-    mock_state_manager.add_conversation.assert_called_with(
-        role="dj", content=transition
-    )
+    mock_state_manager.add_conversation.assert_called_with(role="dj", content=transition)
 
 
-def test_ai_dj_station_id(
-    temp_personas_config, mock_llm_router_success, mock_state_manager
-):
+def test_ai_dj_station_id(temp_personas_config, mock_llm_router_success, mock_state_manager):
     """Test AI DJ station identification."""
     dj = AIDJ(persona="energetic", personas_config_path=temp_personas_config)
 
@@ -221,33 +207,22 @@ def test_ai_dj_station_id(
     assert isinstance(station_id, str)
 
     # Verify state was updated
-    mock_state_manager.add_conversation.assert_called_with(
-        role="dj", content=station_id
-    )
+    mock_state_manager.add_conversation.assert_called_with(role="dj", content=station_id)
 
 
 def test_different_personas_have_different_configs(
     temp_personas_config, mock_llm_router_success, mock_state_manager
 ):
     """Test that different personas have different configurations."""
-    dj_energetic = AIDJ(
-        persona="energetic", personas_config_path=temp_personas_config
-    )
-    dj_chill = AIDJ(
-        persona="chill", personas_config_path=temp_personas_config
-    )
+    dj_energetic = AIDJ(persona="energetic", personas_config_path=temp_personas_config)
+    dj_chill = AIDJ(persona="chill", personas_config_path=temp_personas_config)
 
     assert dj_energetic.persona_config["name"] != dj_chill.persona_config["name"]
-    assert (
-        dj_energetic.persona_config["temperature"]
-        != dj_chill.persona_config["temperature"]
-    )
+    assert dj_energetic.persona_config["temperature"] != dj_chill.persona_config["temperature"]
     assert dj_energetic.voice_id != dj_chill.voice_id
 
 
-def test_ai_dj_fallback_on_llm_failure(
-    temp_personas_config, mock_state_manager
-):
+def test_ai_dj_fallback_on_llm_failure(temp_personas_config, mock_state_manager):
     """Test AI DJ uses fallback when LLM fails."""
     with patch("qfzz.dj.ai_dj.LLMRouter") as mock_router:
         router_instance = MagicMock()
@@ -310,9 +285,7 @@ def test_ai_dj_synthesize_speech_enabled(
     tts_instance.synthesize.assert_called_once_with("Hello world", voice_id="alloy")
 
 
-def test_ai_dj_get_persona_info(
-    temp_personas_config, mock_llm_router_success, mock_state_manager
-):
+def test_ai_dj_get_persona_info(temp_personas_config, mock_llm_router_success, mock_state_manager):
     """Test getting persona information."""
     dj = AIDJ(persona="intellectual", personas_config_path=temp_personas_config)
 
@@ -333,9 +306,7 @@ def test_ai_dj_get_available_personas(
     assert "intellectual" in personas
 
 
-def test_ai_dj_custom_voice_id(
-    temp_personas_config, mock_llm_router_success, mock_state_manager
-):
+def test_ai_dj_custom_voice_id(temp_personas_config, mock_llm_router_success, mock_state_manager):
     """Test that custom voice ID overrides persona default."""
     dj = AIDJ(
         persona="energetic",
@@ -346,13 +317,9 @@ def test_ai_dj_custom_voice_id(
     assert dj.voice_id == "custom_voice"
 
 
-def test_ai_dj_missing_config_uses_defaults(
-    mock_llm_router_success, mock_state_manager
-):
+def test_ai_dj_missing_config_uses_defaults(mock_llm_router_success, mock_state_manager):
     """Test that missing config file uses defaults."""
-    dj = AIDJ(
-        persona="energetic", personas_config_path="/nonexistent/path/config.json"
-    )
+    dj = AIDJ(persona="energetic", personas_config_path="/nonexistent/path/config.json")
 
     assert dj.persona == "energetic"
     assert dj.persona_config is not None
