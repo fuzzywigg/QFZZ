@@ -1,0 +1,88 @@
+version: '3.8'
+
+# Production configuration for pappas.work deployment
+
+services:
+  # Nginx reverse proxy with SSL
+  nginx:
+    image: nginx:alpine
+    container_name: qfzz-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config/ssl:/etc/letsencrypt:ro
+      - certbot-webroot:/var/www/certbot
+      - ./frontend/build:/usr/share/nginx/html:ro
+    depends_on:
+      - qfzz-app
+      - icecast
+    networks:
+      - qfzz-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Let's Encrypt SSL certificates
+  certbot:
+    image: certbot/certbot:latest
+    container_name: qfzz-certbot
+    volumes:
+      - ./config/ssl:/etc/letsencrypt
+      - certbot-webroot:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - qfzz-network
+
+  # QFZZ Application (override)
+  qfzz-app:
+    environment:
+      - DOMAIN=pappas.work
+      - API_URL=https://api.pappas.work
+      - STREAM_URL=https://stream.pappas.work/qfzz
+      - ENVIRONMENT=production
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Icecast (override)
+  icecast:
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # PostgreSQL (override)
+  postgres:
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Redis (override)
+  redis:
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  certbot-webroot:
+    driver: local
+
+networks:
+  qfzz-network:
+    driver: bridge

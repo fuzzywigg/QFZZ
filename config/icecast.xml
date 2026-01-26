@@ -1,0 +1,69 @@
+<icecast>
+    <location>Earth</location>
+    <admin>admin@qfzz.radio</admin>
+    <limits>
+        <clients>100</clients>
+        <sources>2</sources>
+        <queue-size>524288</queue-size>
+        <client-timeout>30</client-timeout>
+        <header-timeout>15</header-timeout>
+        <source-timeout>10</source-timeout>
+        <burst-size>65535</burst-size>
+    </limits>
+
+    <authentication>
+        <source-password>hackme</source-password>
+        <relay-password>hackme</relay-password>
+        <admin-user>admin</admin-user>
+        <admin-password>hackme</admin-password>
+    </authentication>
+
+    <hostname>localhost</hostname>
+
+    <listen-socket>
+        <port>8000</port>
+    </listen-socket>
+
+    <mount type="normal">
+        <mount-name>/qfzz</mount-name>
+        <username>source</username>
+        <password>hackme</password>
+        <max-listeners>100</max-listeners>
+        <dump-file>/tmp/qfzz-dump.ogg</dump-file>
+        <burst-size>65536</burst-size>
+        <fallback-mount>/fallback</fallback-mount>
+        <fallback-override>1</fallback-override>
+        <fallback-when-full>1</fallback-when-full>
+        <intro>/intro.ogg</intro>
+        <hidden>0</hidden>
+        <public>1</public>
+        <stream-name>QFZZ - The Pulse of the Quantum Realm</stream-name>
+        <stream-description>AI-powered personalized radio station</stream-description>
+        <stream-url>https://github.com/fuzzywigg/QFZZ</stream-url>
+        <genre>Electronic/Ambient/AI</genre>
+        <bitrate>128</bitrate>
+        <type>application/ogg</type>
+        <subtype>vorbis</subtype>
+    </mount>
+
+    <fileserve>1</fileserve>
+
+    <paths>
+        <basedir>/usr/share/icecast2</basedir>
+        <logdir>/var/log/icecast2</logdir>
+        <webroot>/usr/share/icecast2/web</webroot>
+        <adminroot>/usr/share/icecast2/admin</adminroot>
+        <alias source="/" destination="/status.xsl"/>
+    </paths>
+
+    <logging>
+        <accesslog>access.log</accesslog>
+        <errorlog>error.log</errorlog>
+        <loglevel>3</loglevel> <!-- 4 Debug, 3 Info, 2 Warn, 1 Error -->
+        <logsize>10000</logsize> <!-- Max size of a logfile -->
+    </logging>
+
+    <security>
+        <chroot>0</chroot>
+    </security>
+</icecast>
