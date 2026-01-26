@@ -20,5 +20,5 @@ mkdocstrings[python]>=0.23.0,<0.24.0
 pymdown-extensions>=10.3,<11.0
 
 # Security scanning
-safety>=2.3.0,<3.0.0
+safety>=2.3.0,<4.0.0
 bandit>=1.7.0,<2.0.0
