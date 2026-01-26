@@ -2,6 +2,19 @@
 
 This guide will help you get the QFZZ AI Radio GUI running on Windows using PowerShell.
 
+## ⏱️ Time Required: 15-20 minutes
+
+## 📋 Setup Checklist
+
+Follow these steps in order:
+- [ ] Install Prerequisites (Python, Node.js, Git)
+- [ ] Clone the Repository
+- [ ] Set Up Python Backend
+- [ ] Set Up Frontend (Next.js)
+- [ ] Start Backend Server (PowerShell Window 1)
+- [ ] Start Frontend Server (PowerShell Window 2)
+- [ ] Open GUI in Browser
+
 ## Prerequisites
 
 Before starting, ensure you have the following installed:
@@ -9,15 +22,19 @@ Before starting, ensure you have the following installed:
 1. **Python 3.10 or higher**
    - Download from: https://www.python.org/downloads/
    - During installation, check "Add Python to PATH"
+   - Verify: Open PowerShell and run `python --version`
 
 2. **Node.js 18 or higher**
    - Download from: https://nodejs.org/
    - This includes npm (Node Package Manager)
+   - Verify: Open PowerShell and run `node --version`
 
 3. **Git for Windows**
    - Download from: https://git-scm.com/download/win
+   - Verify: Open PowerShell and run `git --version`
 
 4. **PowerShell 5.1 or higher** (comes with Windows 10/11)
+   - Verify: Open PowerShell and run `$PSVersionTable.PSVersion`
 
 ## Quick Start Guide
 
@@ -142,6 +159,45 @@ Open your web browser and navigate to:
 **http://localhost:3000**
 
 You should see the QFZZ AI Radio GUI! 🎵
+
+## System Architecture
+
+Here's how the components work together:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Your Web Browser                          │
+│                  http://localhost:3000                       │
+│                  (Next.js Frontend GUI)                      │
+└─────────────────────┬───────────────────────────────────────┘
+                      │ HTTP/WebSocket
+                      │ API Requests
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Python Backend Server                           │
+│              http://localhost:8000                          │
+│                                                              │
+│  ┌────────────────┐  ┌──────────────┐  ┌─────────────────┐ │
+│  │  AI DJ System  │  │  Music Player │  │ Knowledge Graph │ │
+│  │   (LLM-based)  │  │  & Streaming  │  │  & Analytics    │ │
+│  └────────────────┘  └──────────────┘  └─────────────────┘ │
+│                                                              │
+│  ┌────────────────┐  ┌──────────────┐  ┌─────────────────┐ │
+│  │   Blockchain   │  │   Library     │  │   User Data     │ │
+│  │  Trust Network │  │   Scanner     │  │   & Profiles    │ │
+│  └────────────────┘  └──────────────┘  └─────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                      │
+                      ▼
+           ┌──────────────────────┐
+           │  Audio Content Files │
+           │  (qfzz_audio_content)│
+           └──────────────────────┘
+```
+
+**Two PowerShell Windows Required:**
+- **Window 1**: Runs Python backend (port 8000) - handles AI, music, data
+- **Window 2**: Runs Next.js frontend (port 3000) - provides the web GUI
 
 ## What You Can Do in the GUI
 
