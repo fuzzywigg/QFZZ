@@ -254,6 +254,35 @@ score = blockchain.get_trust_score("user_001")
 - **Hashlib** - Blockchain hashing
 - **Type Hints** - Full type safety
 
+## 🛠️ Development
+
+### Setup
+
+```bash
+# Quick setup (recommended)
+./scripts/setup-dev-environment.sh
+
+# Or manual setup
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+pre-commit install
+```
+
+### Code Quality
+
+We use pre-commit hooks to maintain code quality:
+- **detect-secrets**: Prevents committing API keys
+- **black**: Code formatting
+- **ruff**: Fast linting with auto-fixes
+- **mypy**: Type checking
+
+Hooks run automatically on commit. Run manually:
+```bash
+pre-commit run --all-files
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
 ## 🤝 Contributing
 
 We welcome contributions! This is an open source project aimed at democratizing AI radio technology.

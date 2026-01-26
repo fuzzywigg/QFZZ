@@ -88,8 +88,19 @@ The Stage/Backstage split maintains the illusion for users while allowing develo
 git clone https://github.com/YOUR_USERNAME/QFZZ.git
 cd QFZZ
 
-# 3. Install dependencies
+# 3. Quick setup (recommended)
+./scripts/setup-dev-environment.sh
+
+# OR Manual setup
+# Install dependencies
 make install-dev
+
+# Install pre-commit hooks
+pip install pre-commit
+pre-commit install
+
+# Initialize secrets baseline
+detect-secrets scan > .secrets.baseline
 
 # 4. Set up environment
 cp .env.example .env
@@ -97,10 +108,6 @@ cp .env.example .env
 
 # 5. Run tests to verify setup
 make test
-
-# 6. Install pre-commit hooks
-pip install pre-commit
-pre-commit install
 ```
 
 ### Understanding the Codebase
@@ -110,6 +117,61 @@ pre-commit install
 3. **Explore `qfzz/core/`**: Core infrastructure (state, LLM router)
 4. **Run tests**: `make test` - see what's being tested
 5. **Check issues**: Look at open issues for areas needing work
+
+## Pre-commit Hooks
+
+We use pre-commit hooks to ensure code quality. Hooks run automatically on `git commit`.
+
+### What the hooks do:
+
+- **detect-secrets**: Prevents committing API keys and secrets
+- **black**: Formats Python code automatically
+- **isort**: Sorts imports
+- **ruff**: Fast Python linter with auto-fixes
+- **mypy**: Type checking
+- **YAML/JSON validation**: Checks config files
+- **Trailing whitespace**: Fixes whitespace issues
+
+### Running hooks manually
+
+```bash
+# Run all hooks on all files
+pre-commit run --all-files
+
+# Run specific hook
+pre-commit run black --all-files
+
+# Skip hooks (emergency only!)
+git commit --no-verify -m "emergency fix"
+```
+
+### Updating hooks
+
+```bash
+pre-commit autoupdate
+```
+
+### Common Issues
+
+#### Pre-commit hook fails
+
+If a hook fails:
+1. Check the error message
+2. Fix the issue manually or let auto-fixes run
+3. Stage the changes: `git add .`
+4. Commit again: `git commit -m "your message"`
+
+#### Secret detected
+
+If detect-secrets blocks your commit:
+1. Remove the secret from the code
+2. Add to .env instead (already in .gitignore)
+3. If it's a false positive, add to .secrets.baseline
+
+#### Type errors from mypy
+
+Type checking is advisory (won't block commits in tests/).
+Fix gradually by adding type hints.
 
 ## Development Workflow
 
