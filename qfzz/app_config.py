@@ -6,7 +6,6 @@ Centralized configuration management for QFZZ FuzzyRadio.
 
 import os
 from pathlib import Path
-from typing import Optional
 
 from dotenv import load_dotenv
 
@@ -24,20 +23,16 @@ class Config:
     PORT: int = int(os.getenv("QFZZ_PORT", "8080"))
 
     # AI/LLM Provider Keys
-    GOOGLE_AI_API_KEY: Optional[str] = os.getenv("GOOGLE_AI_API_KEY")
-    ANTHROPIC_API_KEY: Optional[str] = os.getenv("ANTHROPIC_API_KEY")
-    OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
-    PERPLEXITY_API_KEY: Optional[str] = os.getenv("PERPLEXITY_API_KEY")
-    GROQ_API_KEY: Optional[str] = os.getenv("GROQ_API_KEY")
-    GROK_API_KEY: Optional[str] = os.getenv("GROK_API_KEY")
+    GOOGLE_AI_API_KEY: str | None = os.getenv("GOOGLE_AI_API_KEY")
+    ANTHROPIC_API_KEY: str | None = os.getenv("ANTHROPIC_API_KEY")
+    OPENAI_API_KEY: str | None = os.getenv("OPENAI_API_KEY")
+    PERPLEXITY_API_KEY: str | None = os.getenv("PERPLEXITY_API_KEY")
+    GROQ_API_KEY: str | None = os.getenv("GROQ_API_KEY")
+    GROK_API_KEY: str | None = os.getenv("GROK_API_KEY")
 
     # Model Defaults
-    GOOGLE_AI_MODEL_DEFAULT: str = os.getenv(
-        "GOOGLE_AI_MODEL_DEFAULT", "gemini-2.0-flash-exp"
-    )
-    CLAUDE_MODEL_DEFAULT: str = os.getenv(
-        "CLAUDE_MODEL_DEFAULT", "claude-3-5-sonnet-20241022"
-    )
+    GOOGLE_AI_MODEL_DEFAULT: str = os.getenv("GOOGLE_AI_MODEL_DEFAULT", "gemini-2.0-flash-exp")
+    CLAUDE_MODEL_DEFAULT: str = os.getenv("CLAUDE_MODEL_DEFAULT", "claude-3-5-sonnet-20241022")
     OPENAI_MODEL_DEFAULT: str = os.getenv("OPENAI_MODEL_DEFAULT", "gpt-4o-mini")
 
     # Ollama (Local)
@@ -45,9 +40,9 @@ class Config:
     OLLAMA_MODEL_DEFAULT: str = os.getenv("OLLAMA_MODEL_DEFAULT", "mistral:7b-instruct")
 
     # Music Source APIs
-    JAMENDO_CLIENT_ID: Optional[str] = os.getenv("JAMENDO_CLIENT_ID")
-    INTERNET_ARCHIVE_ACCESS_KEY: Optional[str] = os.getenv("INTERNET_ARCHIVE_ACCESS_KEY")
-    INTERNET_ARCHIVE_SECRET_KEY: Optional[str] = os.getenv("INTERNET_ARCHIVE_SECRET_KEY")
+    JAMENDO_CLIENT_ID: str | None = os.getenv("JAMENDO_CLIENT_ID")
+    INTERNET_ARCHIVE_ACCESS_KEY: str | None = os.getenv("INTERNET_ARCHIVE_ACCESS_KEY")
+    INTERNET_ARCHIVE_SECRET_KEY: str | None = os.getenv("INTERNET_ARCHIVE_SECRET_KEY")
 
     # System Configuration
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "info").upper()
@@ -69,13 +64,15 @@ class Config:
     @classmethod
     def is_configured(cls) -> bool:
         """Check if at least one LLM provider is configured."""
-        return any([
-            cls.GOOGLE_AI_API_KEY,
-            cls.ANTHROPIC_API_KEY,
-            cls.OPENAI_API_KEY,
-            cls.GROQ_API_KEY,
-            True  # Ollama is always available (local)
-        ])
+        return any(
+            [
+                cls.GOOGLE_AI_API_KEY,
+                cls.ANTHROPIC_API_KEY,
+                cls.OPENAI_API_KEY,
+                cls.GROQ_API_KEY,
+                True,  # Ollama is always available (local)
+            ]
+        )
 
     @classmethod
     def get_configured_providers(cls) -> list[str]:
