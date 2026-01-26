@@ -60,8 +60,11 @@ class PersonalizedDJ:
                 logger.info(
                     f"AI DJ initialized with persona: {dj_persona} ({self.ai_dj.get_persona_name()})"
                 )
+            except (ImportError, FileNotFoundError) as e:
+                logger.warning(f"Failed to initialize AI DJ due to missing dependency or config: {e}")
+                self.ai_dj = None
             except Exception as e:
-                logger.warning(f"Failed to initialize AI DJ: {e}")
+                logger.error(f"Unexpected error initializing AI DJ: {e}")
                 self.ai_dj = None
 
         # Log available providers

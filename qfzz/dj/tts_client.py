@@ -102,6 +102,11 @@ class TTSClient:
         Returns:
             Audio data as bytes, or None if synthesis fails
         """
+        # Validate input
+        if not text or not text.strip():
+            logger.warning("Empty text provided for synthesis")
+            return None
+
         if not self._client:
             logger.warning("TTS client not initialized. Cannot synthesize speech.")
             return None
@@ -169,10 +174,13 @@ class TTSClient:
             "voice_settings": {"stability": 0.5, "similarity_boost": 0.5},
         }
 
-        response = requests.post(url, json=data, headers=headers)
-        response.raise_for_status()
-
-        return response.content
+        try:
+            response = requests.post(url, json=data, headers=headers)
+            response.raise_for_status()
+            return response.content
+        except requests.exceptions.RequestException as e:
+            logger.error(f"ElevenLabs TTS synthesis failed: {e}")
+            raise
 
     def _synthesize_google(self, text: str, voice_id: str | None) -> bytes:
         """
