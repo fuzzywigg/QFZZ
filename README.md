@@ -92,6 +92,49 @@ response = dj.interact("user_001", "Can you recommend some music?")
 print(response)
 ```
 
+## 🔧 Configuration
+
+QFZZ uses environment variables for configuration. 
+
+### Quick Setup
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env` and add your API keys:
+   - **Required**: At least `GOOGLE_AI_API_KEY` for LLM functionality
+   - **Recommended**: Also add `GROQ_API_KEY` for free tier backup
+   - **Optional**: Add other providers for maximum reliability
+
+3. Get API Keys:
+   - Google Gemini: https://makersuite.google.com/app/apikey
+   - Groq (free): https://console.groq.com
+   - Anthropic: https://console.anthropic.com
+   - OpenAI: https://platform.openai.com/api-keys
+
+### Local-Only Setup (No API Keys)
+
+You can run QFZZ entirely locally with Ollama:
+
+```bash
+# Install Ollama
+curl https://ollama.ai/install.sh | sh
+
+# Pull a model
+ollama pull mistral:7b-instruct
+
+# Run QFZZ (will automatically use local Ollama)
+python main.py
+```
+
+No API keys needed! 🎉
+
+### Configuration Options
+
+See `.env.example` for all available configuration options.
+
 ## 💡 Key Features
 
 ### 🎧 Personalized DJ Experience
