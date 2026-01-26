@@ -56,6 +56,38 @@ QFZZ is an AI radio station inspired by projects like Andon Labs Radio Eval, des
 
 ### Installation
 
+#### Windows Users (PowerShell)
+
+**📘 For a complete Windows guide with PowerShell commands, see [WINDOWS_SETUP.md](WINDOWS_SETUP.md)**
+
+Quick start for Windows:
+```powershell
+# Clone and navigate
+git clone https://github.com/fuzzywigg/QFZZ.git
+cd QFZZ
+
+# Set up Python backend
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+
+# In a new PowerShell window, set up frontend
+cd QFZZ\frontend
+npm install
+
+# Start backend (first window)
+cd ..
+python run_server.py
+
+# Start frontend (second window)
+cd frontend
+npm run dev
+
+# Open http://localhost:3000 in your browser
+```
+
+#### Linux/Mac Users
+
 ```bash
 # Clone the repository
 git clone https://github.com/fuzzywigg/QFZZ.git
@@ -69,6 +101,25 @@ python main.py
 ```
 
 ### Basic Usage
+
+#### Running the Full GUI Application
+
+To run the complete QFZZ experience with the web GUI:
+
+```bash
+# Terminal 1: Start the backend server
+python run_server.py
+
+# Terminal 2: Start the frontend
+cd frontend
+npm run dev
+
+# Open http://localhost:3000 in your browser
+```
+
+For Windows PowerShell instructions, see [WINDOWS_SETUP.md](WINDOWS_SETUP.md).
+
+#### Using Python API
 
 ```python
 from qfzz import QFZZStation, PersonalizedDJ
