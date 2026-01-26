@@ -12,11 +12,7 @@ def test_precommit_config_exists():
 
 def test_precommit_hooks_installed():
     """Test pre-commit hooks are installed."""
-    result = subprocess.run(
-        ["pre-commit", "--version"],
-        capture_output=True,
-        text=True
-    )
+    result = subprocess.run(["pre-commit", "--version"], capture_output=True, text=True)
     assert result.returncode == 0, "pre-commit not installed"
 
 
@@ -31,4 +27,5 @@ def test_setup_script_executable():
     script = Path("scripts/setup-dev-environment.sh")
     if script.exists():
         import os
+
         assert os.access(script, os.X_OK), "setup script not executable"

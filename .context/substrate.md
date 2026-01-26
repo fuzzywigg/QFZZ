@@ -35,7 +35,7 @@ Multi-provider AI routing with automatic fallback:
 **Cost Optimization**: Prefer free/cheap providers when possible
 - Gemini Flash: ~$0.000075/1k tokens
 - Groq: Free tier
-- Claude Sonnet: ~$0.003/1k tokens  
+- Claude Sonnet: ~$0.003/1k tokens
 - GPT-4o-mini: ~$0.00015/1k tokens
 - Ollama: $0 (local)
 
@@ -118,7 +118,7 @@ Traditional radio structure applied to AI station:
 ### Cost Optimization
 AI calls are expensive. We optimize by:
 1. Using free/cheap providers when possible
-2. Caching responses when appropriate  
+2. Caching responses when appropriate
 3. Batching requests when possible
 4. Falling back to local Ollama as last resort
 5. Tracking costs per request

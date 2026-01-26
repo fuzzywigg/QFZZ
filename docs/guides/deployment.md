@@ -172,13 +172,13 @@ exports.generatePlaylist = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'User not authenticated');
     }
-    
+
     const userId = context.auth.uid;
     const preferences = data.preferences;
-    
+
     // Call Python QFZZ backend
     // Implementation varies based on your setup
-    
+
     return {
         status: 'success',
         playlist: []
@@ -190,12 +190,12 @@ exports.updateUserProfile = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'User not authenticated');
     }
-    
+
     const userId = context.auth.uid;
     const db = admin.firestore();
-    
+
     await db.collection('users').doc(userId).set(data, { merge: true });
-    
+
     return { status: 'success' };
 });
 ```
@@ -213,13 +213,13 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if request.auth.uid == userId;
     }
-    
+
     // Playlists
     match /playlists/{playlistId} {
       allow read: if request.auth.uid == resource.data.owner_id;
       allow write: if request.auth.uid == resource.data.owner_id;
     }
-    
+
     // Public content
     match /content/{contentId} {
       allow read: if true;
@@ -242,7 +242,7 @@ service firebase.storage {
     match /users/{userId}/{allPaths=**} {
       allow read, write: if request.auth.uid == userId;
     }
-    
+
     // Public content
     match /content/{allPaths=**} {
       allow read: if true;
@@ -347,7 +347,7 @@ Resources:
             TableName: !Ref StationsTable
         - S3CrudPolicy:
             BucketName: !Ref DataBucket
-  
+
   # API Gateway
   QFZZApi:
     Type: AWS::Serverless::Api
@@ -359,7 +359,7 @@ Resources:
         Authorizers:
           QFZZAuthorizer:
             FunctionArn: !GetAtt AuthorizerFunction.Arn
-  
+
   # DynamoDB Table
   StationsTable:
     Type: AWS::DynamoDB::Table
@@ -372,7 +372,7 @@ Resources:
         - AttributeName: station_id
           KeyType: HASH
       BillingMode: PAY_PER_REQUEST
-  
+
   # S3 Bucket
   DataBucket:
     Type: AWS::S3::Bucket
@@ -380,7 +380,7 @@ Resources:
       BucketName: qfzz-data-bucket
       VersioningConfiguration:
         Status: Enabled
-  
+
   # RDS Database
   QFZZDatabase:
     Type: AWS::RDS::DBInstance
@@ -398,11 +398,11 @@ Outputs:
   APIEndpoint:
     Description: API Gateway endpoint URL
     Value: !Sub 'https://${QFZZApi}.execute-api.${AWS::Region}.amazonaws.com/prod/'
-  
+
   DatabaseEndpoint:
     Description: RDS database endpoint
     Value: !GetAtt QFZZDatabase.Endpoint.Address
-  
+
   DataBucketName:
     Description: S3 bucket for data storage
     Value: !Ref DataBucket
@@ -503,14 +503,14 @@ class AWSConfig:
         self.s3 = boto3.client('s3')
         self.dynamodb = boto3.resource('dynamodb')
         self.secrets_manager = boto3.client('secretsmanager')
-    
+
     def get_secret(self, secret_name):
         """Retrieve secret from AWS Secrets Manager."""
         response = self.secrets_manager.get_secret_value(
             SecretId=secret_name
         )
         return response['SecretString']
-    
+
     def upload_to_s3(self, bucket, key, data):
         """Upload data to S3."""
         self.s3.put_object(
@@ -518,7 +518,7 @@ class AWSConfig:
             Key=key,
             Body=data
         )
-    
+
     def store_station_config(self, station_id, config_data):
         """Store station config in DynamoDB."""
         table = self.dynamodb.Table('qfzz-stations')
@@ -845,7 +845,7 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-  
+
   redis:
     image: redis:7-alpine
     container_name: qfzz-redis
@@ -854,7 +854,7 @@ services:
       - qfzz-network
     volumes:
       - redis-data:/data
-  
+
   db:
     image: postgres:14-alpine
     container_name: qfzz-db
@@ -867,7 +867,7 @@ services:
       - qfzz-network
     volumes:
       - postgres-data:/var/lib/postgresql/data
-  
+
   nginx:
     image: nginx:alpine
     container_name: qfzz-nginx
@@ -1138,7 +1138,7 @@ upstream qfzz_backend {
 server {
     listen 80;
     server_name qfzz.example.com;
-    
+
     # Redirect to HTTPS
     return 301 https://$server_name$request_uri;
 }
@@ -1146,16 +1146,16 @@ server {
 server {
     listen 443 ssl http2;
     server_name qfzz.example.com;
-    
+
     # SSL certificates
     ssl_certificate /etc/letsencrypt/live/qfzz.example.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/qfzz.example.com/privkey.pem;
-    
+
     # SSL configuration
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
-    
+
     # Proxy settings
     location / {
         proxy_pass http://qfzz_backend;
@@ -1164,7 +1164,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
-    
+
     # WebSocket support
     location /ws {
         proxy_pass http://qfzz_backend;
@@ -1280,22 +1280,22 @@ def cached(ttl_seconds=3600):
         def wrapper(*args, **kwargs):
             # Create cache key
             cache_key = f"{func.__name__}:{args}:{kwargs}"
-            
+
             # Check cache
             cached_result = redis_client.get(cache_key)
             if cached_result:
                 return json.loads(cached_result)
-            
+
             # Execute function
             result = func(*args, **kwargs)
-            
+
             # Store in cache
             redis_client.setex(
                 cache_key,
                 ttl_seconds,
                 json.dumps(result)
             )
-            
+
             return result
         return wrapper
     return decorator
@@ -1446,13 +1446,13 @@ def require_api_key(f):
         token = request.headers.get('Authorization')
         if not token:
             return {'error': 'Missing API key'}, 401
-        
+
         try:
             payload = jwt.decode(token, 'secret-key', algorithms=['HS256'])
             request.user_id = payload['user_id']
         except jwt.InvalidTokenError:
             return {'error': 'Invalid API key'}, 401
-        
+
         return f(*args, **kwargs)
     return decorated_function
 
@@ -1469,13 +1469,13 @@ from pydantic import BaseModel, validator
 class PlaylistRequest(BaseModel):
     user_id: str
     limit: int
-    
+
     @validator('user_id')
     def validate_user_id(cls, v):
         if not v or len(v) < 3:
             raise ValueError('Invalid user_id')
         return v
-    
+
     @validator('limit')
     def validate_limit(cls, v):
         if v < 1 or v > 1000:

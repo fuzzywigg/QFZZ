@@ -31,59 +31,59 @@ graph TB
         Desktop[Desktop App]
         IoT[IoT Devices]
     end
-    
+
     subgraph "QFZZ Core"
         Station[QFZZStation<br/>Orchestrator]
-        
+
         subgraph "AI Layer"
             DJ[PersonalizedDJ]
             Profiles[User Profiles]
         end
-        
+
         subgraph "Data Layer"
             Datasets[DatasetManager]
             Models[Dataset Models]
         end
-        
+
         subgraph "Security Layer"
             Blockchain[BlockchainTrustNetwork]
             TrustRecords[Trust Records]
         end
-        
+
         subgraph "Optimization Layer"
             Edge[EdgeOptimizer]
             DeviceConfigs[Device Configs]
         end
-        
+
         subgraph "Streaming Layer"
             Player[MusicPlayer]
             Streaming[Streaming Engine]
         end
     end
-    
+
     subgraph "External Services"
         Firebase[Firebase]
         CDN[Content CDN]
         Analytics[Analytics]
     end
-    
+
     Web --> Station
     Mobile --> Station
     Desktop --> Station
     IoT --> Station
-    
+
     Station --> DJ
     Station --> Datasets
     Station --> Blockchain
     Station --> Edge
     Station --> Player
-    
+
     DJ --> Profiles
     Datasets --> Models
     Blockchain --> TrustRecords
     Edge --> DeviceConfigs
     Player --> Streaming
-    
+
     Station --> Firebase
     Player --> CDN
     Station --> Analytics
@@ -215,20 +215,20 @@ sequenceDiagram
     participant Datasets
     participant Blockchain
     participant Edge
-    
+
     User->>Station: generate_playlist(user_id)
     Station->>DJ: recommend(user_id, preferences)
     DJ->>Datasets: get_candidate_tracks()
     Datasets-->>DJ: tracks
     DJ->>DJ: score_tracks()
     DJ-->>Station: recommendations
-    
+
     Station->>Blockchain: filter by trust_score()
     Blockchain-->>Station: trusted_tracks
-    
+
     Station->>Edge: optimize_for_device()
     Edge-->>Station: streaming_params
-    
+
     Station-->>User: personalized_playlist
 ```
 
@@ -241,13 +241,13 @@ sequenceDiagram
     participant DJ
     participant Profile
     participant Blockchain
-    
+
     User->>Station: record_interaction(track, type, rating)
     Station->>DJ: record_feedback()
     DJ->>Profile: update_preferences()
     Profile->>Profile: adjust_weights()
     Profile-->>DJ: updated
-    
+
     alt positive feedback
         Station->>Blockchain: verify_content()
         Blockchain->>Blockchain: increment_verifications()
@@ -255,7 +255,7 @@ sequenceDiagram
         Station->>Blockchain: report_content()
         Blockchain->>Blockchain: increment_reports()
     end
-    
+
     Blockchain->>Blockchain: recalculate_trust_score()
     Blockchain-->>Station: confirmed
 ```
@@ -268,20 +268,20 @@ sequenceDiagram
     participant Station
     participant Edge
     participant Player
-    
+
     Device->>Station: connect(device_info)
     Station->>Edge: register_device(config)
     Edge->>Edge: analyze_capabilities()
     Edge-->>Station: device_registered
-    
+
     Station->>Edge: optimize_streaming(device_id)
     Edge->>Edge: select_profile()
     Edge->>Edge: calculate_parameters()
     Edge-->>Station: streaming_params
-    
+
     Station->>Player: configure(params)
     Player-->>Device: optimized_stream
-    
+
     Device->>Station: update_conditions(battery, network)
     Station->>Edge: recalculate()
     Edge-->>Station: updated_params
@@ -350,19 +350,19 @@ graph TB
         Authz[Authorization]
         Validation[Input Validation]
     end
-    
+
     subgraph "Data Layer"
         Encryption[Encryption at Rest]
         Transit[TLS/HTTPS]
         Signing[Data Signing]
     end
-    
+
     subgraph "Blockchain Layer"
         PoW[Proof of Work]
         Immutable[Immutable Records]
         Consensus[Distributed Consensus]
     end
-    
+
     subgraph "Privacy Layer"
         Anonymization[Data Anonymization]
         Minimal[Minimal Data Collection]
@@ -390,43 +390,43 @@ graph TB
     subgraph "Load Balancer"
         LB[Load Balancer]
     end
-    
+
     subgraph "Application Tier"
         App1[Station Instance 1]
         App2[Station Instance 2]
         App3[Station Instance N]
     end
-    
+
     subgraph "Data Tier"
         DB[(Database)]
         Cache[(Redis Cache)]
         Files[(File Storage)]
     end
-    
+
     subgraph "Blockchain Tier"
         BC1[Blockchain Node 1]
         BC2[Blockchain Node 2]
         BC3[Blockchain Node N]
     end
-    
+
     LB --> App1
     LB --> App2
     LB --> App3
-    
+
     App1 --> DB
     App2 --> DB
     App3 --> DB
-    
+
     App1 --> Cache
     App2 --> Cache
     App3 --> Cache
-    
+
     App1 --> Files
-    
+
     App1 --> BC1
     App2 --> BC2
     App3 --> BC3
-    
+
     BC1 <--> BC2
     BC2 <--> BC3
     BC3 <--> BC1
@@ -462,10 +462,10 @@ class MyCustomDJ(PersonalizedDJ):
         # Your custom recommendation logic
         profile = self.get_or_create_profile(user_id, preferences)
         candidates = self._get_candidate_tracks(profile)
-        
+
         # Custom scoring
         scored = self._my_custom_scoring(candidates, profile)
-        
+
         return scored[:20]  # Top 20 recommendations
 ```
 

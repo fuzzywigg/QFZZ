@@ -23,7 +23,7 @@ DELIVERABLES
     - QFZZStation class - Main orchestrator for radio stations
     - 9 methods documented with full signatures
     - 5 practical code examples
-    - Topics: Lifecycle management, listener management, playlist 
+    - Topics: Lifecycle management, listener management, playlist
       generation, interaction recording, station statistics
 
 [✓] docs/api-reference/dj.md (2,131 words)

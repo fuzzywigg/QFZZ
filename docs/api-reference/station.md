@@ -291,7 +291,7 @@ for track in playlist[:5]:
 ### record_interaction()
 
 ```python
-def record_interaction(self, user_id: str, track_id: str, 
+def record_interaction(self, user_id: str, track_id: str,
                       interaction_type: str, rating: Optional[float] = None) -> None
 ```
 
@@ -535,17 +535,17 @@ def _initialize_components(self) -> None:
     from qfzz.dj.personalized_dj import PersonalizedDJ
     from qfzz.datasets.manager import DatasetManager
     from qfzz.streaming.player import MusicPlayer
-    
+
     self._dj = PersonalizedDJ()
     self._dataset_manager = DatasetManager(
         allowed_licenses=self.config.allowed_licenses
     )
     self._player = MusicPlayer()
-    
+
     if self.config.enable_blockchain:
         from qfzz.blockchain.trust_network import BlockchainTrustNetwork
         self._trust_network = BlockchainTrustNetwork()
-    
+
     if self.config.enable_edge_optimization:
         from qfzz.edge.optimizer import EdgeOptimizer
         self._edge_optimizer = EdgeOptimizer()
@@ -602,4 +602,3 @@ The playlist generation applies multi-stage filtering:
 - **Class**: `QFZZStation`
 - **Python**: 3.8+
 - **Dependencies**: logging, typing, datetime
-

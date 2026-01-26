@@ -78,7 +78,7 @@ network3 = BlockchainTrustNetwork(difficulty=4)
 ### add_trust_record()
 
 ```python
-def add_trust_record(self, content_id: str, creator_id: str, 
+def add_trust_record(self, content_id: str, creator_id: str,
                     initial_score: float = 0.5,
                     metadata: Optional[Dict[str, Any]] = None) -> TrustRecord
 ```
@@ -1003,17 +1003,17 @@ print(f"Valid: {stats['is_valid']}")
 def get_trusted_tracks(network, track_list, threshold=0.7):
     """Filter tracks by minimum trust score."""
     trusted = []
-    
+
     for track in track_list:
         score = network.get_trust_score(
             track['content_id'],
             track['creator_id']
         )
-        
+
         if score >= threshold:
             track['trust_score'] = score
             trusted.append(track)
-    
+
     return trusted
 
 # Usage
@@ -1091,4 +1091,3 @@ Security relies on:
 - **Classes**: `BlockchainTrustNetwork`, `Block`, `TrustRecord`
 - **Python**: 3.8+
 - **Dependencies**: dataclasses, typing, datetime, hashlib, json
-

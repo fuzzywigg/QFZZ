@@ -187,11 +187,11 @@ Your PR should:
 # Good
 def calculate_trust_score(user_id: str, interactions: int) -> float:
     """Calculate user trust score.
-    
+
     Args:
         user_id: User identifier
         interactions: Number of interactions
-        
+
     Returns:
         Trust score between 0.0 and 1.0
     """
@@ -212,19 +212,19 @@ Use Google-style docstrings:
 ```python
 def function_name(param1: str, param2: int) -> bool:
     """Short description.
-    
+
     Longer description if needed.
-    
+
     Args:
         param1: Description of param1
         param2: Description of param2
-        
+
     Returns:
         Description of return value
-        
+
     Raises:
         ValueError: When this happens
-        
+
     Examples:
         >>> function_name("test", 42)
         True
@@ -277,7 +277,7 @@ def test_dj_greeting_new_user():
     """Test DJ greeting for new user"""
     dj = PersonalizedDJ()
     greeting = dj.greet_user("user_001", "Alice")
-    
+
     assert "Alice" in greeting
     assert "Welcome" in greeting
     assert "user_001" in dj.user_profiles
@@ -287,9 +287,9 @@ def test_dj_trust_score_increases():
     """Test trust score increases with interactions"""
     dj = PersonalizedDJ()
     initial_score = dj.get_trust_score("user_001")
-    
+
     dj.interact("user_001", "Hello")
-    
+
     new_score = dj.get_trust_score("user_001")
     assert new_score > initial_score
 ```
@@ -303,10 +303,10 @@ def test_full_station_workflow():
     station = QFZZStation()
     station.initialize()
     station.start()
-    
+
     # Verify running
     assert station.is_running
-    
+
     # Stop
     station.stop()
     assert not station.is_running
@@ -347,30 +347,30 @@ Document all public APIs:
 ```python
 class MyClass:
     """Short class description.
-    
+
     Longer description with details about the class,
     its purpose, and how to use it.
-    
+
     Attributes:
         attribute1: Description of attribute1
         attribute2: Description of attribute2
-        
+
     Examples:
         >>> obj = MyClass()
         >>> obj.do_something()
     """
-    
+
     def public_method(self, param: str) -> int:
         """Document public methods.
-        
+
         Args:
             param: Parameter description
-            
+
         Returns:
             Return value description
         """
         return 42
-        
+
     def _private_method(self):
         """Private methods should also be documented."""
         pass

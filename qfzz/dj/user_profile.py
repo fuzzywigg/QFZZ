@@ -2,13 +2,13 @@
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import Any
 
 
 @dataclass
 class UserProfile:
     """User profile for personalization
-    
+
     Attributes:
         user_id: Unique user identifier
         name: User's display name
@@ -18,10 +18,11 @@ class UserProfile:
         community_connections: List of connected user IDs
         created_at: Profile creation timestamp
     """
+
     user_id: str
     name: str
-    music_preferences: List[str] = field(default_factory=list)
-    interaction_history: List[Dict[str, Any]] = field(default_factory=list)
+    music_preferences: list[str] = field(default_factory=list)
+    interaction_history: list[dict[str, Any]] = field(default_factory=list)
     trust_score: float = 0.5
-    community_connections: List[str] = field(default_factory=list)
+    community_connections: list[str] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.now)

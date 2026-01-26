@@ -141,11 +141,11 @@ def main():
         max_playlist_size=20,
         trust_threshold=0.5
     )
-    
+
     # Create and start station
     station = QFZZStation(config)
     station.start()
-    
+
     # Add multiple listeners
     listeners = [
         {
@@ -163,20 +163,20 @@ def main():
             }
         }
     ]
-    
+
     for listener in listeners:
         station.add_listener(**listener)
         print(f"Added listener: {listener['user_id']}")
-    
+
     # Generate playlists for each listener
     for listener in listeners:
         user_id = listener['user_id']
         playlist = station.generate_playlist(user_id)
-        
+
         print(f"\n🎵 Playlist for {user_id}:")
         for i, track in enumerate(playlist[:5], 1):
             print(f"  {i}. {track['title']} - {track['artist']}")
-    
+
     # Stop station when done
     station.stop()
 
@@ -300,7 +300,7 @@ for track in tracks:
 # Add to manager
 if manager.add_dataset(dataset):
     print(f"Dataset added! Quality score: {dataset.quality_score}")
-    
+
 # List datasets
 datasets = manager.list_datasets(min_quality=0.5)
 for ds in datasets:
@@ -318,18 +318,18 @@ config = StationConfig(
     # Basic settings
     station_name="My Station",           # Station display name
     station_id="station_001",            # Unique identifier
-    
+
     # Feature toggles
     enable_blockchain=True,               # Enable trust network
     enable_edge_optimization=True,        # Enable device optimization
-    
+
     # Playlist settings
     max_playlist_size=20,                 # Max tracks per playlist
     trust_threshold=0.5,                  # Min trust score (0.0-1.0)
-    
+
     # Quality settings
     streaming_quality="high",             # low, medium, high, lossless
-    
+
     # Licensing
     allowed_licenses=[                    # Allowed license types
         'CC-BY',
@@ -359,7 +359,7 @@ Now that you have a basic station running, explore:
 if station.is_running():
     print("Station is already running!")
     station.stop()  # Stop first, then restart
-    
+
 station.start()
 ```
 

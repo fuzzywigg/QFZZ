@@ -15,8 +15,8 @@ QFZZ is an AI-powered personalized radio platform that combines:
 
 ## Current Status
 
-**Stage**: Research & Planning Phase  
-**Repository**: Initial setup with documentation  
+**Stage**: Research & Planning Phase
+**Repository**: Initial setup with documentation
 **Next Steps**: Begin MVP implementation
 
 ## Prerequisites
@@ -256,11 +256,11 @@ async function fetchUser(id: string): Promise<User> {
 // Use functional components with hooks
 export function UserProfile({ userId }: { userId: string }) {
   const [user, setUser] = useState<User | null>(null);
-  
+
   useEffect(() => {
     fetchUser(userId).then(setUser);
   }, [userId]);
-  
+
   return <div>{user?.username}</div>;
 }
 ```
@@ -472,16 +472,16 @@ npm run seed
 
 ### Common Issues
 
-**Issue**: Database connection fails  
+**Issue**: Database connection fails
 **Solution**: Check PostgreSQL is running and `.env` is configured correctly
 
-**Issue**: Audio won't play  
+**Issue**: Audio won't play
 **Solution**: Check browser console, verify audio file exists, check CORS
 
-**Issue**: Dependencies won't install  
+**Issue**: Dependencies won't install
 **Solution**: Clear node_modules and package-lock.json, then `npm install` again
 
-**Issue**: Port already in use  
+**Issue**: Port already in use
 **Solution**: Kill process on port: `lsof -ti:3000 | xargs kill -9` (Mac/Linux)
 
 ## Next Steps

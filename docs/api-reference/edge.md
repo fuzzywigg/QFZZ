@@ -208,7 +208,7 @@ else:
 ### optimize_streaming()
 
 ```python
-def optimize_streaming(self, device_id: str, 
+def optimize_streaming(self, device_id: str,
                       preferences: Optional[Dict[str, Any]] = None) -> Dict[str, Any]
 ```
 
@@ -269,7 +269,7 @@ settings = optimizer.optimize_streaming(
 ### update_network_conditions()
 
 ```python
-def update_network_conditions(self, device_id: str, 
+def update_network_conditions(self, device_id: str,
                              network_type: NetworkType,
                              bandwidth_mbps: float) -> None
 ```
@@ -873,7 +873,7 @@ print(f"Device types: {stats['device_types']}")
 def simulate_network_change():
     """Simulate device streaming with changing network."""
     optimizer = EdgeOptimizer()
-    
+
     device = EdgeDeviceConfig(
         device_id="test_device",
         device_type=DeviceType.SMARTPHONE,
@@ -882,15 +882,15 @@ def simulate_network_change():
         battery_powered=True,
         battery_level=0.9
     )
-    
+
     optimizer.register_device(device)
-    
+
     # Scenario: User on WiFi
     print("=== WiFi (Good) ===")
     settings = optimizer.optimize_streaming("test_device")
     print(f"Quality: {settings['quality']}")
     print(f"Bitrate: {settings['bitrate_kbps']} kbps")
-    
+
     # User leaves WiFi, connects to 4G
     print("\n=== 4G (Medium) ===")
     optimizer.update_network_conditions(
@@ -901,7 +901,7 @@ def simulate_network_change():
     settings = optimizer.optimize_streaming("test_device")
     print(f"Quality: {settings['quality']}")
     print(f"Bitrate: {settings['bitrate_kbps']} kbps")
-    
+
     # User enters 3G coverage area
     print("\n=== 3G (Poor) ===")
     optimizer.update_network_conditions(
@@ -913,7 +913,7 @@ def simulate_network_change():
     print(f"Quality: {settings['quality']}")
     print(f"Bitrate: {settings['bitrate_kbps']} kbps")
     print(f"Buffer: {settings['buffer_size_seconds']}s")  # Increased
-    
+
     # Battery also drains
     print("\n=== 3G + Low Battery ===")
     optimizer.update_battery_status("test_device", 0.2)
@@ -946,20 +946,20 @@ The optimizer automatically selects profiles based on device state:
 ```
 1. Check user preference
    If provided, use if within constraints
-   
+
 2. Auto-select based on state
    If low battery (< 30%) AND mobile:
        → power_save
-   
+
    If cellular (3G/4G):
        → bandwidth_save
-   
+
    If bandwidth < 1 Mbps:
        → bandwidth_save
-   
+
    If high bandwidth (>= 5) AND (desktop/laptop):
        → quality
-   
+
    Otherwise:
        → balanced
 ```
@@ -973,4 +973,3 @@ The optimizer automatically selects profiles based on device state:
 - **Enums**: `DeviceType`, `NetworkType`
 - **Python**: 3.8+
 - **Dependencies**: dataclasses, typing, enum
-

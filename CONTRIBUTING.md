@@ -271,19 +271,19 @@ from qfzz.core import something
 
 class MyClass:
     """Class docstring."""
-    
+
     def public_method(self, arg: str) -> bool:
         """
         Method docstring explaining what it does.
-        
+
         Args:
             arg: Description of argument
-            
+
         Returns:
             Description of return value
         """
         return True
-    
+
     def _private_method(self):
         """Private methods still need docstrings."""
         pass
@@ -330,17 +330,17 @@ def my_fixture():
 
 class TestMyFeature:
     """Test class for feature X."""
-    
+
     def test_basic_functionality(self):
         """Test basic use case."""
         result = function_to_test("input")
         assert result == "expected"
-    
+
     def test_edge_case(self):
         """Test edge case Y."""
         result = function_to_test("")
         assert result is None
-    
+
     def test_error_handling(self):
         """Test error handling."""
         with pytest.raises(ValueError):
@@ -377,7 +377,7 @@ def test_google_provider(mock_genai):
     mock_response = MagicMock()
     mock_response.text = "Mocked response"
     mock_genai.GenerativeModel.return_value.generate_content.return_value = mock_response
-    
+
     # Test code here
 ```
 

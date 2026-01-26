@@ -123,7 +123,7 @@ graph TB
     Station --> Blockchain[BlockchainTrustNetwork<br/>Verification]
     Station --> Edge[EdgeOptimizer<br/>Device Adaptation]
     Station --> Player[MusicPlayer<br/>Streaming]
-    
+
     DJ --> Profiles[User Profiles]
     Datasets --> Models[Dataset Models]
     Blockchain --> TrustRecords[Trust Records]

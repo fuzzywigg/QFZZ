@@ -57,7 +57,7 @@ dj.update_preferences(
 # These preferences are immediately reflected in recommendations
 response = dj.interact("user_001", "Recommend something for me")
 print(response)
-# Output: "Based on your taste for jazz, electronic, ambient, 
+# Output: "Based on your taste for jazz, electronic, ambient,
 #          I've got the perfect track queued up!"
 ```
 
@@ -172,13 +172,13 @@ dj = PersonalizedDJ(name="DJ Quantum", edge_mode=True)
 # Day 1: New user
 greeting = dj.greet_user("user_001", "Alex")
 print(greeting)
-# "Hey Alex! Welcome to QFZZ! I'm DJ Quantum, your personal DJ. 
+# "Hey Alex! Welcome to QFZZ! I'm DJ Quantum, your personal DJ.
 #  Let's discover some great music together!"
 
 # After 50 interactions
 greeting = dj.greet_user("user_001", "Alex")
 print(greeting)
-# "Welcome back, Alex! Great to see you again. 
+# "Welcome back, Alex! Great to see you again.
 #  We've shared 50 sessions together. What's your vibe today?"
 
 # Check profile status
@@ -217,7 +217,7 @@ dj = PersonalizedDJ(name="DJ Quantum", edge_mode=True)
 dj.greet_user("new_user", "Sam")
 response = dj.interact("new_user", "Recommend something")
 print(response)
-# "I'm learning your taste! Let's start with something smooth. 
+# "I'm learning your taste! Let's start with something smooth.
 #  Tell me what genres you're into?"
 
 # After many interactions - trust builds
@@ -230,7 +230,7 @@ print(f"Trust: {trust:.2f}")  # 0.95
 # High trust (0.95) - Confident personalized response
 response = dj.interact("new_user", "Recommend something")
 print(response)
-# "Based on your taste for jazz, electronic, ambient, 
+# "Based on your taste for jazz, electronic, ambient,
 #  I've got the perfect track queued up! Let me play something special for you."
 ```
 
@@ -334,18 +334,18 @@ The DJ uses context to generate better responses:
 ```python
 def demonstrate_context_awareness():
     dj = PersonalizedDJ(name="DJ Quantum", edge_mode=True)
-    
+
     # Without context
     r1 = dj.interact("user_001", "Play something")
     print(r1)  # Generic: "I'm learning your taste!"
-    
+
     # Build context
     dj.update_preferences("user_001", ["jazz", "electronic"])
     dj.interact("user_001", "I'm feeling energetic")
-    
+
     # With context - much better response
     r2 = dj.interact("user_001", "Play something")
-    print(r2)  # Contextual: "Based on your taste for jazz, electronic, 
+    print(r2)  # Contextual: "Based on your taste for jazz, electronic,
                #              and your energetic vibe, here's a perfect track!"
 ```
 
@@ -374,7 +374,7 @@ dj.update_preferences("user_001", ["jazz", "electronic", "ambient"])
 # 2. User requests music
 response = dj.interact("user_001", "Play some music for me")
 print(response)
-# "Based on your taste for jazz, electronic, ambient, 
+# "Based on your taste for jazz, electronic, ambient,
 #  I've got the perfect track queued up!"
 
 # 3. DJ generates recommendation based on:
@@ -485,7 +485,7 @@ The DJ considers community in responses:
 # User asks about community
 response = dj.interact("user_001", "What's my music community like?")
 print(response)
-# "You're part of a trusted community of 3 music lovers. 
+# "You're part of a trusted community of 3 music lovers.
 #  Together we're discovering amazing sounds!"
 
 # DJ can recommend based on community preferences:
@@ -500,10 +500,10 @@ Community connections contribute to overall trust:
 ```python
 def calculate_community_trust(user_id, dj):
     """Calculate trust score including community influence"""
-    
+
     # User's direct trust
     user_trust = dj.get_trust_score(user_id)
-    
+
     # Community trust (average of connected users)
     profile = dj.user_profiles[user_id]
     community_trusts = [
@@ -511,14 +511,14 @@ def calculate_community_trust(user_id, dj):
         for friend_id in profile.community_connections
         if friend_id in dj.user_profiles
     ]
-    
+
     if community_trusts:
         community_avg = sum(community_trusts) / len(community_trusts)
         # Weighted: 70% user, 30% community
         total_trust = (user_trust * 0.7) + (community_avg * 0.3)
     else:
         total_trust = user_trust
-    
+
     return total_trust
 
 # Example
@@ -550,7 +550,7 @@ dj = PersonalizedDJ(name="DJ Quantum", edge_mode=True)
 # First interaction
 greeting = dj.greet_user("user_001", "Alex")
 print(greeting)
-# "Hey Alex! Welcome to QFZZ! I'm DJ Quantum, your personal DJ. 
+# "Hey Alex! Welcome to QFZZ! I'm DJ Quantum, your personal DJ.
 #  Let's discover some great music together!"
 
 # Share preferences
@@ -564,7 +564,7 @@ print(response1)
 # Request recommendation
 response2 = dj.interact("user_001", "Can you recommend something?")
 print(response2)
-# "Based on your taste for jazz, electronic, ambient, 
+# "Based on your taste for jazz, electronic, ambient,
 #  I've got the perfect track queued up! Let me play something special for you."
 
 # Check trust
@@ -578,7 +578,7 @@ dj.add_to_community("user_001", "friend_002")
 # Ask about community
 response3 = dj.interact("user_001", "Tell me about my community")
 print(response3)
-# "You're part of a trusted community of 1 music lovers. 
+# "You're part of a trusted community of 1 music lovers.
 #  Together we're discovering amazing sounds!"
 ```
 
@@ -600,10 +600,10 @@ for user_id, name, preferences in users:
     # Greet each user
     greeting = dj.greet_user(user_id, name)
     print(f"{name}: {greeting}")
-    
+
     # Set preferences
     dj.update_preferences(user_id, preferences)
-    
+
     # Interact
     response = dj.interact(user_id, "Play something for me")
     print(f"{name}: {response}\n")
@@ -870,14 +870,14 @@ def track_milestones(user_id, dj):
     profile = dj.user_profiles[user_id]
     interactions = len(profile.interaction_history)
     trust = dj.get_trust_score(user_id)
-    
+
     milestones = {
         10: "First 10 conversations",
         50: "50 sessions together",
         100: "100 sessions milestone",
         500: "Long-time listener"
     }
-    
+
     if interactions in milestones:
         celebrate_milestone(user_id, milestones[interactions])
 
@@ -940,7 +940,7 @@ Have multiple DJs for different contexts:
 # Work DJ - focus and productivity
 work_dj = PersonalizedDJ(name="DJ Focus", edge_mode=True)
 
-# Workout DJ - energy and motivation  
+# Workout DJ - energy and motivation
 workout_dj = PersonalizedDJ(name="DJ Energy", edge_mode=True)
 
 # Relaxation DJ - calm and peaceful

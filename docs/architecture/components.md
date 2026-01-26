@@ -30,7 +30,7 @@ class QFZZStation:
         self.config = config
         self._running = False
         self._listeners: Dict[str, Any] = {}
-        
+
         # Components initialized lazily
         self._dj = None
         self._dataset_manager = None
@@ -51,11 +51,11 @@ def _initialize_components(self) -> None:
         allowed_licenses=self.config.allowed_licenses
     )
     self._player = MusicPlayer()
-    
+
     # Conditional initialization
     if self.config.enable_blockchain:
         self._trust_network = BlockchainTrustNetwork()
-    
+
     if self.config.enable_edge_optimization:
         self._edge_optimizer = EdgeOptimizer()
 ```
@@ -192,29 +192,29 @@ Scoring algorithm weights multiple factors:
 ```python
 def _calculate_track_score(self, track, profile, preferences) -> float:
     score = 0.0
-    
+
     # Genre matching (30%)
     if track['genre'] in profile.genres:
         score += profile.genres[track['genre']] * 0.3
     elif track['genre'] in similar_genres:
         score += 0.5 * 0.3
-    
+
     # Artist matching (25%)
     if track['artist'] in profile.artists:
         score += profile.artists[track['artist']] * 0.25
-    
+
     # Energy level matching (20%)
     energy_diff = abs(track['energy'] - profile.energy_level)
     score += (1.0 - energy_diff) * 0.2
-    
+
     # Tempo matching (15%)
     if track['tempo'] == profile.tempo_preference:
         score += 0.15
-    
+
     # Mood matching (10%)
     if track['mood'] in profile.moods:
         score += profile.moods[track['mood']] * 0.1
-    
+
     return score
 ```
 
@@ -224,18 +224,18 @@ def _calculate_track_score(self, track, profile, preferences) -> float:
 def _apply_discovery(self, scored_tracks, discovery_factor) -> List[Dict]:
     # Split into high-scoring and discovery candidates
     split_point = int(len(scored_tracks) * (1.0 - discovery_factor))
-    
+
     high_scores = scored_tracks[:split_point]
     discovery_pool = scored_tracks[split_point:]
-    
+
     # Combine with random discovery tracks
     recommendations = [track for _, track in high_scores]
-    
+
     if discovery_pool:
         num_discovery = int(len(recommendations) * discovery_factor / (1.0 - discovery_factor))
         discovery_tracks = random.sample(discovery_pool, min(num_discovery, len(discovery_pool)))
         recommendations.extend([track for _, track in discovery_tracks])
-    
+
     return recommendations
 ```
 
@@ -246,7 +246,7 @@ def _apply_discovery(self, scored_tracks, discovery_factor) -> List[Dict]:
 ```python
 def record_feedback(self, user_id, track_id, interaction_type, rating):
     profile = self.get_or_create_profile(user_id)
-    
+
     interaction = {
         'track_id': track_id,
         'type': interaction_type,
@@ -254,7 +254,7 @@ def record_feedback(self, user_id, track_id, interaction_type, rating):
         'timestamp': datetime.now().isoformat()
     }
     profile.add_interaction(interaction)
-    
+
     self._update_profile_from_feedback(profile, track_id, interaction_type, rating)
 ```
 
@@ -266,7 +266,7 @@ def _update_profile_from_feedback(self, profile, track_id, interaction_type, rat
     track = self._find_track(track_id)
     if not track:
         return
-    
+
     # Calculate feedback strength
     strength = {
         'like': 0.1,
@@ -275,12 +275,12 @@ def _update_profile_from_feedback(self, profile, track_id, interaction_type, rat
         'play': 0.05,
         'favorite': 0.2
     }.get(interaction_type, 0.0)
-    
+
     # Apply to preferences
     if 'genre' in track:
         current = profile.genres.get(track['genre'], 0.5)
         profile.genres[track['genre']] = max(0.0, min(1.0, current + strength))
-    
+
     # Similarly for artists, moods, etc.
 ```
 
@@ -342,27 +342,27 @@ Quality score calculated from five factors:
 ```python
 def calculate_quality_score(self, dataset: Dataset) -> float:
     score = 0.0
-    
+
     # Metadata completeness
     metadata_score = self._score_metadata_completeness(dataset)
     score += metadata_score * 0.3
-    
+
     # Data consistency
     consistency_score = self._score_data_consistency(dataset)
     score += consistency_score * 0.25
-    
+
     # Dataset size
     size_score = self._score_dataset_size(dataset)
     score += size_score * 0.2
-    
+
     # Diversity
     diversity_score = self._score_diversity(dataset)
     score += diversity_score * 0.15
-    
+
     # License permissiveness
     license_score = self._score_license(dataset.license)
     score += license_score * 0.1
-    
+
     return score
 ```
 
@@ -437,7 +437,7 @@ class TrustRecord:
 ```python
 def mine_block(self, difficulty: int) -> None:
     target = "0" * difficulty
-    
+
     while not self.hash.startswith(target):
         self.nonce += 1
         self.hash = self.calculate_hash()
@@ -449,7 +449,7 @@ def mine_block(self, difficulty: int) -> None:
 def calculate_trust_score(self) -> float:
     if self.verifications + self.reports == 0:
         return 0.5  # Neutral default
-    
+
     return self.verifications / (self.verifications + self.reports)
 ```
 
@@ -460,15 +460,15 @@ def is_chain_valid(self) -> bool:
     for i in range(1, len(self._chain)):
         current = self._chain[i]
         previous = self._chain[i - 1]
-        
+
         # Verify hash
         if not current.is_valid():
             return False
-        
+
         # Verify linkage
         if current.previous_hash != previous.hash:
             return False
-    
+
     return True
 ```
 
@@ -522,16 +522,16 @@ profiles = {
 ```python
 def optimize_streaming(self, device_id, preferences) -> Dict:
     device = self._devices[device_id]
-    
+
     # Select profile
     profile = self._select_profile(device, preferences)
-    
+
     # Calculate parameters
     quality = self._calculate_quality(device, profile, preferences)
     bitrate = self._calculate_bitrate(device, profile, quality)
     buffer_size = self._calculate_buffer_size(device, profile)
     cache_settings = self._calculate_cache_settings(device, profile)
-    
+
     return {
         'profile': profile_name,
         'quality': quality,
@@ -549,20 +549,20 @@ def _select_profile(self, device, preferences):
     # User preference takes priority
     if preferences and 'profile' in preferences:
         return preferences['profile']
-    
+
     # Auto-select based on conditions
     if device.battery_powered and device.battery_level < 0.3:
         return 'power_save'
-    
+
     if device.network_type in [NetworkType.CELLULAR_3G, NetworkType.CELLULAR_4G]:
         return 'bandwidth_save'
-    
+
     if device.bandwidth_mbps < 1.0:
         return 'bandwidth_save'
-    
+
     if device.bandwidth_mbps >= 5.0 and device.device_type in [DeviceType.DESKTOP]:
         return 'quality'
-    
+
     return 'balanced'
 ```
 

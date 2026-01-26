@@ -830,7 +830,7 @@ def test_station():
     """Test station creation and basic operations."""
     try:
         from qfzz import QFZZStation, StationConfig
-        
+
         config = StationConfig(
             station_id="test",
             station_name="Test Station"
@@ -849,15 +849,15 @@ def test_station():
 def main():
     """Run all verification tests."""
     print("🧪 QFZZ Installation Verification\n")
-    
+
     tests = [
         test_import,
         test_configuration,
         test_station
     ]
-    
+
     results = [test() for test in tests]
-    
+
     print(f"\n{'='*40}")
     if all(results):
         print("✓ All verification tests passed!")
@@ -1010,7 +1010,7 @@ def diagnose():
     print(f"Python: {sys.version}")
     print(f"Platform: {platform.platform()}")
     print(f"Python Executable: {sys.executable}")
-    
+
     print("\n=== Installed Packages ===")
     try:
         import qfzz
@@ -1018,7 +1018,7 @@ def diagnose():
         print(f"Location: {qfzz.__file__}")
     except ImportError as e:
         print(f"QFZZ: NOT INSTALLED ({e})")
-    
+
     print("\n=== Python Path ===")
     for path in sys.path:
         print(f"  {path}")

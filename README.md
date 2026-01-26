@@ -94,7 +94,7 @@ print(response)
 
 ## 🔧 Configuration
 
-QFZZ uses environment variables for configuration. 
+QFZZ uses environment variables for configuration.
 
 ### Quick Setup
 
@@ -346,4 +346,4 @@ Inspired by:
 
 ---
 
-**QFZZ** - *The Pulse of the Quantum Realm* 🎵✨ 
+**QFZZ** - *The Pulse of the Quantum Realm* 🎵✨

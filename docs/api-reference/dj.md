@@ -70,7 +70,7 @@ The DJ maintains predefined genre similarity relationships:
 ### get_or_create_profile()
 
 ```python
-def get_or_create_profile(self, user_id: str, 
+def get_or_create_profile(self, user_id: str,
                          initial_preferences: Optional[Dict[str, Any]] = None) -> UserProfile
 ```
 
@@ -221,7 +221,7 @@ relaxed_recs = dj.recommend("user_001", preferences)
 ### record_feedback()
 
 ```python
-def record_feedback(self, user_id: str, track_id: str, 
+def record_feedback(self, user_id: str, track_id: str,
                    interaction_type: str, rating: Optional[float] = None) -> None
 ```
 
@@ -762,7 +762,7 @@ print(f"Learned genres: {profile.get_top_genres()}")
 ### Recommendation Scoring Algorithm
 
 ```
-Final Score = (Genre × 0.30) + (Artist × 0.25) + (Energy × 0.20) + 
+Final Score = (Genre × 0.30) + (Artist × 0.25) + (Energy × 0.20) +
               (Tempo × 0.15) + (Mood × 0.10)
 
 Where:
@@ -795,4 +795,3 @@ Higher discovery factor = more serendipitous recommendations
 - **Classes**: `PersonalizedDJ`, `UserProfile`
 - **Python**: 3.8+
 - **Dependencies**: dataclasses, typing, datetime, random, logging
-

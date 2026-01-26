@@ -3,12 +3,13 @@ Configuration for edge devices.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, Any
 from enum import Enum
+from typing import Any
 
 
 class DeviceType(Enum):
     """Supported edge device types."""
+
     SMARTPHONE = "smartphone"
     TABLET = "tablet"
     LAPTOP = "laptop"
@@ -20,6 +21,7 @@ class DeviceType(Enum):
 
 class NetworkType(Enum):
     """Network connection types."""
+
     WIFI = "wifi"
     CELLULAR_5G = "5g"
     CELLULAR_4G = "4g"
@@ -32,7 +34,7 @@ class NetworkType(Enum):
 class EdgeDeviceConfig:
     """
     Configuration for an edge device.
-    
+
     Attributes:
         device_id: Unique device identifier
         device_type: Type of device
@@ -47,7 +49,7 @@ class EdgeDeviceConfig:
         max_bitrate_kbps: Maximum supported bitrate in kbps
         metadata: Additional device metadata
     """
-    
+
     device_id: str
     device_type: DeviceType
     network_type: NetworkType = NetworkType.UNKNOWN
@@ -59,81 +61,84 @@ class EdgeDeviceConfig:
     battery_level: float = 1.0
     supports_hardware_decode: bool = True
     max_bitrate_kbps: int = 320
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    
+    metadata: dict[str, Any] = field(default_factory=dict)
+
     def __post_init__(self):
         """Validate configuration after initialization."""
         self.validate()
-    
+
     def validate(self) -> None:
         """
         Validate configuration parameters.
-        
+
         Raises:
             ValueError: If any parameter is invalid
         """
         if not self.device_id:
             raise ValueError("device_id must be non-empty")
-        
+
         if self.bandwidth_mbps < 0:
             raise ValueError("bandwidth_mbps must be non-negative")
-        
+
         if self.cpu_cores < 1:
             raise ValueError("cpu_cores must be positive")
-        
+
         if self.memory_mb < 0:
             raise ValueError("memory_mb must be non-negative")
-        
+
         if self.storage_mb < 0:
             raise ValueError("storage_mb must be non-negative")
-        
+
         if not 0.0 <= self.battery_level <= 1.0:
             raise ValueError("battery_level must be between 0.0 and 1.0")
-        
+
         if self.max_bitrate_kbps < 0:
             raise ValueError("max_bitrate_kbps must be non-negative")
-    
+
     def get_quality_tier(self) -> str:
         """
         Get recommended quality tier based on device capabilities.
-        
+
         Returns:
             Quality tier: 'low', 'medium', 'high', or 'lossless'
         """
         # Consider bandwidth and device type
-        if self.bandwidth_mbps >= 5.0 and self.device_type in [DeviceType.DESKTOP, DeviceType.LAPTOP]:
-            return 'lossless'
+        if self.bandwidth_mbps >= 5.0 and self.device_type in [
+            DeviceType.DESKTOP,
+            DeviceType.LAPTOP,
+        ]:
+            return "lossless"
         elif self.bandwidth_mbps >= 2.0:
-            return 'high'
+            return "high"
         elif self.bandwidth_mbps >= 1.0:
-            return 'medium'
+            return "medium"
         else:
-            return 'low'
-    
+            return "low"
+
     def should_use_cache(self) -> bool:
         """
         Determine if device should use aggressive caching.
-        
+
         Returns:
             True if caching recommended, False otherwise
         """
         # Use cache if on cellular or limited bandwidth
         if self.network_type in [NetworkType.CELLULAR_3G, NetworkType.CELLULAR_4G]:
             return True
-        
+
         if self.bandwidth_mbps < 2.0:
             return True
-        
+
         # Use cache if battery powered and low battery
         if self.battery_powered and self.battery_level < 0.3:
             return True
-        
+
         return False
-    
+
     def get_buffer_size_seconds(self) -> int:
         """
         Get recommended buffer size in seconds.
-        
+
         Returns:
             Buffer size in seconds
         """
@@ -144,20 +149,20 @@ class EdgeDeviceConfig:
             return 15
         else:
             return 10
-    
-    def to_dict(self) -> Dict[str, Any]:
+
+    def to_dict(self) -> dict[str, Any]:
         """Convert configuration to dictionary."""
         return {
-            'device_id': self.device_id,
-            'device_type': self.device_type.value,
-            'network_type': self.network_type.value,
-            'bandwidth_mbps': self.bandwidth_mbps,
-            'cpu_cores': self.cpu_cores,
-            'memory_mb': self.memory_mb,
-            'storage_mb': self.storage_mb,
-            'battery_powered': self.battery_powered,
-            'battery_level': self.battery_level,
-            'supports_hardware_decode': self.supports_hardware_decode,
-            'max_bitrate_kbps': self.max_bitrate_kbps,
-            'metadata': self.metadata
+            "device_id": self.device_id,
+            "device_type": self.device_type.value,
+            "network_type": self.network_type.value,
+            "bandwidth_mbps": self.bandwidth_mbps,
+            "cpu_cores": self.cpu_cores,
+            "memory_mb": self.memory_mb,
+            "storage_mb": self.storage_mb,
+            "battery_powered": self.battery_powered,
+            "battery_level": self.battery_level,
+            "supports_hardware_decode": self.supports_hardware_decode,
+            "max_bitrate_kbps": self.max_bitrate_kbps,
+            "metadata": self.metadata,
         }

@@ -216,7 +216,7 @@ profiles = {
 ```python
 def explain_profile(profile_name):
     """Explain what each profile parameter does."""
-    
+
     explanations = {
         'max_quality': 'Maximum audio quality tier to use',
         'buffer_multiplier': 'Multiplier for default buffer size (1.0 = normal)',
@@ -224,9 +224,9 @@ def explain_profile(profile_name):
         'aggressive_cache': 'Cache entire tracks, not just next track',
         'max_bitrate_kbps': 'Maximum bitrate in kilobits per second'
     }
-    
+
     profile = optimizer._optimization_profiles.get(profile_name)
-    
+
     if profile:
         print(f"\n{profile_name.upper()} Profile:")
         for param, value in profile.items():
@@ -312,9 +312,9 @@ quality_tiers = {
 ```python
 def recommend_quality_for_device(device):
     """Recommend quality tier based on device capabilities."""
-    
+
     quality_order = ['low', 'medium', 'high', 'lossless']
-    
+
     # Consider bandwidth
     if device.bandwidth_mbps >= 5.0:
         quality_idx = 3  # lossless
@@ -324,13 +324,13 @@ def recommend_quality_for_device(device):
         quality_idx = 1  # medium
     else:
         quality_idx = 0  # low
-    
+
     # Consider device type
     if device.device_type in [DeviceType.SMARTPHONE, DeviceType.TABLET]:
         quality_idx = min(quality_idx, 2)  # Cap at high
     elif device.device_type in [DeviceType.SMART_SPEAKER, DeviceType.IOT]:
         quality_idx = min(quality_idx, 1)  # Cap at medium
-    
+
     return quality_order[quality_idx]
 
 quality = recommend_quality_for_device(smartphone)
@@ -403,24 +403,24 @@ print(f"New bitrate: {opt['bitrate_kbps']} kbps")
 ```python
 def adaptive_bitrate_streaming(optimizer, device_id):
     """Example of adaptive bitrate streaming."""
-    
+
     device = optimizer.get_device_config(device_id)
-    
+
     if not device:
         return None
-    
+
     # Calculate bitrate based on available bandwidth
     # Use 80% of available bandwidth
     available_bitrate = device.bandwidth_mbps * 1024 * 0.8  # Convert to kbps
-    
+
     # Apply profile limits
     profile_name = optimizer._select_profile(device, None)
     profile = optimizer._optimization_profiles[profile_name]
     max_profile_bitrate = profile['max_bitrate_kbps']
-    
+
     # Use minimum of available and profile max
     recommended_bitrate = min(int(available_bitrate), max_profile_bitrate)
-    
+
     return {
         'device_id': device_id,
         'available_bandwidth_mbps': device.bandwidth_mbps,
@@ -502,7 +502,7 @@ print(f"  Preload: {cache_config['preload_count']} tracks")
 ```python
 def select_cache_strategy(device):
     """Select caching strategy based on device."""
-    
+
     strategies = {
         'aggressive': {
             'enabled': True,
@@ -522,7 +522,7 @@ def select_cache_strategy(device):
             'use_case': 'Fast, stable connection'
         }
     }
-    
+
     # Select based on network and device
     if device.network_type in [NetworkType.CELLULAR_3G, NetworkType.CELLULAR_4G]:
         return strategies['aggressive']
@@ -547,10 +547,10 @@ print(f"Cache Strategy: {strategy['use_case']}")
 ```python
 def detect_device_capabilities(device_id):
     """Automatically detect device capabilities."""
-    
+
     # In a real system, this would probe the device
     # For now, return based on device type
-    
+
     capabilities = {
         'hardware_video_decode': True,
         'hardware_audio_decode': True,
@@ -560,24 +560,24 @@ def detect_device_capabilities(device_id):
         'dolby_atmos': False,
         'hires_audio': False
     }
-    
+
     device = optimizer.get_device_config(device_id)
-    
+
     if device:
         # Smartphones typically don't support spatial audio
         if device.device_type == DeviceType.SMARTPHONE:
             capabilities['spatial_audio'] = False
-        
+
         # Desktop systems might support it
         if device.device_type == DeviceType.DESKTOP:
             capabilities['spatial_audio'] = True
             capabilities['hires_audio'] = True
-        
+
         # IoT devices have limited capabilities
         if device.device_type in [DeviceType.SMART_SPEAKER, DeviceType.IOT]:
             capabilities['hardware_video_decode'] = False
             capabilities['background_playback'] = False
-    
+
     return capabilities
 
 # Check capabilities
@@ -591,34 +591,34 @@ print(f"Hires Audio: {caps['hires_audio']}")
 ```python
 def sync_optimization_across_devices(optimizer, user_devices):
     """Synchronize optimization settings across user's devices."""
-    
+
     # Get user preferences (e.g., from profile)
     user_preferences = {
         'preferred_quality': 'high',
         'battery_mode': False,
         'cache_aggressive': False
     }
-    
+
     optimizations = {}
-    
+
     for device_id in user_devices:
         # Get device
         device = optimizer.get_device_config(device_id)
         if not device:
             continue
-        
+
         # Adjust preferences based on device
         device_prefs = user_preferences.copy()
-        
+
         # Override for low-battery devices
         if device.battery_powered and device.battery_level < 0.3:
             device_prefs['battery_mode'] = True
             device_prefs['preferred_quality'] = 'medium'
-        
+
         # Get optimization
         opt = optimizer.optimize_streaming(device_id, device_prefs)
         optimizations[device_id] = opt
-    
+
     return optimizations
 
 # Sync across devices
@@ -634,25 +634,25 @@ for device_id, opt in synced.items():
 ```python
 def intelligent_profile_selection(optimizer, device_id):
     """Intelligently select profile based on multiple factors."""
-    
+
     device = optimizer.get_device_config(device_id)
     if not device:
         return 'balanced'
-    
+
     scores = {
         'power_save': 0,
         'bandwidth_save': 0,
         'balanced': 0,
         'quality': 0
     }
-    
+
     # Battery status
     if device.battery_powered:
         if device.battery_level < 0.2:
             scores['power_save'] += 10
         elif device.battery_level < 0.4:
             scores['power_save'] += 5
-    
+
     # Network conditions
     if device.bandwidth_mbps < 0.5:
         scores['bandwidth_save'] += 10
@@ -660,7 +660,7 @@ def intelligent_profile_selection(optimizer, device_id):
         scores['bandwidth_save'] += 5
     elif device.bandwidth_mbps > 5.0:
         scores['quality'] += 5
-    
+
     # Network type
     if device.network_type == NetworkType.CELLULAR_3G:
         scores['bandwidth_save'] += 10
@@ -668,16 +668,16 @@ def intelligent_profile_selection(optimizer, device_id):
         scores['balanced'] += 5
     elif device.network_type == NetworkType.ETHERNET:
         scores['quality'] += 10
-    
+
     # Device type
     if device.device_type in [DeviceType.DESKTOP, DeviceType.LAPTOP]:
         scores['quality'] += 3
     elif device.device_type in [DeviceType.IOT, DeviceType.SMART_SPEAKER]:
         scores['bandwidth_save'] += 3
-    
+
     # Default to balanced
     scores['balanced'] += 2
-    
+
     # Return profile with highest score
     return max(scores, key=scores.get)
 
@@ -708,17 +708,17 @@ for device_type, count in stats['device_types'].items():
 ```python
 def monitor_device_health(optimizer, device_id):
     """Monitor device health and performance."""
-    
+
     device = optimizer.get_device_config(device_id)
     if not device:
         return None
-    
+
     health = {
         'device_id': device_id,
         'status': 'HEALTHY',
         'issues': []
     }
-    
+
     # Check battery
     if device.battery_powered:
         if device.battery_level < 0.1:
@@ -726,21 +726,21 @@ def monitor_device_health(optimizer, device_id):
             health['status'] = 'WARNING'
         elif device.battery_level < 0.2:
             health['issues'].append('Low battery')
-    
+
     # Check bandwidth
     if device.bandwidth_mbps < 0.5:
         health['issues'].append('Very low bandwidth')
         health['status'] = 'WARNING'
-    
+
     # Check storage
     if device.storage_mb < 1000:
         health['issues'].append('Limited storage')
-    
+
     # Check memory
     if device.memory_mb < 512:
         health['issues'].append('Limited memory')
         health['status'] = 'WARNING'
-    
+
     return health
 
 # Monitor device
@@ -763,36 +763,36 @@ optimizer = EdgeOptimizer()
 
 def get_dataset_for_device(manager, optimizer, device_id):
     """Select appropriate dataset for device."""
-    
+
     device = optimizer.get_device_config(device_id)
     if not device:
         return None
-    
+
     # Get all datasets
     datasets = manager.list_datasets()
-    
+
     # Filter by device capability
     suitable = []
     for dataset in datasets:
         # Skip if quality too low
         if dataset.quality_score < 0.6:
             continue
-        
+
         # Skip if too large for device
         total_duration = dataset.get_total_duration()
-        
+
         # Estimate storage needed (256 kbps average)
         estimated_mb = (total_duration / 3600) * (256 / 8) / 1024
-        
+
         if estimated_mb > device.storage_mb * 0.5:  # Use max 50% of storage
             continue
-        
+
         suitable.append(dataset)
-    
+
     # Return highest quality dataset
     if suitable:
         return sorted(suitable, key=lambda d: d.quality_score, reverse=True)[0]
-    
+
     return None
 ```
 
@@ -806,18 +806,18 @@ optimizer = EdgeOptimizer()
 
 def get_optimized_playlist(dj, optimizer, user_id, device_id):
     """Generate playlist optimized for device."""
-    
+
     # Get device optimization
     opt = optimizer.optimize_streaming(device_id)
-    
+
     # Generate playlist
     playlist = dj.generate_playlist(user_id)
-    
+
     # Adjust playlist for device
     # - Limit number of tracks based on storage
     # - Suggest quality based on bandwidth
     # - Recommend cache settings
-    
+
     return {
         'playlist': playlist,
         'optimization': opt,
@@ -852,13 +852,13 @@ for device_id, device_type in devices:
 # Detect network changes and update
 def network_change_handler(device_id, new_bandwidth, new_network_type):
     """Handle network change event."""
-    
+
     optimizer.update_network_conditions(
         device_id=device_id,
         network_type=new_network_type,
         bandwidth_mbps=new_bandwidth
     )
-    
+
     # Get updated optimization
     opt = optimizer.optimize_streaming(device_id)
     print(f"Optimization updated: {opt['profile']}")
@@ -870,9 +870,9 @@ def network_change_handler(device_id, new_bandwidth, new_network_type):
 # Update optimization when battery changes
 def battery_change_handler(device_id, new_battery_level):
     """Handle battery change event."""
-    
+
     optimizer.update_battery_status(device_id, new_battery_level)
-    
+
     if new_battery_level < 0.3:
         print(f"⚠️ Low battery on {device_id}")
         # Update optimization
@@ -886,9 +886,9 @@ def battery_change_handler(device_id, new_battery_level):
 # Implement smart caching based on optimization
 def setup_caching(device_id):
     """Setup device caching based on optimization."""
-    
+
     opt = optimizer.optimize_streaming(device_id)
-    
+
     cache_config = {
         'enabled': opt['cache_enabled'],
         'size_mb': opt['cache_size_mb'],
@@ -896,7 +896,7 @@ def setup_caching(device_id):
         'preload_on_wifi': True,
         'clear_on_low_storage': True
     }
-    
+
     return cache_config
 ```
 
@@ -911,13 +911,13 @@ device = optimizer.get_device_config('device_001')  # O(1)
 # Get optimization with caching
 def get_cached_optimization(optimizer, device_id):
     """Get optimization with result caching."""
-    
+
     # First call computes
     opt1 = optimizer.optimize_streaming(device_id)
-    
+
     # Subsequent calls reuse computation
     opt2 = optimizer.optimize_streaming(device_id)
-    
+
     return opt2
 ```
 
@@ -926,7 +926,7 @@ def get_cached_optimization(optimizer, device_id):
 ```python
 def batch_update_devices(optimizer, updates):
     """Efficiently update multiple devices."""
-    
+
     for device_id, network_info in updates.items():
         optimizer.update_network_conditions(
             device_id=device_id,
@@ -940,9 +940,9 @@ def batch_update_devices(optimizer, updates):
 ```python
 def test_edge_optimization():
     """Test edge optimization functionality."""
-    
+
     optimizer = EdgeOptimizer()
-    
+
     # Register test device
     device = EdgeDeviceConfig(
         device_id='test_device',
@@ -951,29 +951,29 @@ def test_edge_optimization():
         battery_powered=True,
         battery_level=0.8
     )
-    
+
     optimizer.register_device(device)
-    
+
     # Test optimization
     opt = optimizer.optimize_streaming('test_device')
     assert opt['device_id'] == 'test_device'
     assert opt['quality'] in ['low', 'medium', 'high', 'lossless']
-    
+
     # Test network update
     optimizer.update_network_conditions(
         'test_device',
         NetworkType.CELLULAR_3G,
         0.5
     )
-    
+
     opt2 = optimizer.optimize_streaming('test_device')
     assert opt2['profile'] in ['power_save', 'balanced', 'quality', 'bandwidth_save']
-    
+
     # Test battery update
     optimizer.update_battery_status('test_device', 0.1)
     opt3 = optimizer.optimize_streaming('test_device')
     assert opt3['profile'] == 'power_save'
-    
+
     print("✓ All edge optimization tests passed")
 
 test_edge_optimization()
@@ -986,29 +986,29 @@ test_edge_optimization()
 ```python
 def diagnose_device_performance(optimizer, device_id):
     """Diagnose performance issues on a device."""
-    
+
     device = optimizer.get_device_config(device_id)
     if not device:
         return None
-    
+
     issues = []
-    
+
     # Check bandwidth
     if device.bandwidth_mbps < 1.0:
         issues.append(f"Low bandwidth: {device.bandwidth_mbps} Mbps")
-    
+
     # Check battery
     if device.battery_powered and device.battery_level < 0.2:
         issues.append(f"Low battery: {device.battery_level:.1%}")
-    
+
     # Check memory
     if device.memory_mb < 512:
         issues.append(f"Low memory: {device.memory_mb} MB")
-    
+
     # Check storage
     if device.storage_mb < 1000:
         issues.append(f"Low storage: {device.storage_mb} MB")
-    
+
     return issues
 
 issues = diagnose_device_performance(optimizer, 'problem_device')

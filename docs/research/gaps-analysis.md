@@ -371,18 +371,18 @@ Trains models across distributed devices without centralizing data:
 Server:
   t ← 0
   model ← initialize()
-  
+
   repeat:
     selected_clients ← random_sample(clients, fraction_fit)
-    
+
     for each client in selected_clients:
       client_model ← download(model)
       client_updates ← train_local(client_model, local_data)
       upload(client_updates)
-    
+
     model ← aggregate(client_updates)  # e.g., FedAvg
     t ← t + 1
-    
+
   until convergence
 ```
 
@@ -462,7 +462,7 @@ Parameters:
   - Communication interval: T (seconds)
   - Message size limit: M (bytes)
   - Peer set size: K
-  
+
 Process:
   On Node i:
     - Periodically (every T seconds):
@@ -639,7 +639,7 @@ Solution: Need shared embedding space
 **Approaches**:
 1. Fixed embedding function (centralized model download)
    - Reduces flexibility; requires periodic model updates
-   
+
 2. Federated embedding learning
    - Nodes train jointly but keep data local
    - Challenge: Embedding drift (nodes diverge over time)
@@ -673,7 +673,7 @@ Problem: Malicious peers could suggest bad songs
 **Approach**: Don't blindly trust recommendations; validate against peer consensus
 
 ```
-Recommendation_Quality_Score = 
+Recommendation_Quality_Score =
   (number of peers who agree) / (total queries) +
   history_accuracy_of_recommender
 ```
@@ -822,7 +822,7 @@ The convergence of federated learning, blockchain transparency, and edge computi
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2024  
-**Maintained By**: QFZZ Research Team  
+**Document Version**: 1.0
+**Last Updated**: 2024
+**Maintained By**: QFZZ Research Team
 **Status**: Active Research
