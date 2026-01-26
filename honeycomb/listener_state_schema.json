@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "active_listeners": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of active listeners"
+    },
+    "recent_requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "request_id": {
+            "type": "string"
+          },
+          "listener_id": {
+            "type": "string"
+          },
+          "request_type": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "preferences": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Aggregated listener preferences"
+    }
+  },
+  "required": ["active_listeners", "recent_requests", "preferences"]
+}
