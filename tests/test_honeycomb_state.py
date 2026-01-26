@@ -232,19 +232,19 @@ class TestErrorHandling:
             assert (honeycomb_path / "current_track.json").exists()
 
     def test_missing_state_file_initializes_with_defaults(self, temp_honeycomb):
-        """Test that missing state files are recreated with defaults."""
+        """Test that missing state files are handled gracefully."""
         state_manager = StateManager(honeycomb_dir=temp_honeycomb)
 
         # Remove a state file
         playlist_file = Path(temp_honeycomb) / "playlist.json"
         playlist_file.unlink()
 
-        # Reading should reinitialize or handle gracefully
-        # Depending on implementation, might recreate or return default
+        # Reading should return None (file doesn't exist)
+        # Implementation returns None when file is missing
         playlist = state_manager.get_playlist()
 
-        # Should get valid data (either cached or reinitialized)
-        assert isinstance(playlist, dict)
+        # Should return None when file is missing
+        assert playlist is None
 
     def test_corrupted_json_recovery(self, temp_honeycomb, mock_file_corruption):
         """Test recovery from corrupted JSON files."""

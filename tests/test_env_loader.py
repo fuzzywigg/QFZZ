@@ -131,6 +131,10 @@ class TestMissingKeys:
 
     def test_partial_keys_available_providers(self, monkeypatch):
         """Test provider availability with partial keys."""
+        # Clean environment first
+        for key in ["GOOGLE_AI_API_KEY", "GROQ_API_KEY", "ANTHROPIC_API_KEY", "OPENAI_API_KEY"]:
+            monkeypatch.delenv(key, raising=False)
+        
         # Set only Google and Groq keys
         monkeypatch.setenv("GOOGLE_AI_API_KEY", "google_key")
         monkeypatch.setenv("GROQ_API_KEY", "groq_key")
