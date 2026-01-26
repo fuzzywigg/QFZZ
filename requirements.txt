@@ -2,7 +2,7 @@
 # Audio processing and analysis
 librosa>=0.10.0,<0.11.0
 mutagen>=1.47.0,<2.0.0
-numpy>=1.24.0,<2.0.0
+numpy>=1.24.0,<3.0.0
 networkx>=3.0,<4.0.0
 
 # Optional: YouTube content fetching (for future music source integration)
