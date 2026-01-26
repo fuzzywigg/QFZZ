@@ -1,0 +1,198 @@
+version: '3.8'
+
+services:
+  # Icecast streaming server
+  icecast:
+    image: moul/icecast:latest
+    container_name: qfzz-icecast
+    ports:
+      - "8000:8000"  # Icecast server
+    volumes:
+      - ./config/icecast.xml:/etc/icecast2/icecast.xml:ro
+      - icecast-logs:/var/log/icecast2
+    environment:
+      - ICECAST_SOURCE_PASSWORD=hackme
+      - ICECAST_ADMIN_PASSWORD=hackme
+      - ICECAST_RELAY_PASSWORD=hackme
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/status.xsl"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - qfzz-network
+
+  # QFZZ Application
+  qfzz-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: qfzz-app
+    ports:
+      - "8001:8001"  # API/HTTP server
+      - "3000:3000"  # Frontend (optional)
+    volumes:
+      # Audio content
+      - ./qfzz_audio_content:/app/qfzz_audio_content
+      # State and data
+      - ./honeycomb:/app/honeycomb
+      - ./qfzz_ledger.json:/app/qfzz_ledger.json
+      - ./qfzz_knowledge_graph.json:/app/qfzz_knowledge_graph.json
+      # Logs
+      - qfzz-logs:/app/logs
+      # Config (optional overrides)
+      - ./config:/app/config:ro
+    environment:
+      # LLM API Keys (set these in .env file)
+      - GOOGLE_AI_API_KEY=${GOOGLE_AI_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      
+      # Icecast configuration
+      - ICECAST_HOST=icecast
+      - ICECAST_PORT=8000
+      - ICECAST_PASSWORD=hackme
+      - ICECAST_MOUNT=/qfzz
+      
+      # Application settings
+      - QFZZ_STATION_NAME=QFZZ Prime
+      - QFZZ_ENABLE_BLOCKCHAIN=true
+      - QFZZ_ENABLE_ICECAST=true
+      
+      # Python settings
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - icecast
+      - postgres
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/playlist.json"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - qfzz-network
+
+  # PostgreSQL Database (for future use)
+  postgres:
+    image: postgres:15-alpine
+    container_name: qfzz-postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    environment:
+      - POSTGRES_DB=qfzz
+      - POSTGRES_USER=qfzz
+      - POSTGRES_PASSWORD=qfzz_password_change_me
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qfzz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - qfzz-network
+
+  # Redis Cache (for future use)
+  redis:
+    image: redis:7-alpine
+    container_name: qfzz-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - qfzz-network
+
+  # Frontend (optional - for web UI)
+  frontend:
+    image: node:18-alpine
+    container_name: qfzz-frontend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3001:3000"
+    command: sh -c "npm install && npm start"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8001
+      - REACT_APP_STREAM_URL=http://localhost:8000/qfzz
+    depends_on:
+      - qfzz-app
+    restart: unless-stopped
+    networks:
+      - qfzz-network
+    profiles:
+      - frontend  # Only start with --profile frontend
+
+  # Monitoring with Prometheus (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: qfzz-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+    networks:
+      - qfzz-network
+    profiles:
+      - monitoring  # Only start with --profile monitoring
+
+  # Grafana Dashboard (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: qfzz-grafana
+    ports:
+      - "3002:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana:/etc/grafana/provisioning:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - qfzz-network
+    profiles:
+      - monitoring  # Only start with --profile monitoring
+
+# Volumes for persistent data
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  icecast-logs:
+    driver: local
+  qfzz-logs:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+# Networks
+networks:
+  qfzz-network:
+    driver: bridge

@@ -1,0 +1,99 @@
+# Docker ignore file for QFZZ
+# Reduces image size and build time
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (not needed in container)
+docs/
+*.md
+!README.md
+
+# Tests (use separate test stage)
+tests/
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Docker files (don't copy into container)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Large data files
+*.mp3
+*.wav
+*.ogg
+*.flac
+qfzz_audio_content/*
+!qfzz_audio_content/.gitkeep
+
+# Generated files
+qfzz_ledger.json
+qfzz_knowledge_graph.json
+honeycomb/
+
+# Logs
+logs/
+*.log
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Node modules (if any)
+node_modules/
+npm-debug.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets
+*.pem
+*.key
+secrets/
+.secrets.baseline
