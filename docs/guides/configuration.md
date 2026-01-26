@@ -1133,7 +1133,7 @@ config_json = template.substitute(
 ```python
 class ConfigProfile:
     """Base class for configuration profiles."""
-    
+
     def get_config(self):
         raise NotImplementedError
 
@@ -1185,19 +1185,19 @@ config = StationConfig(
     # Identity
     station_id="complete_station",
     station_name="Complete QFZZ Station",
-    
+
     # Playlist
     max_playlist_size=200,
     trust_threshold=0.7,
-    
+
     # Features
     enable_blockchain=True,
     enable_edge_optimization=True,
-    
+
     # Quality
     streaming_quality="high",
     cache_size_mb=1000,
-    
+
     # Licensing
     allowed_licenses=[
         "CC-BY",
@@ -1205,7 +1205,7 @@ config = StationConfig(
         "CC0",
         "CC-BY-NC"
     ],
-    
+
     # Metadata
     metadata={
         "owner_id": "user_123",

@@ -46,7 +46,7 @@ dataset = Dataset(
 success = manager.register_dataset(dataset)
 if success:
     manager.verify_dataset_blockchain(dataset.id)
-    
+
 # Get high quality datasets
 high_quality = manager.get_high_quality_datasets()
 print(f"Found {len(high_quality)} high quality datasets")

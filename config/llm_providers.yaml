@@ -15,7 +15,7 @@ providers:
     setup_url: "https://ollama.ai/"
     free: true
     privacy: excellent
-    
+
   # Secondary: Groq (Free Tier API)
   groq:
     priority: 2
@@ -29,7 +29,7 @@ providers:
       requests_per_day: "High limits"
       rate_limit: "50 requests/minute"
     privacy: good
-    
+
   # Tertiary: Together.ai (Free Tier)
   together:
     priority: 3
@@ -43,7 +43,7 @@ providers:
       credits: "$25 free credits"
       rate_limit: "Varies by model"
     privacy: good
-    
+
   # Quaternary: HuggingFace Inference API (Free Tier)
   huggingface:
     priority: 4
@@ -56,7 +56,7 @@ providers:
     free_tier:
       rate_limit: "Varies by model, may have cold starts"
     privacy: good
-    
+
   # Optional: Google Gemini (Free Tier Available)
   gemini:
     priority: 5

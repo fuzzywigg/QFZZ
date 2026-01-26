@@ -19,27 +19,27 @@ flowchart TD
     B -->|Yes| D{User Registered?}
     D -->|No| E[Error: Unknown User]
     D -->|Yes| F[Get User Preferences]
-    
+
     F --> G[PersonalizedDJ.recommend]
     G --> H[Get Candidate Tracks]
     H --> I[Score Tracks]
     I --> J[Apply Discovery Factor]
     J --> K[Return Recommendations]
-    
+
     K --> L{Blockchain Enabled?}
     L -->|Yes| M[Filter by Trust Score]
     L -->|No| N[Skip Trust Filter]
-    
+
     M --> O[Apply Playlist Size Limit]
     N --> O
-    
+
     O --> P{Edge Optimization Enabled?}
     P -->|Yes| Q[Get Streaming Params]
     P -->|No| R[Use Default Params]
-    
+
     Q --> S[Store Playlist]
     R --> S
-    
+
     S --> T[Return Playlist to User]
 ```
 
@@ -137,29 +137,29 @@ sequenceDiagram
     participant DJ as PersonalizedDJ
     participant P as UserProfile
     participant B as Blockchain
-    
+
     U->>S: record_interaction(track, type, rating)
-    
+
     S->>S: Validate user exists
     S->>DJ: record_feedback(user_id, track_id, type, rating)
-    
+
     DJ->>P: get_profile(user_id)
     P-->>DJ: profile
-    
+
     DJ->>P: add_interaction(interaction)
     DJ->>DJ: _update_profile_from_feedback()
-    
+
     DJ->>DJ: Find track in catalog
     DJ->>DJ: Calculate feedback strength
-    
+
     alt Track found
         DJ->>P: update_genre_preference()
         DJ->>P: update_artist_preference()
         DJ->>P: update_mood_preference()
     end
-    
+
     DJ-->>S: feedback_recorded
-    
+
     alt Positive interaction (like, play)
         S->>B: verify_content(content_id, creator_id)
         B->>B: increment_verifications()
@@ -169,7 +169,7 @@ sequenceDiagram
         B->>B: increment_reports()
         B->>B: recalculate_trust_score()
     end
-    
+
     B-->>S: trust_updated
     S-->>U: interaction_recorded
 ```
@@ -206,23 +206,23 @@ Blockchain operations for content verification.
 flowchart LR
     A[New Content] --> B[Create Trust Record]
     B --> C[Add to Pending Records]
-    
+
     D[User Verification] --> E[Increment Verifications]
     F[User Report] --> G[Increment Reports]
-    
+
     E --> H[Recalculate Trust Score]
     G --> H
-    
+
     H --> I{Score Changed?}
     I -->|Yes| J[Update Trust Index]
     I -->|No| K[No Action]
-    
+
     C --> L[Mining Trigger]
     L --> M[Create New Block]
     M --> N[Mine Block: PoW]
     N --> O[Add to Chain]
     O --> P[Clear Pending Records]
-    
+
     P --> Q[Validate Chain]
     Q --> R{Valid?}
     R -->|Yes| S[Block Confirmed]
@@ -235,16 +235,16 @@ flowchart LR
 def calculate_trust_score(verifications, reports):
     """
     Calculate trust score from verifications and reports.
-    
+
     Score = verifications / (verifications + reports)
-    
+
     - All verifications: 1.0
     - All reports: 0.0
     - No feedback: 0.5 (neutral)
     """
     if verifications + reports == 0:
         return 0.5  # Neutral default
-    
+
     return verifications / (verifications + reports)
 ```
 
@@ -254,15 +254,15 @@ def calculate_trust_score(verifications, reports):
 def mine_block(block, difficulty):
     """
     Mine block using Proof-of-Work.
-    
+
     Find nonce such that hash starts with 'difficulty' zeros.
     """
     target = "0" * difficulty
-    
+
     while not block.hash.startswith(target):
         block.nonce += 1
         block.hash = block.calculate_hash()
-    
+
     return block
 ```
 
@@ -282,28 +282,28 @@ Device-aware streaming parameter calculation.
 flowchart TD
     A[Device Registration] --> B[Parse Device Config]
     B --> C[Store Device Profile]
-    
+
     D[Optimization Request] --> E{Device Registered?}
     E -->|No| F[Error: Unknown Device]
     E -->|Yes| G[Get Device Config]
-    
+
     G --> H{User Preferences?}
     H -->|Yes| I[Apply User Prefs]
     H -->|No| J[Auto-Select Profile]
-    
+
     I --> K[Select Profile]
     J --> K
-    
+
     K --> L[Calculate Quality Tier]
     L --> M[Calculate Bitrate]
     M --> N[Calculate Buffer Size]
     N --> O[Calculate Cache Settings]
-    
+
     O --> P[Return Optimization Params]
-    
+
     Q[Network Update] --> R[Update Device Config]
     R --> S[Trigger Re-optimization]
-    
+
     T[Battery Update] --> U[Update Device Config]
     U --> S
 ```
@@ -316,22 +316,22 @@ def select_profile(device, preferences):
     # 1. Check user preference
     if preferences and 'profile' in preferences:
         return preferences['profile']
-    
+
     # 2. Battery-based selection
     if device.battery_powered and device.battery_level < 0.3:
         return 'power_save'
-    
+
     # 3. Network-based selection
     if device.network_type in [NetworkType.CELLULAR_3G, NetworkType.CELLULAR_4G]:
         return 'bandwidth_save'
-    
+
     if device.bandwidth_mbps < 1.0:
         return 'bandwidth_save'
-    
+
     # 4. Quality-based selection
     if device.bandwidth_mbps >= 5.0 and device.device_type == DeviceType.DESKTOP:
         return 'quality'
-    
+
     # 5. Default
     return 'balanced'
 ```
@@ -348,14 +348,14 @@ def calculate_bitrate(device, profile, quality):
         'high': 256,
         'lossless': 320
     }
-    
+
     base_bitrate = QUALITY_BITRATES[quality]
-    
+
     # Apply limits
     profile_limit = profile['max_bitrate_kbps']
     device_limit = device.max_bitrate_kbps
     bandwidth_limit = int(device.bandwidth_mbps * 1024 * 0.8)
-    
+
     # Return minimum of all limits
     return min(base_bitrate, profile_limit, device_limit, bandwidth_limit)
 ```
@@ -371,27 +371,27 @@ flowchart TD
     A[New Dataset] --> B[Validate License]
     B -->|Invalid| C[Reject Dataset]
     B -->|Valid| D[Calculate Quality Score]
-    
+
     D --> E[Metadata Completeness: 30%]
     D --> F[Data Consistency: 25%]
     D --> G[Dataset Size: 20%]
     D --> H[Diversity: 15%]
     D --> I[License Permissiveness: 10%]
-    
+
     E --> J[Aggregate Scores]
     F --> J
     G --> J
     H --> J
     I --> J
-    
+
     J --> K[Normalize to 0.0-1.0]
     K --> L[Store Quality Score]
     L --> M[Add to Collection]
-    
+
     M --> N{Min Quality Filter?}
     N -->|Yes| O[Filter by Quality]
     N -->|No| P[Include All]
-    
+
     O --> Q[Return Datasets]
     P --> Q
 ```
@@ -403,17 +403,17 @@ flowchart TD
 def score_metadata(dataset):
     required = ['title', 'artist', 'genre', 'duration']
     optional = ['album', 'year', 'mood', 'energy', 'tempo']
-    
+
     score = 0.0
     for track in dataset.tracks:
         # Required fields: 70% of score
         req_score = sum(1 for f in required if f in track and track[f])
         score += (req_score / len(required)) * 0.7
-        
+
         # Optional fields: 30% of score
         opt_score = sum(1 for f in optional if f in track and track[f])
         score += (opt_score / len(optional)) * 0.3
-    
+
     return score / len(dataset.tracks)
 ```
 
@@ -423,13 +423,13 @@ def score_consistency(dataset):
     # Field consistency
     sample_fields = set(dataset.tracks[0].keys())
     field_consistency = 0.0
-    
+
     for track in dataset.tracks:
         overlap = len(sample_fields & set(track.keys())) / len(sample_fields)
         field_consistency += overlap
-    
+
     field_consistency /= len(dataset.tracks)
-    
+
     # Value validity
     valid_values = 1.0
     for track in dataset.tracks:
@@ -437,7 +437,7 @@ def score_consistency(dataset):
             valid_values -= 0.01
         if 'energy' in track and not 0.0 <= track['energy'] <= 1.0:
             valid_values -= 0.01
-    
+
     return (field_consistency * 0.5 + max(0, valid_values) * 0.5)
 ```
 
@@ -552,7 +552,7 @@ Components initialized only when needed:
 def _initialize_components(self):
     # Always needed
     self._dj = PersonalizedDJ()
-    
+
     # Conditional
     if self.config.enable_blockchain:
         self._trust_network = BlockchainTrustNetwork()  # Only if enabled

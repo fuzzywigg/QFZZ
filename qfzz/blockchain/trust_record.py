@@ -3,13 +3,13 @@
 import hashlib
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any
 
 
 @dataclass
 class Block:
     """Represents a block in the trust chain
-    
+
     Attributes:
         index: Block index in the chain
         timestamp: Block creation timestamp
@@ -17,15 +17,16 @@ class Block:
         previous_hash: Hash of the previous block
         hash: Hash of this block
     """
+
     index: int
     timestamp: datetime
-    data: Dict[str, Any]
+    data: dict[str, Any]
     previous_hash: str
     hash: str = ""
-    
+
     def calculate_hash(self) -> str:
         """Calculate block hash using SHA-256
-        
+
         Returns:
             Calculated hash string
         """
@@ -36,7 +37,7 @@ class Block:
 @dataclass
 class TrustRecord:
     """Record of trust transaction
-    
+
     Attributes:
         user_id: User identifier
         action: Action type (e.g., "interaction", "rating", "verification")
@@ -44,6 +45,7 @@ class TrustRecord:
         trust_delta: Change in trust score
         timestamp: Record creation timestamp
     """
+
     user_id: str
     action: str
     target: str

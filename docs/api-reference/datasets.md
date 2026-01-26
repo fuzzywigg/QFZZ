@@ -39,7 +39,7 @@ Initialize the Dataset Manager with license configuration.
 
 - `allowed_licenses` (Optional[List[str]]): List of allowed license types.
   Default: `['CC-BY', 'CC-BY-SA', 'CC0']`
-  
+
   Supported licenses:
   - `"CC0"`: Public domain
   - `"CC-BY"`: Attribution required
@@ -829,14 +829,14 @@ manager = DatasetManager(allowed_licenses=[
 datasets = []
 for i in range(3):
     license_type = ["CC-BY", "CC-BY-SA", "CC0"][i]
-    
+
     license = DatasetLicense(
         license_type=license_type,
         license_url=f"https://example.com/{license_type}",
         commercial_use=True,
         derivative_works=True
     )
-    
+
     dataset = Dataset(
         dataset_id=f"dataset_{i:03d}",
         name=f"Collection {i+1}",
@@ -845,7 +845,7 @@ for i in range(3):
         license=license,
         creator_id=f"curator_{i}"
     )
-    
+
     # Add tracks
     for j in range(100):
         dataset.add_track({
@@ -858,7 +858,7 @@ for i in range(3):
             "tempo": ["slow", "medium", "fast"][j % 3],
             "duration": 200 + (j % 200)
         })
-    
+
     datasets.append(dataset)
 
 # Add datasets to manager
@@ -946,4 +946,3 @@ Base Score: 0.5
 - **Classes**: `DatasetManager`, `Dataset`, `DatasetLicense`
 - **Python**: 3.8+
 - **Dependencies**: dataclasses, typing, datetime, enum
-

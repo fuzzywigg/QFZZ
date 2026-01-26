@@ -193,15 +193,15 @@ def verify_chain(self):
     for i in range(1, len(self.chain)):
         current = self.chain[i]
         previous = self.chain[i - 1]
-        
+
         # Check hash
         if current.hash != current.calculate_hash():
             return False
-            
+
         # Check linkage
         if current.previous_hash != previous.hash:
             return False
-            
+
     return True
 ```
 

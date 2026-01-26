@@ -165,11 +165,11 @@ def report_with_reason(content_id, creator_id, reason):
         'timestamp': datetime.now().isoformat(),
         'reporter_notes': 'Quality issues detected'
     }
-    
+
     record = network.get_trust_record(content_id, creator_id)
     if record:
         record.metadata['reports'] = record.metadata.get('reports', []) + [metadata]
-    
+
     network.report_content(content_id, creator_id)
 ```
 
@@ -274,22 +274,22 @@ else:
 ```python
 def validate_chain_integrity(network):
     """Comprehensive chain validation."""
-    
+
     # Check chain length
     if network.get_chain_length() < 1:
         return False, "Chain must have at least genesis block"
-    
+
     # Check block hashes
     for i in range(1, network.get_chain_length()):
         current = network.get_block(i)
         previous = network.get_block(i - 1)
-        
+
         if current.previous_hash != previous.hash:
             return False, f"Block {i} has broken chain linkage"
-        
+
         if not current.is_valid():
             return False, f"Block {i} has invalid hash"
-    
+
     # Overall validation
     return network.is_chain_valid(), "Chain is valid"
 ```
@@ -323,15 +323,15 @@ print(f"Creator Trust Score: {creator_trust:.3f}")  # Average of all content
 ```python
 def analyze_creator_trust(network, creator_id):
     """Analyze trust distribution for a creator."""
-    
-    records = [r for r in network._trust_index.values() 
+
+    records = [r for r in network._trust_index.values()
                if r.creator_id == creator_id]
-    
+
     if not records:
         return None
-    
+
     scores = [r.trust_score for r in records]
-    
+
     return {
         'creator_id': creator_id,
         'total_content': len(records),
@@ -456,20 +456,20 @@ print(f"File size: {len(json.dumps(chain_data))} bytes")
 ```python
 def batch_verify_content(network, verification_batch):
     """Process multiple verifications efficiently."""
-    
+
     for verification in verification_batch:
         network.verify_content(
             content_id=verification['content_id'],
             creator_id=verification['creator_id']
         )
-    
+
     # Mine when batch is complete
     mined_block = network.mine_pending_records()
-    
+
     if mined_block:
         print(f"Mined block with {mined_block.index}")
         return mined_block
-    
+
     return None
 
 # Usage
@@ -487,14 +487,14 @@ block = batch_verify_content(network, verifications)
 ```python
 def get_trust_trend(network, content_id, creator_id):
     """Analyze trust score changes over time."""
-    
+
     record = network.get_trust_record(content_id, creator_id)
-    
+
     if not record:
         return None
-    
+
     total_signals = record.verifications + record.reports
-    
+
     if total_signals == 0:
         trend = "No signals"
     elif record.reports > record.verifications:
@@ -503,7 +503,7 @@ def get_trust_trend(network, content_id, creator_id):
         trend = "Improving"
     else:
         trend = "Neutral"
-    
+
     return {
         'content_id': content_id,
         'creator_id': creator_id,
@@ -527,29 +527,29 @@ print(f"Verification Ratio: {trend['verification_ratio']:.1%}")
 ```python
 def monitor_creator_reputation(network, creator_id, min_trust=0.6):
     """Monitor creator reputation and flag issues."""
-    
+
     creator_trust = network.get_creator_trust(creator_id)
-    
+
     flags = []
-    
+
     # Check overall trust
     if creator_trust < min_trust:
         flags.append(f"Low reputation: {creator_trust:.3f}")
-    
+
     # Get detailed records
-    records = [r for r in network._trust_index.values() 
+    records = [r for r in network._trust_index.values()
                if r.creator_id == creator_id]
-    
+
     for record in records:
         # Check individual content issues
         if record.reports > record.verifications:
             flags.append(f"Content '{record.content_id}' has more reports than verifications")
-        
+
         # Check for sudden changes
         total_signals = record.verifications + record.reports
         if total_signals > 5 and record.trust_score < 0.3:
             flags.append(f"Content '{record.content_id}' severely low trust")
-    
+
     return {
         'creator_id': creator_id,
         'overall_trust': creator_trust,
@@ -572,24 +572,24 @@ if status['flags']:
 ```python
 def detect_tampering(network):
     """Detect if blockchain has been tampered with."""
-    
+
     # Check if chain is valid
     if not network.is_chain_valid():
         return True  # Tampering detected
-    
+
     # Check for suspicious patterns
     for i in range(1, network.get_chain_length()):
         current = network.get_block(i)
         previous = network.get_block(i - 1)
-        
+
         # Check timestamp ordering
         if current.timestamp < previous.timestamp:
             return True  # Tampering detected
-        
+
         # Check nonce sanity
         if current.nonce < 0:
             return True  # Invalid nonce
-    
+
     return False  # No tampering detected
 
 is_tampered = detect_tampering(network)
@@ -607,20 +607,20 @@ print(f"Chain Integrity: {'COMPROMISED' if is_tampered else 'SECURE'}")
 # The network uses an index for O(1) lookups
 def fast_trust_lookup(network, content_id, creator_id):
     """Fast trust score lookup using internal index."""
-    
+
     # This is O(1) - uses the trust index
     return network.get_trust_score(content_id, creator_id)
 
 # Bulk lookups
 def bulk_trust_lookup(network, content_creator_pairs):
     """Efficiently lookup multiple trust scores."""
-    
+
     results = {}
     for content_id, creator_id in content_creator_pairs:
         results[f"{content_id}:{creator_id}"] = network.get_trust_score(
             content_id, creator_id
         )
-    
+
     return results
 ```
 
@@ -629,22 +629,22 @@ def bulk_trust_lookup(network, content_creator_pairs):
 ```python
 def adaptive_mining(network, target_time_seconds=5):
     """Adjust difficulty based on mining time."""
-    
+
     import time
-    
+
     if len(network._pending_records) < 10:
         return None  # Wait for more records
-    
+
     start = time.time()
     block = network.mine_pending_records()
     elapsed = time.time() - start
-    
+
     # Adjust difficulty for future blocks
     if elapsed > target_time_seconds and network._difficulty > 1:
         network._difficulty -= 1
     elif elapsed < target_time_seconds * 0.5:
         network._difficulty += 1
-    
+
     return block
 ```
 
@@ -718,9 +718,9 @@ network = BlockchainTrustNetwork()
 
 def get_trusted_recommendations(user_id, count=10):
     """Get recommendations filtered by trust score."""
-    
+
     playlist = dj.generate_playlist(user_id, count)
-    
+
     # Filter by trust score
     trusted = []
     for track in playlist:
@@ -728,10 +728,10 @@ def get_trusted_recommendations(user_id, count=10):
             track.get('track_id'),
             track.get('creator_id')
         )
-        
+
         if trust_score >= 0.6:  # Minimum trust threshold
             trusted.append(track)
-    
+
     return trusted
 ```
 
@@ -740,31 +740,31 @@ def get_trusted_recommendations(user_id, count=10):
 ```python
 def test_blockchain_network():
     """Complete test of blockchain functionality."""
-    
+
     # Initialize
     network = BlockchainTrustNetwork(difficulty=2)
-    
+
     # Add records
     network.add_trust_record("track_001", "artist_001")
     network.add_trust_record("track_002", "artist_002")
-    
+
     # Add verification
     network.verify_content("track_001", "artist_001")
     network.verify_content("track_001", "artist_001")
-    
+
     # Mine
     block = network.mine_pending_records()
     assert block is not None
     assert block.index == 1
-    
+
     # Validate
     assert network.is_chain_valid()
     assert network.get_chain_length() == 2
-    
+
     # Check trust
     trust = network.get_trust_score("track_001", "artist_001")
     assert trust > 0.5
-    
+
     print("✓ All blockchain tests passed")
 
 test_blockchain_network()

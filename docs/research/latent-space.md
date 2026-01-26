@@ -184,21 +184,21 @@ class AudioEmbeddingLSTM(nn.Module):
         )
         self.projection = nn.Linear(2*hidden_dim, embedding_dim)
         self.norm = nn.LayerNorm(embedding_dim)
-    
+
     def forward(self, mel_spec):
         # mel_spec: (batch_size, time_steps, 40)
         lstm_out, _ = self.lstm(mel_spec)
-        
+
         # Attention aggregation over time
         attn_out, _ = self.attention(lstm_out, lstm_out, lstm_out)
-        
+
         # Global average pooling
         pooled = attn_out.mean(dim=1)
-        
+
         # Project and normalize
         embedding = self.projection(pooled)
         embedding = self.norm(embedding)
-        
+
         return embedding
 ```
 
@@ -230,25 +230,25 @@ class AudioTransformerEmbedding(nn.Module):
             num_layers=num_layers
         )
         self.norm = nn.LayerNorm(d_model)
-    
+
     def forward(self, mel_spec):
         # mel_spec: (batch_size, time_steps, 40)
-        
+
         # Project to model dimension
         x = self.embedding(mel_spec)  # (B, T, d_model)
-        
+
         # Add positional encoding
         x = self.pos_encoding(x)
-        
+
         # Transformer blocks
         x = self.transformer(x)  # (B, T, d_model)
-        
+
         # Mean pooling across time
         embedding = x.mean(dim=1)  # (B, d_model)
-        
+
         # Layer normalization
         embedding = self.norm(embedding)
-        
+
         return embedding
 ```
 
@@ -276,21 +276,21 @@ from transformers import Wav2Vec2Model
 def get_wav2vec_embedding(audio_path, model_name="facebook/wav2vec2-base"):
     # Load pre-trained model
     model = Wav2Vec2Model.from_pretrained(model_name)
-    
+
     # Load audio and resample to 16kHz
     waveform, sr = torchaudio.load(audio_path)
     if sr != 16000:
         resampler = torchaudio.transforms.Resample(sr, 16000)
         waveform = resampler(waveform)
-    
+
     # Extract embedding from hidden state
     with torch.no_grad():
         outputs = model(waveform)
         embeddings = outputs.last_hidden_state  # (1, time_steps, 768)
-    
+
     # Aggregate across time
     embedding = embeddings.mean(dim=1).squeeze()  # (768,)
-    
+
     return embedding
 ```
 
@@ -344,7 +344,7 @@ Song Audio
     ├─ Augmentation 2: Pitch-shift (±2 semitones)
     ├─ Augmentation 3: Frequency masking (remove random freq bands)
     └─ Augmentation 4: Time masking (remove random time segments)
-    
+
 Assumption: Different augmentations of same audio are "similar"
 Challenge: Aggressive augmentations (>2 semitone pitch shift, >1.2x tempo change) alter perception
 ```
@@ -457,7 +457,7 @@ Pitch-shift      Time-stretch        Mixup
                nn.AdaptiveAvgPool2d((1, 1))
            )
            self.lstm = nn.LSTM(64, 256, batch_first=True)
-           
+
            # Projection head
            self.projection = nn.Sequential(
                nn.Linear(256, 512),
@@ -465,7 +465,7 @@ Pitch-shift      Time-stretch        Mixup
                nn.ReLU(),
                nn.Linear(512, embedding_dim)
            )
-       
+
        def forward(self, mel_spec):
            # mel_spec: (batch_size, time_steps, 40)
            conv_out = self.audio_encoder(mel_spec.unsqueeze(1))
@@ -500,9 +500,9 @@ Word2Vec (Mikolov et al., 2013) learns embeddings for words by predicting contex
 ```
 Skip-Gram Objective:
   maximize P(context | target_word)
-  
+
   "The cat sat on the mat"
-  
+
   If target = "cat", context = {"The", "sat"} (window size 2)
 ```
 
@@ -513,7 +513,7 @@ Listening History: [Song_A, Song_B, Song_C, Song_D, Song_E]
 
 Skip-Gram Objective:
   Given Song_C, predict {Song_B, Song_D} (context)
-  
+
 Rationale:
   - If user listens to Song_C, likely to enjoy Song_B and Song_D
   - Similar songs should have similar embeddings
@@ -525,27 +525,27 @@ Rationale:
 class Music2VecModel(nn.Module):
     def __init__(self, vocab_size, embedding_dim=512):
         super().__init__()
-        
+
         # Song embeddings (target)
         self.target_embeddings = nn.Embedding(vocab_size, embedding_dim)
-        
+
         # Context embeddings
         self.context_embeddings = nn.Embedding(vocab_size, embedding_dim)
-        
+
     def forward(self, target_ids, context_ids):
         # target_ids: [batch_size] - center song
         # context_ids: [batch_size, context_size] - surrounding songs
-        
+
         target_vecs = self.target_embeddings(target_ids)  # [B, dim]
         context_vecs = self.context_embeddings(context_ids)  # [B, context_size, dim]
-        
+
         # Compute similarity: dot product
         # Broadcasting: [B, 1, dim] · [B, context_size, dim]^T = [B, context_size]
         logits = torch.bmm(
             target_vecs.unsqueeze(1),  # [B, 1, dim]
             context_vecs.transpose(1, 2)  # [B, dim, context_size]
         ).squeeze(1)  # [B, context_size]
-        
+
         return logits
 ```
 
@@ -559,13 +559,13 @@ class Music2VecModel(nn.Module):
 def music2vec_loss(logits, positive_mask):
     # logits: [B, context_size]
     # positive_mask: [B, context_size] - 1 for actual context, 0 for negatives
-    
+
     # Softmax over all items
     log_probs = torch.log_softmax(logits, dim=1)
-    
+
     # Loss: negative log likelihood of positive items
     loss = -(positive_mask * log_probs).sum() / positive_mask.sum()
-    
+
     return loss
 ```
 
@@ -771,37 +771,37 @@ class HierarchicalEmbeddingSpace:
     def __init__(self, full_dim=512, reduced_dim=128):
         self.full_dim = full_dim
         self.reduced_dim = reduced_dim
-        
+
         # Reduction model
         self.reducer = umap.UMAP(
             n_components=reduced_dim,
             metric='cosine',
             n_neighbors=15
         )
-        
+
         # For even faster search
         self.lsh = LSHIndex(
             input_dim=reduced_dim,
             num_tables=10,
             bucket_size=1000
         )
-    
+
     def fit(self, embeddings):
         # embeddings: (n_songs, 512)
-        
+
         # Train dimensionality reduction
         self.embeddings_full = embeddings
         self.embeddings_reduced = self.reducer.fit_transform(embeddings)
-        
+
         # Build LSH index
         self.lsh.build_index(self.embeddings_reduced)
-    
+
     def query(self, query_embedding_full, k=10, use_exact=False):
         # query_embedding_full: (512,)
-        
+
         # Reduce query
         query_reduced = self.reducer.transform(query_embedding_full)
-        
+
         if use_exact:
             # Exact search in reduced space
             similarities = cosine_similarity(query_reduced, self.embeddings_reduced)
@@ -810,11 +810,11 @@ class HierarchicalEmbeddingSpace:
             # Fast approximate search via LSH
             candidates = self.lsh.query(query_reduced)
             similarities = cosine_similarity(
-                query_reduced, 
+                query_reduced,
                 self.embeddings_reduced[candidates]
             )
             top_k_idx = candidates[np.argsort(-similarities)[:k]]
-        
+
         return top_k_idx
 ```
 
@@ -863,35 +863,35 @@ Instead of pure audio similarity, incorporate metadata into embedding space:
 class MetadataAwareEmbedding(nn.Module):
     def __init__(self, audio_dim=512, num_genres=200, num_eras=10, embedding_dim=512):
         super().__init__()
-        
+
         # Audio encoder
         self.audio_encoder = AudioCNN()  # Produces 256-dim
-        
+
         # Metadata embeddings
         self.genre_embedding = nn.Embedding(num_genres, 64)
         self.era_embedding = nn.Embedding(num_eras, 32)
         self.artist_embedding = nn.Embedding(num_artists, 64)
-        
+
         # Combination and projection
         self.combine = nn.Linear(256 + 64 + 32 + 64, embedding_dim)
         self.norm = nn.LayerNorm(embedding_dim)
-    
+
     def forward(self, audio, genre_id, era_id, artist_id):
         # Audio embedding
         audio_emb = self.audio_encoder(audio)  # (batch, 256)
-        
+
         # Metadata embeddings
         genre_emb = self.genre_embedding(genre_id)  # (batch, 64)
         era_emb = self.era_embedding(era_id)  # (batch, 32)
         artist_emb = self.artist_embedding(artist_id)  # (batch, 64)
-        
+
         # Concatenate
         combined = torch.cat([audio_emb, genre_emb, era_emb, artist_emb], dim=1)
-        
+
         # Project and normalize
         embedding = self.combine(combined)
         embedding = self.norm(embedding)
-        
+
         return embedding
 ```
 
@@ -903,36 +903,36 @@ Enable searches like "upbeat summer indie pop":
 class TextToMusicBridge(nn.Module):
     def __init__(self, music_embedding_dim=512, text_embedding_model='all-MiniLM-L6-v2'):
         super().__init__()
-        
+
         # Pre-trained text encoder
         self.text_encoder = SentenceTransformer(text_embedding_model)  # 384-dim
-        
+
         # Map text embeddings to music space
         self.text_to_music = nn.Sequential(
             nn.Linear(384, 512),
             nn.ReLU(),
             nn.Linear(512, 512)
         )
-        
+
         # Temperature scaling for similarity
         self.temperature = nn.Parameter(torch.tensor(0.07))
-    
+
     def forward(self, music_embeddings, text_queries):
         # music_embeddings: (n_songs, 512)
         # text_queries: List of strings
-        
+
         # Encode text
         text_emb = self.text_encoder.encode(text_queries)  # (n_queries, 384)
-        
+
         # Map to music space
         text_in_music_space = self.text_to_music(torch.tensor(text_emb))  # (n_queries, 512)
-        
+
         # Compute similarities
         similarities = torch.mm(
             text_in_music_space / text_in_music_space.norm(dim=1, keepdim=True),
             music_embeddings.t() / music_embeddings.norm(dim=1, keepdim=True).t()
         )  # (n_queries, n_songs)
-        
+
         return similarities
 
 # Usage
@@ -965,61 +965,61 @@ class FederatedEmbeddingTrainer:
     def __init__(self, num_nodes=100, embedding_dim=512):
         self.num_nodes = num_nodes
         self.embedding_dim = embedding_dim
-        
+
         # Global model (server)
         self.global_model = AudioEmbeddingCNN(embedding_dim)
-        
+
         # Local models (peers)
         self.local_models = [
-            AudioEmbeddingCNN(embedding_dim) 
+            AudioEmbeddingCNN(embedding_dim)
             for _ in range(num_nodes)
         ]
-        
+
     def train_round(self, local_data_per_node):
         """
         local_data_per_node: List of (audio, labels) for each node
         """
-        
+
         updates = []
-        
+
         for node_id in range(self.num_nodes):
             # 1. Download global model weights
             self.local_models[node_id].load_state_dict(
                 self.global_model.state_dict()
             )
-            
+
             # 2. Train on local data
             optimizer = torch.optim.Adam(
                 self.local_models[node_id].parameters(),
                 lr=0.001
             )
-            
+
             for audio, labels in local_data_per_node[node_id]:
                 # Contrastive loss or supervised loss
                 embeddings = self.local_models[node_id](audio)
                 loss = contrastive_loss(embeddings, labels)
-                
+
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-            
+
             # 3. Collect model update (or just final weights)
             updates.append(copy.deepcopy(self.local_models[node_id].state_dict()))
-        
+
         # 4. Aggregate updates (FedAvg)
         aggregated_state = self.fedavg_aggregate(updates)
         self.global_model.load_state_dict(aggregated_state)
-        
+
         return self.global_model
-    
+
     def fedavg_aggregate(self, updates):
         """Average model weights across nodes"""
         aggregated = {}
-        
+
         for param_name in updates[0].keys():
             param_updates = [u[param_name] for u in updates]
             aggregated[param_name] = torch.stack(param_updates).mean(dim=0)
-        
+
         return aggregated
 ```
 
@@ -1032,50 +1032,50 @@ class CompressedEmbeddingCodec:
     def __init__(self, full_dim=512, compressed_dim=64):
         self.full_dim = full_dim
         self.compressed_dim = compressed_dim
-        
+
         # Learn compression via autoencoder
         self.encoder = nn.Sequential(
             nn.Linear(full_dim, 256),
             nn.ReLU(),
             nn.Linear(256, compressed_dim)
         )
-        
+
         self.decoder = nn.Sequential(
             nn.Linear(compressed_dim, 256),
             nn.ReLU(),
             nn.Linear(256, full_dim)
         )
-    
+
     def compress(self, embedding):
         """Reduce dimensionality"""
         return self.encoder(embedding)
-    
+
     def decompress(self, compressed):
         """Reconstruct approximation"""
         return self.decoder(compressed)
-    
+
     def train(self, embeddings):
         """Train autoencoder"""
         optimizer = torch.optim.Adam(
             list(self.encoder.parameters()) + list(self.decoder.parameters()),
             lr=0.001
         )
-        
+
         for epoch in range(100):
             # Encode-decode cycle
             compressed = self.encoder(embeddings)
             reconstructed = self.decoder(compressed)
-            
+
             # Reconstruction loss
             loss = nn.MSELoss()(reconstructed, embeddings)
-            
+
             # Also minimize information loss
             similarity_loss = 1 - cosine_similarity(
                 embeddings, reconstructed
             ).mean()
-            
+
             total_loss = loss + 0.5 * similarity_loss
-            
+
             optimizer.zero_grad()
             total_loss.backward()
             optimizer.step()
@@ -1091,40 +1091,40 @@ class DynamicEmbeddingUpdater:
         self.embedding_model = embedding_model
         self.history = []  # Store recent (audio, embedding) pairs
         self.history_size = history_size
-    
+
     def add_new_songs(self, new_audios):
         """
         Embed new songs and potentially fine-tune model
         """
         new_embeddings = self.embedding_model(new_audios)
-        
+
         # Store in history
         for audio, embedding in zip(new_audios, new_embeddings):
             self.history.append((audio, embedding))
-        
+
         # Keep history manageable
         if len(self.history) > self.history_size:
             self.history = self.history[-self.history_size:]
-        
+
         return new_embeddings
-    
+
     def fine_tune_from_feedback(self, user_preferences):
         """
         user_preferences: List of (song_embedding, user_rating) pairs
-        
+
         Fine-tune model to better align with user preferences
         """
-        
+
         # Create synthetic pairs for contrastive learning
         positive_pairs = []
         negative_pairs = []
-        
+
         for i in range(len(user_preferences)):
             emb_i, rating_i = user_preferences[i]
-            
+
             for j in range(i+1, len(user_preferences)):
                 emb_j, rating_j = user_preferences[j]
-                
+
                 if abs(rating_i - rating_j) > 2:  # Different preferences
                     if rating_i > rating_j:
                         positive_pairs.append((emb_i, emb_j))
@@ -1132,13 +1132,13 @@ class DynamicEmbeddingUpdater:
                     else:
                         positive_pairs.append((emb_j, emb_i))
                         negative_pairs.append((emb_i, emb_j))
-        
+
         # Fine-tune on these pairs
         optimizer = torch.optim.Adam(
             self.embedding_model.parameters(),
             lr=0.0001  # Small learning rate
         )
-        
+
         for epoch in range(10):
             for pos_pair in positive_pairs:
                 # Contrastive loss
@@ -1198,11 +1198,11 @@ def hubness_aware_similarity(query, candidates, popularity_scores):
     Compute similarity but discount popular items
     """
     similarities = torch.nn.functional.cosine_similarity(query, candidates)
-    
+
     # Penalize popular items
     popularity_penalty = torch.log(popularity_scores + 1)  # Log scale
     adjusted_similarities = similarities - 0.1 * popularity_penalty
-    
+
     return adjusted_similarities
 ```
 
@@ -1216,10 +1216,10 @@ Assumption: 512-dim embeddings actually lie on ~50-dim manifold
 Implications:
   1. Intrinsic dimensionality << 512
      (only ~50 degrees of freedom in music space)
-  
+
   2. Dimensionality reduction possible without information loss
      (compress from 512 to 50 dimensions)
-  
+
   3. Local neighborhoods preserve structure
      (nearby embeddings in reduced space were nearby in original)
 ```
@@ -1231,17 +1231,17 @@ def estimate_intrinsic_dim(embeddings, k=10):
     """
     Estimate intrinsic dimensionality using correlation dimension
     """
-    
+
     n = embeddings.shape[0]
     distances = torch.cdist(embeddings, embeddings)
-    
+
     # For each point, count neighbors within k-NN distance
     knn_distances, _ = torch.topk(distances, k=k, dim=1)
     epsilon = knn_distances[:, -1]  # k-th nearest neighbor distance
-    
+
     # Correlation dimension
     # d_corr = lim_{ε→0} log(C(ε)) / log(ε)
-    
+
     # Practical estimation: count pairs within distance ε
     estimated_dims = []
     for i in range(n):
@@ -1249,7 +1249,7 @@ def estimate_intrinsic_dim(embeddings, k=10):
         if count > 1:
             d = torch.log(torch.tensor(count, dtype=torch.float32)) / torch.log(epsilon[i])
             estimated_dims.append(d)
-    
+
     return torch.tensor(estimated_dims).mean()
 ```
 
@@ -1352,7 +1352,7 @@ The combination of self-supervised learning (CLMR), user-driven approaches (Musi
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2024  
-**Maintained By**: QFZZ Research Team  
+**Document Version**: 1.0
+**Last Updated**: 2024
+**Maintained By**: QFZZ Research Team
 **Status**: Active Research

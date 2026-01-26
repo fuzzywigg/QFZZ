@@ -47,7 +47,7 @@ Create these milestones via Issues → Milestones:
 - Description: Core station orchestrator, configuration, component lifecycle, basic blockchain and dataset foundations
 
 **Phase 2: DJ System**
-- Due: 16 weeks from start  
+- Due: 16 weeks from start
 - Description: PersonalizedDJ implementation, user profiles, trust building, conversational system
 
 **Phase 3: Music Curation**

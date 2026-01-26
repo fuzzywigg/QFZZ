@@ -96,19 +96,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-      
+
       - name: Install dependencies
         run: |
           pip install mkdocs-material mkdocstrings[python] pymdown-extensions
-      
+
       - name: Build documentation
         run: mkdocs build
-      
+
       - name: Deploy to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -225,7 +225,7 @@ from qfzz import QFZZStation, StationConfig
 
 with open('config.yaml') as f:
     config_data = yaml.safe_load(f)
-    
+
 config = StationConfig(**config_data['station'])
 station = QFZZStation(config)
 ```
@@ -263,13 +263,13 @@ logging.basicConfig(
 def health_check(station):
     """Check station health"""
     status = station.get_status()
-    
+
     checks = {
         'running': status['running'],
         'blockchain': status['blockchain_enabled'],
         'edge_mode': status['edge_mode']
     }
-    
+
     return all(checks.values())
 
 if health_check(station):

@@ -7,6 +7,7 @@ from enum import Enum
 
 class DatasetLicense(Enum):
     """Supported open source licenses"""
+
     GPL = "GPL"
     MIT = "MIT"
     APACHE = "Apache"
@@ -19,7 +20,7 @@ class DatasetLicense(Enum):
 @dataclass
 class Dataset:
     """Represents a GNU/OPENSOURCE dataset
-    
+
     Attributes:
         id: Unique dataset identifier
         name: Dataset name
@@ -34,6 +35,7 @@ class Dataset:
         community_rating: Community rating score (0.0-1.0)
         verified: Whether dataset is blockchain verified
     """
+
     id: str
     name: str
     description: str

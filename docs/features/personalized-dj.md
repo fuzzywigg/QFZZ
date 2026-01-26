@@ -119,29 +119,29 @@ Each track is scored based on multiple factors:
 ```python
 def calculate_track_score(track, profile):
     score = 0.0
-    
+
     # Genre matching (30% weight)
     if track['genre'] in profile.genres:
         score += profile.genres[track['genre']] * 0.3
     elif track['genre'] in similar_genres(profile.genres):
         score += 0.5 * 0.3  # Partial match for similar genres
-    
+
     # Artist matching (25% weight)
     if track['artist'] in profile.artists:
         score += profile.artists[track['artist']] * 0.25
-    
+
     # Energy level matching (20% weight)
     energy_diff = abs(track['energy'] - profile.energy_level)
     score += (1.0 - energy_diff) * 0.2
-    
+
     # Tempo matching (15% weight)
     if track['tempo'] == profile.tempo_preference or profile.tempo_preference == 'varied':
         score += 0.15
-    
+
     # Mood matching (10% weight)
     if track['mood'] in profile.moods:
         score += profile.moods[track['mood']] * 0.1
-    
+
     return score
 ```
 
@@ -163,15 +163,15 @@ After scoring, apply discovery factor:
 def apply_discovery(scored_tracks, discovery_factor):
     # Split into familiar and discovery pools
     split_point = int(len(scored_tracks) * (1.0 - discovery_factor))
-    
+
     # Take high-scoring tracks
     familiar = scored_tracks[:split_point]
-    
+
     # Add random discovery tracks
     discovery_pool = scored_tracks[split_point:]
     num_discovery = int(len(familiar) * discovery_factor / (1.0 - discovery_factor))
     discovery = random.sample(discovery_pool, min(num_discovery, len(discovery_pool)))
-    
+
     return [track for _, track in familiar] + [track for _, track in discovery]
 ```
 
@@ -183,13 +183,13 @@ Preferences update incrementally with each interaction:
 def update_from_feedback(profile, track, interaction_type, rating):
     # Calculate feedback strength
     strength = FEEDBACK_STRENGTH[interaction_type]
-    
+
     # Update genre preference
     if 'genre' in track:
         current = profile.genres.get(track['genre'], 0.5)
         new_weight = clamp(current + strength, 0.0, 1.0)
         profile.genres[track['genre']] = new_weight
-    
+
     # Similarly for artists, moods, etc.
 ```
 
@@ -287,7 +287,7 @@ import datetime
 
 def get_time_of_day_preferences():
     hour = datetime.datetime.now().hour
-    
+
     if 6 <= hour < 12:  # Morning
         return {'energy_level': 0.6, 'moods': {'upbeat': 0.8}}
     elif 12 <= hour < 18:  # Afternoon
@@ -358,21 +358,21 @@ Monitor profile evolution:
 ```python
 def analyze_profile(profile):
     """Analyze user profile for insights."""
-    
+
     # Genre diversity
     genre_count = len(profile.genres)
     top_genre_weight = max(profile.genres.values()) if profile.genres else 0
-    
+
     # Artist diversity
     artist_count = len(profile.artists)
-    
+
     # Interaction patterns
     interaction_count = len(profile.interactions)
     recent_interactions = profile.interactions[-20:] if len(profile.interactions) >= 20 else profile.interactions
-    
+
     likes = sum(1 for i in recent_interactions if i['type'] == 'like')
     skips = sum(1 for i in recent_interactions if i['type'] == 'skip')
-    
+
     return {
         'genre_diversity': genre_count,
         'genre_concentration': top_genre_weight,

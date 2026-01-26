@@ -308,6 +308,6 @@ Each phase is complete when:
 
 ---
 
-**Document Status**: v1.0  
-**Last Updated**: January 2026  
+**Document Status**: v1.0
+**Last Updated**: January 2026
 **Owner**: @fuzzywigg
