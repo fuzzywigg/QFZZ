@@ -4,6 +4,33 @@ This guide will help you get the QFZZ AI Radio GUI running on Windows using Powe
 
 ## ⏱️ Time Required: 15-20 minutes
 
+## 🚀 Two Setup Methods
+
+### Method 1: Automated Setup (Recommended for Beginners)
+
+After cloning the repository, simply run the setup script:
+
+```powershell
+# Clone the repository first
+git clone https://github.com/fuzzywigg/QFZZ.git
+cd QFZZ
+
+# Run the automated setup script
+.\setup-windows.ps1
+```
+
+The script will:
+- ✅ Check all prerequisites
+- ✅ Create Python virtual environment
+- ✅ Install all Python dependencies
+- ✅ Install all frontend dependencies
+- ✅ Create .env configuration file
+- ✅ Optionally start both servers for you
+
+### Method 2: Manual Setup (Complete Control)
+
+Follow the detailed steps below for a manual installation.
+
 ## 📋 Setup Checklist
 
 Follow these steps in order:
@@ -36,7 +63,7 @@ Before starting, ensure you have the following installed:
 4. **PowerShell 5.1 or higher** (comes with Windows 10/11)
    - Verify: Open PowerShell and run `$PSVersionTable.PSVersion`
 
-## Quick Start Guide
+## Manual Setup Guide
 
 ### Step 1: Open PowerShell
 
