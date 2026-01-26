@@ -107,8 +107,9 @@ try {
     Write-Host "✓ Virtual environment activated" -ForegroundColor Green
 } catch {
     Write-Host "⚠ Could not activate virtual environment" -ForegroundColor Yellow
-    Write-Host "  Trying to set execution policy..." -ForegroundColor Yellow
-    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+    Write-Host "  Setting execution policy to allow script execution..." -ForegroundColor Yellow
+    Write-Host "  (This requires your confirmation)" -ForegroundColor Yellow
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
     & $activateScript
     Write-Host "✓ Virtual environment activated" -ForegroundColor Green
 }
@@ -184,21 +185,40 @@ $startNow = Read-Host "Would you like to start the servers now? (y/n)"
 if ($startNow -eq "y" -or $startNow -eq "Y") {
     Write-Host ""
     Write-Host "Starting backend server in a new window..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD'; .\venv\Scripts\Activate.ps1; Write-Host 'Starting QFZZ Backend...' -ForegroundColor Cyan; python run_server.py"
     
-    Start-Sleep -Seconds 2
-    
-    Write-Host "Starting frontend server in a new window..." -ForegroundColor Yellow
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD\frontend'; Write-Host 'Starting QFZZ Frontend...' -ForegroundColor Cyan; npm run dev"
+    # Backend startup command
+    $backendCmd = "cd '$PWD'; .\venv\Scripts\Activate.ps1; " +
+                  "Write-Host 'Starting QFZZ Backend...' -ForegroundColor Cyan; " +
+                  "python run_server.py"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", $backendCmd
     
     Start-Sleep -Seconds 3
     
-    Write-Host ""
-    Write-Host "✓ Servers started!" -ForegroundColor Green
-    Write-Host "Opening browser in 10 seconds..." -ForegroundColor Yellow
-    Write-Host "(The servers may take a moment to fully start up)" -ForegroundColor Gray
+    Write-Host "Starting frontend server in a new window..." -ForegroundColor Yellow
     
-    Start-Sleep -Seconds 10
+    # Frontend startup command
+    $frontendCmd = "cd '$PWD\frontend'; " +
+                   "Write-Host 'Starting QFZZ Frontend...' -ForegroundColor Cyan; " +
+                   "npm run dev"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", $frontendCmd
+    
+    Write-Host ""
+    Write-Host "✓ Servers started in separate windows!" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Waiting for servers to initialize..." -ForegroundColor Yellow
+    Write-Host "(This typically takes 15-30 seconds)" -ForegroundColor Gray
+    
+    # Wait longer for slower systems, with progress indicators
+    for ($i = 1; $i -le 20; $i++) {
+        Start-Sleep -Seconds 1
+        if ($i -eq 10) {
+            Write-Host "  Still initializing..." -ForegroundColor Gray
+        }
+    }
+    
+    Write-Host ""
+    Write-Host "Opening browser to http://localhost:3000..." -ForegroundColor Yellow
+    Write-Host "(If the page doesn't load, wait a few more seconds and refresh)" -ForegroundColor Gray
     Start-Process "http://localhost:3000"
     
     Write-Host ""
