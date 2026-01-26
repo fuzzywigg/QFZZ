@@ -5,8 +5,18 @@ set -e
 echo "🚀 Setting up QFZZ development environment..."
 
 # Check Python version
-python_version=$(python3 --version | cut -d' ' -f2 | cut -d'.' -f1,2)
-if [[ "$python_version" < "3.10" ]]; then
+python_version=$(python3 --version | cut -d' ' -f2)
+required_version="3.10"
+
+# Convert version strings to comparable integers (e.g., 3.10.1 -> 31001)
+version_to_int() {
+    echo "$1" | awk -F. '{printf("%d%03d%03d\n", $1,$2,$3)}'
+}
+
+current_version_int=$(version_to_int "$python_version")
+required_version_int=$(version_to_int "$required_version.0")
+
+if [ "$current_version_int" -lt "$required_version_int" ]; then
     echo "❌ Error: Python 3.10+ required. Found: $python_version"
     exit 1
 fi

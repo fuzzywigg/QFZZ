@@ -1,5 +1,6 @@
 """Test pre-commit hooks are configured correctly."""
 
+import os
 import subprocess
 from pathlib import Path
 
@@ -26,6 +27,4 @@ def test_setup_script_executable():
     """Test setup script is executable."""
     script = Path("scripts/setup-dev-environment.sh")
     if script.exists():
-        import os
-
         assert os.access(script, os.X_OK), "setup script not executable"
