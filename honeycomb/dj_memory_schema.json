@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "conversation_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["dj", "listener", "system"]
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "learned_patterns": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Patterns learned from interactions"
+    },
+    "banned_phrases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Phrases to avoid (e.g., breaking 4th wall)"
+    }
+  },
+  "required": ["conversation_history", "learned_patterns", "banned_phrases"]
+}

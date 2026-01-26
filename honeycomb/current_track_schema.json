@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "track_id": {
+      "type": "string",
+      "description": "Unique identifier for the track"
+    },
+    "title": {
+      "type": "string",
+      "description": "Track title"
+    },
+    "artist": {
+      "type": "string",
+      "description": "Track artist"
+    },
+    "genre": {
+      "type": "string",
+      "description": "Music genre"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when track started"
+    },
+    "duration": {
+      "type": "number",
+      "description": "Track duration in seconds"
+    }
+  },
+  "required": ["track_id", "title", "artist", "started_at"]
+}

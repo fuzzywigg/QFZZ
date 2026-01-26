@@ -97,6 +97,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.*
 .venv
 env/
 venv/
@@ -163,6 +164,13 @@ models/
 qfzz_knowledge_graph.json
 qfzz_ledger.json
 
+# Honeycomb state files (except schemas)
+honeycomb/*.json
+!honeycomb/*_schema.json
+
 # Temporary test files
 tribe_test.html
 test_*.html
+
+# Node modules (for future frontend)
+node_modules/
