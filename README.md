@@ -1,5 +1,10 @@
 # QFZZ: The Pulse of the Quantum Realm 🎵🤖
 
+[![CI](https://github.com/fuzzywigg/QFZZ/actions/workflows/ci.yml/badge.svg)](https://github.com/fuzzywigg/QFZZ/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/fuzzywigg/QFZZ/branch/main/graph/badge.svg)](https://codecov.io/gh/fuzzywigg/QFZZ)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 **AI Radio for the Individual** - A next-generation radio station powered by AI, running on edge devices, secured with blockchain, and built on open source datasets.
 
 ## 🌟 Vision
