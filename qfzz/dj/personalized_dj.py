@@ -5,19 +5,18 @@ Personalized DJ with user profiling and recommendations.
 import logging
 import random
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
+from qfzz.blockchain import SovereignLedger
 from qfzz.knowledge import QFZZKnowledgeGraph
+from qfzz.library import ContentScanner
+from qfzz.library.fetcher import ContentFetcher
 from qfzz.llm.router import LLMRouter
 
+from .ai_dj import AIDJ
 from .profiles import UserProfile
 
 logger = logging.getLogger(__name__)
-
-
-from qfzz.blockchain import SovereignLedger
-from qfzz.library import ContentScanner
-from qfzz.library.fetcher import ContentFetcher
 
 
 class PersonalizedDJ:
@@ -26,13 +25,21 @@ class PersonalizedDJ:
     tailored playlists with trust-based content filtering.
     """
 
-    def __init__(self, llm_model: str = "llama3", api_key: Optional[str] = None):
+    def __init__(
+        self,
+        llm_model: str = "llama3",
+        api_key: str | None = None,
+        dj_persona: str = "energetic",
+        enable_ai_dj: bool = True,
+    ):
         """
         Initialize the Personalized DJ.
 
         Args:
             llm_model: Name of the LLM model to use (default: llama3) - deprecated
             api_key: Optional API key for cloud providers - deprecated
+            dj_persona: DJ persona for AI commentary (energetic, chill, intellectual, storyteller)
+            enable_ai_dj: Whether to enable AI DJ commentary
         """
         self._user_profiles: dict[str, UserProfile] = {}
         self._content_catalog: list[dict[str, Any]] = []
@@ -45,6 +52,21 @@ class PersonalizedDJ:
         # Initialize LLM Router with automatic provider selection and fallback
         self.llm_router = LLMRouter()
 
+        # Initialize AI DJ if enabled
+        self.ai_dj = None
+        if enable_ai_dj:
+            try:
+                self.ai_dj = AIDJ(persona=dj_persona)
+                logger.info(
+                    f"AI DJ initialized with persona: {dj_persona} ({self.ai_dj.get_persona_name()})"
+                )
+            except (ImportError, FileNotFoundError) as e:
+                logger.warning(f"Failed to initialize AI DJ due to missing dependency or config: {e}")
+                self.ai_dj = None
+            except Exception as e:
+                logger.error(f"Unexpected error initializing AI DJ: {e}")
+                self.ai_dj = None
+
         # Log available providers
         available = self.llm_router.get_available_providers()
         logger.info(
@@ -56,7 +78,7 @@ class PersonalizedDJ:
                 "llm_model and api_key parameters are deprecated. Use environment variables instead."
             )
 
-    def request_track(self, url: str) -> Optional[dict[str, Any]]:
+    def request_track(self, url: str) -> dict[str, Any] | None:
         """Download and register a track from a URL."""
         track = self.fetcher.fetch_from_url(url)
         if track:
@@ -81,12 +103,17 @@ class PersonalizedDJ:
         Returns:
             DJ response
         """
+        # Use AI DJ if available, otherwise use LLM router directly
+        if self.ai_dj:
+            return self.ai_dj.respond_to_listener(message)
+
+        # Fallback to original implementation
         profile = self.get_or_create_profile(user_id)
 
         # Construct system prompt with user context
         context = f"""You are a personalized AI Radio DJ named QFZZ.
         User: {user_id}
-        Preferences: {profile.genres if hasattr(profile, 'genres') else 'Unknown'}
+        Preferences: {profile.genres if hasattr(profile, "genres") else "Unknown"}
 
         Keep it brief (under 50 words), cool, and radio-friendly."""
 
@@ -95,11 +122,19 @@ class PersonalizedDJ:
         return result["text"]
 
     def generate_segue(
-        self, track_prev: Optional[dict[str, Any]], track_next: dict[str, Any]
+        self, track_prev: dict[str, Any] | None, track_next: dict[str, Any]
     ) -> str:
         """
         Generate a radio segue connecting two tracks using Knowledge Graph context.
         """
+        # Use AI DJ if available for better commentary
+        if self.ai_dj:
+            if not track_prev:
+                return self.ai_dj.introduce_track(track_next)
+            else:
+                return self.ai_dj.generate_transition(track_prev, track_next)
+
+        # Fallback to original implementation
         if not track_prev:
             prompt = (
                 f"Introduce the first track: '{track_next['title']}' by {track_next['artist']}."
@@ -174,7 +209,7 @@ class PersonalizedDJ:
         }
 
     def get_or_create_profile(
-        self, user_id: str, initial_preferences: Optional[dict[str, Any]] = None
+        self, user_id: str, initial_preferences: dict[str, Any] | None = None
     ) -> UserProfile:
         """
         Get existing user profile or create a new one.
@@ -211,7 +246,7 @@ class PersonalizedDJ:
         return self._user_profiles[user_id]
 
     def recommend(
-        self, user_id: str, preferences: Optional[dict[str, Any]] = None
+        self, user_id: str, preferences: dict[str, Any] | None = None
     ) -> list[dict[str, Any]]:
         """
         Generate personalized recommendations for a user.
@@ -296,7 +331,7 @@ class PersonalizedDJ:
         self,
         track: dict[str, Any],
         profile: UserProfile,
-        preferences: Optional[dict[str, Any]] = None,
+        preferences: dict[str, Any] | None = None,
     ) -> float:
         """
         Calculate compatibility score for a track.
@@ -406,7 +441,7 @@ class PersonalizedDJ:
         return recommendations
 
     def record_feedback(
-        self, user_id: str, track_id: str, interaction_type: str, rating: Optional[float] = None
+        self, user_id: str, track_id: str, interaction_type: str, rating: float | None = None
     ) -> None:
         """
         Record user feedback to improve recommendations.
@@ -434,7 +469,7 @@ class PersonalizedDJ:
         logger.debug(f"Recorded feedback for user {user_id}: {interaction_type} on {track_id}")
 
     def _update_profile_from_feedback(
-        self, profile: UserProfile, track_id: str, interaction_type: str, rating: Optional[float]
+        self, profile: UserProfile, track_id: str, interaction_type: str, rating: float | None
     ) -> None:
         """
         Update user profile based on feedback.
@@ -502,7 +537,7 @@ class PersonalizedDJ:
         self._content_catalog.extend(tracks)
         logger.info(f"Added {len(tracks)} tracks to catalog. Total: {len(self._content_catalog)}")
 
-    def get_profile(self, user_id: str) -> Optional[UserProfile]:
+    def get_profile(self, user_id: str) -> UserProfile | None:
         """
         Get user profile.
 
@@ -513,3 +548,45 @@ class PersonalizedDJ:
             UserProfile if exists, None otherwise
         """
         return self._user_profiles.get(user_id)
+
+    def get_ai_dj_persona(self) -> str | None:
+        """
+        Get current AI DJ persona name.
+
+        Returns:
+            Persona name if AI DJ is enabled, None otherwise
+        """
+        if self.ai_dj:
+            return self.ai_dj.get_persona_name()
+        return None
+
+    def set_ai_dj_persona(self, persona: str) -> bool:
+        """
+        Change AI DJ persona.
+
+        Args:
+            persona: New persona name (energetic, chill, intellectual, storyteller)
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            self.ai_dj = AIDJ(persona=persona)
+            logger.info(f"AI DJ persona changed to: {persona}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to change AI DJ persona: {e}")
+            return False
+
+    def generate_station_id(self) -> str:
+        """
+        Generate station identification.
+
+        Returns:
+            Station ID text
+        """
+        if self.ai_dj:
+            return self.ai_dj.generate_station_id()
+
+        # Fallback
+        return "You're listening to QFZZ FuzzyRadio!"
