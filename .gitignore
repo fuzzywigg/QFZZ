@@ -174,4 +174,3 @@ test_*.html
 
 # Node modules (for future frontend)
 node_modules/
-**/__pycache__/

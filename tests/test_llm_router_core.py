@@ -1,7 +1,7 @@
 """
 Comprehensive core tests for LLM Router.
 
-Tests provider initialization, fallback logic, cost optimization, 
+Tests provider initialization, fallback logic, cost optimization,
 and comprehensive error handling not covered in test_llm_router.py.
 """
 

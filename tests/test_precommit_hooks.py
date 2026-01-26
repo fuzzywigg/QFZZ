@@ -285,12 +285,13 @@ class TestPreCommitConfiguration:
         with open(config_path) as f:
             content = f.read()
 
-        # detect-secrets should come first
+        # detect-secrets should come before linting tools
         detect_pos = content.find("detect-secrets")
         ruff_pos = content.find("ruff")
 
         if detect_pos != -1 and ruff_pos != -1:
-            # Security checks before linting
+            # Security checks before linting is a best practice
+            # Note: Position in file may not reflect execution order in all cases
             assert detect_pos < ruff_pos
 
 

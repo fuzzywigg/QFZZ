@@ -409,7 +409,7 @@ class TestEnvLoadingIntegration:
         """Test loading .env from different paths."""
         # Create .env in temp location
         with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".env", delete=False, dir="/tmp"
+            mode="w", suffix=".env", delete=False
         ) as f:
             f.write("TEST_VAR=test_value\n")
             temp_path = f.name
