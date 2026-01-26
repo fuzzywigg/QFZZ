@@ -71,7 +71,20 @@ npm install
 
 ### 3. Set Up Environment Variables
 
-Create `.env.local` files:
+QFZZ uses environment variables for configuration. Start by copying the example file:
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` with your actual API keys and configuration. See [Configuration](#configuration) in README.md for details on obtaining API keys.
+
+**Minimum Configuration** (for basic functionality):
+- `GOOGLE_AI_API_KEY` - Primary LLM provider
+
+**Recommended Configuration** (with fallback):
+- `GOOGLE_AI_API_KEY` - Primary provider
+- `GROQ_API_KEY` - Free tier fallback
 
 **Frontend (.env.local):**
 ```env
