@@ -30,6 +30,9 @@ pyyaml>=6.0,<7.0
 # HTTP requests for API integration
 requests>=2.31.0,<3.0.0
 
+# System monitoring
+psutil>=5.9.0,<6.0.0
+
 # Icecast streaming (optional - for production streaming)
 # Requires libshout3-dev on Ubuntu/Debian: sudo apt-get install libshout3-dev
 # python-shout>=0.2.7
