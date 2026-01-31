@@ -1,0 +1,36 @@
+# QFZZ Default Configuration
+# This file contains default settings that can be overridden by environment variables
+
+station:
+  name: "QFZZ"
+  audio_content_dir: "./qfzz_audio_content"
+  cache_dir: "./cache"
+  port: 8080
+  edge_mode: false
+  enable_6g: false
+  blockchain_enabled: true
+  ledger_file: "./qfzz_ledger.json"
+
+llm:
+  ollama_base_url: "http://localhost:11434"
+  ollama_model: "llama3"
+  # API keys should be set via environment variables for security
+  # gemini_api_key: null
+  # groq_api_key: null
+  # together_api_key: null
+  # huggingface_api_key: null
+
+music_sources:
+  # API credentials should be set via environment variables
+  # jamendo_client_id: null
+  # internet_archive_access_key: null
+  # internet_archive_secret_key: null
+
+logging:
+  level: "INFO"
+  file: "./logs/qfzz.log"
+
+advanced:
+  strict_licensing: true
+  cache_expiry_days: 30
+  max_downloads: 3

@@ -1,0 +1,271 @@
+[
+  {
+    "index": 0,
+    "timestamp": "2026-01-25T13:38:04.389662",
+    "event_type": "GENESIS",
+    "data": {},
+    "prev_hash": "0",
+    "hash": "4b6141a44349a600dcf7dc5e82ede04aa1dea97ab84261fa35779ef9ef8e7068"
+  },
+  {
+    "index": 1,
+    "timestamp": "2026-01-25T13:38:30.462963",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "Station Intro",
+      "next_track": "test_tone",
+      "prompt_hash": -3680754532741554151
+    },
+    "prev_hash": "4b6141a44349a600dcf7dc5e82ede04aa1dea97ab84261fa35779ef9ef8e7068",
+    "hash": "07fe7e6261a3ac7874936534e3e4ff9ce1dd7f3576639f1a8bf5e8ba4effbfd3"
+  },
+  {
+    "index": 2,
+    "timestamp": "2026-01-25T13:42:03.023308",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "Station Intro",
+      "next_track": "test_tone",
+      "prompt_hash": 4728334349606733248
+    },
+    "prev_hash": "07fe7e6261a3ac7874936534e3e4ff9ce1dd7f3576639f1a8bf5e8ba4effbfd3",
+    "hash": "c8508a7a8aa2971bdb3bee073077f13704b9946de426eca9460c6958b3b7089f"
+  },
+  {
+    "index": 3,
+    "timestamp": "2026-01-25T13:50:31.682822",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "Station Intro",
+      "next_track": "test_tone",
+      "prompt_hash": -8567320175872262303
+    },
+    "prev_hash": "c8508a7a8aa2971bdb3bee073077f13704b9946de426eca9460c6958b3b7089f",
+    "hash": "cd71b2a941a3cf42b895bcd1c5356740d6d6073b3a3d331c4e499615db6b67ae"
+  },
+  {
+    "index": 4,
+    "timestamp": "2026-01-25T13:56:19.385231",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "Station Intro",
+      "next_track": "test_tone",
+      "prompt_hash": 4370565247132566350
+    },
+    "prev_hash": "cd71b2a941a3cf42b895bcd1c5356740d6d6073b3a3d331c4e499615db6b67ae",
+    "hash": "c1f95fb8d6c9c4ff0049e9fd4d65330b18648270ce76220d306bbafc6ca7bea9"
+  },
+  {
+    "index": 5,
+    "timestamp": "2026-01-25T13:57:05.812272",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "Station Intro",
+      "next_track": "test_tone",
+      "prompt_hash": -6956771228351886933
+    },
+    "prev_hash": "c1f95fb8d6c9c4ff0049e9fd4d65330b18648270ce76220d306bbafc6ca7bea9",
+    "hash": "626e6bec4a115ce2dde2fb5714d3347969182387e17e1b1215a4baa517a30259"
+  },
+  {
+    "index": 6,
+    "timestamp": "2026-01-25T13:58:34.965958",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "Station Intro",
+      "next_track": "test_tone",
+      "prompt_hash": 6620825723261351039
+    },
+    "prev_hash": "626e6bec4a115ce2dde2fb5714d3347969182387e17e1b1215a4baa517a30259",
+    "hash": "264ed938a31390d2801ef250d0c768dae3c2ff1d15c0154000f3b5706bd9c163"
+  },
+  {
+    "index": 7,
+    "timestamp": "2026-01-25T14:06:49.420895",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": -2860916956294809863
+    },
+    "prev_hash": "264ed938a31390d2801ef250d0c768dae3c2ff1d15c0154000f3b5706bd9c163",
+    "hash": "dd524a4e7ee32ab2218285ba12eb9cfdb72e549c2a3de78f12661708595c5e87"
+  },
+  {
+    "index": 8,
+    "timestamp": "2026-01-25T14:26:17.226000",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": -7697349567529344812
+    },
+    "prev_hash": "dd524a4e7ee32ab2218285ba12eb9cfdb72e549c2a3de78f12661708595c5e87",
+    "hash": "a0e6b7e881c1c5e9abfab4915888835d0cca08e16bc0dae4651049be0864f7a7"
+  },
+  {
+    "index": 9,
+    "timestamp": "2026-01-25T14:26:46.732516",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": 8230402601573755657
+    },
+    "prev_hash": "a0e6b7e881c1c5e9abfab4915888835d0cca08e16bc0dae4651049be0864f7a7",
+    "hash": "340b12b4855c90a770a83043bc1c2c65e3f92c519faa2d1da9bdc7e93900e9bf"
+  },
+  {
+    "index": 10,
+    "timestamp": "2026-01-25T14:28:01.574737",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": -193449973845031216
+    },
+    "prev_hash": "340b12b4855c90a770a83043bc1c2c65e3f92c519faa2d1da9bdc7e93900e9bf",
+    "hash": "715c95f50bc2005ff38198f6829bdcc33b71bb03c62a6d06e875f4c7f9590661"
+  },
+  {
+    "index": 11,
+    "timestamp": "2026-01-25T14:32:24.600739",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": -6976317239673795618
+    },
+    "prev_hash": "715c95f50bc2005ff38198f6829bdcc33b71bb03c62a6d06e875f4c7f9590661",
+    "hash": "72f67f8a65baf1f906d8416988e0bc132728407cc6f09f8146040566c4536ace"
+  },
+  {
+    "index": 12,
+    "timestamp": "2026-01-25T14:33:05.565523",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": -2570660237037730125
+    },
+    "prev_hash": "72f67f8a65baf1f906d8416988e0bc132728407cc6f09f8146040566c4536ace",
+    "hash": "fd98a185785c3d3c92df56be658f8cdacdfa67c7935adff332440590feb83956"
+  },
+  {
+    "index": 13,
+    "timestamp": "2026-01-25T14:34:08.638341",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": -250886711657223138
+    },
+    "prev_hash": "fd98a185785c3d3c92df56be658f8cdacdfa67c7935adff332440590feb83956",
+    "hash": "4b08f1c635b5174bb71290f061cbf45518321ff0aadaaaee6af705f8fb4916b1"
+  },
+  {
+    "index": 14,
+    "timestamp": "2026-01-25T14:40:18.893776",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": 7776060347176405760
+    },
+    "prev_hash": "4b08f1c635b5174bb71290f061cbf45518321ff0aadaaaee6af705f8fb4916b1",
+    "hash": "4d0974a4947d9631e9a730b34689c2cb4ba3efcdaec6e7c99952e1399a317cba"
+  },
+  {
+    "index": 15,
+    "timestamp": "2026-01-25T14:41:17.969398",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": 8520507388411521063
+    },
+    "prev_hash": "4d0974a4947d9631e9a730b34689c2cb4ba3efcdaec6e7c99952e1399a317cba",
+    "hash": "1a4d100cd4e2dface02dd1d03906eb8ebc2901acda3b07005d4d49ed8246278f"
+  },
+  {
+    "index": 16,
+    "timestamp": "2026-01-25T14:41:29.152383",
+    "event_type": "TRACK_INGESTED",
+    "data": {
+      "url": "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Kai_Engel/Satin/Kai_Engel_-_04_-_Sentinel.mp3",
+      "filename": "direct_d1940ce4.mp3"
+    },
+    "prev_hash": "1a4d100cd4e2dface02dd1d03906eb8ebc2901acda3b07005d4d49ed8246278f",
+    "hash": "d30918e9c425f11d944c85ef8ee0a1a8d1ec6b106354d35c9db4bb58714f8d09"
+  },
+  {
+    "index": 17,
+    "timestamp": "2026-01-25T14:42:05.526528",
+    "event_type": "TRACK_INGESTED",
+    "data": {
+      "url": "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3",
+      "filename": "direct_ce000632.mp3"
+    },
+    "prev_hash": "d30918e9c425f11d944c85ef8ee0a1a8d1ec6b106354d35c9db4bb58714f8d09",
+    "hash": "b1553b6517e639038fec2bf85f56a8cc00004299ed4e0b6ce08dbdb86d413e53"
+  },
+  {
+    "index": 18,
+    "timestamp": "2026-01-25T14:42:42.527174",
+    "event_type": "TRACK_INGESTED",
+    "data": {
+      "url": "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/WFMU/Broke_For_Free/Directionless_EP/Broke_For_Free_-_01_-_Night_Owl.mp3",
+      "filename": "direct_d49a65a3.mp3"
+    },
+    "prev_hash": "b1553b6517e639038fec2bf85f56a8cc00004299ed4e0b6ce08dbdb86d413e53",
+    "hash": "b59b280100d16efd6d80a9c9488fc1d0572a868bbc7172608a2601a5df6e8647"
+  },
+  {
+    "index": 19,
+    "timestamp": "2026-01-25T15:02:44.565553",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": -5727176351427320275
+    },
+    "prev_hash": "b59b280100d16efd6d80a9c9488fc1d0572a868bbc7172608a2601a5df6e8647",
+    "hash": "7872b9ffaa6c481ea0f775ffe6071e3e321d9b5c30bbe1cc74b108fa43d05fe1"
+  },
+  {
+    "index": 20,
+    "timestamp": "2026-01-25T15:06:26.629196",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": 958156476386323157
+    },
+    "prev_hash": "7872b9ffaa6c481ea0f775ffe6071e3e321d9b5c30bbe1cc74b108fa43d05fe1",
+    "hash": "47c210cc9d0d4e16380df70828eb6470f143f88dc5b3ada7265e15922c39db4e"
+  },
+  {
+    "index": 21,
+    "timestamp": "2026-01-25T15:14:08.798369",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": -896806345737308856
+    },
+    "prev_hash": "47c210cc9d0d4e16380df70828eb6470f143f88dc5b3ada7265e15922c39db4e",
+    "hash": "db111c36b45334d9a0472705eeb773870cac3c5befe82502e73ef548fb598a35"
+  },
+  {
+    "index": 22,
+    "timestamp": "2026-01-25T15:21:07.038891",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": -706795898648197370
+    },
+    "prev_hash": "db111c36b45334d9a0472705eeb773870cac3c5befe82502e73ef548fb598a35",
+    "hash": "c6fe8c01a6dc8ccc6d6fcda80c454955cf80f8f4bf844798ddeee818a371ad09"
+  }
+]
