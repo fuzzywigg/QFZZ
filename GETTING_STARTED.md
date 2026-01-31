@@ -46,6 +46,12 @@ Before diving in, please review these documents:
 3. **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture and design
 4. **[FEATURE_ROADMAP.md](./FEATURE_ROADMAP.md)** - Feature prioritization and timeline
 
+## Quick Setup Guides
+
+**Windows Users**: See **[WINDOWS_SETUP.md](./WINDOWS_SETUP.md)** for complete PowerShell instructions and GUI setup.
+
+**Quick Reference**: See **[docs/QUICK_START_WINDOWS.md](./docs/QUICK_START_WINDOWS.md)** for a condensed cheat sheet.
+
 ## Development Setup (MVP Phase)
 
 Once implementation begins, follow these steps:
