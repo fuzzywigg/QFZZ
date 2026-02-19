@@ -33,6 +33,7 @@ class StationConfig:
     enable_edge_optimization: bool = True
     streaming_quality: str = "high"
     allowed_licenses: list[str] = field(default_factory=lambda: ["CC-BY", "CC-BY-SA", "CC0"])
+    enable_quantum: bool = False
     cache_size_mb: int = 500
     metadata: dict[str, Any] = field(default_factory=dict)
 
@@ -62,6 +63,9 @@ class StationConfig:
         if self.streaming_quality not in ["low", "medium", "high", "lossless"]:
             raise ValueError("streaming_quality must be one of: low, medium, high, lossless")
 
+        if not isinstance(self.enable_quantum, bool):
+            raise ValueError("enable_quantum must be a boolean")
+
         if self.cache_size_mb < 0:
             raise ValueError("cache_size_mb must be non-negative")
 
@@ -74,6 +78,7 @@ class StationConfig:
             "trust_threshold": self.trust_threshold,
             "enable_blockchain": self.enable_blockchain,
             "enable_edge_optimization": self.enable_edge_optimization,
+            "enable_quantum": self.enable_quantum,
             "streaming_quality": self.streaming_quality,
             "allowed_licenses": self.allowed_licenses,
             "cache_size_mb": self.cache_size_mb,

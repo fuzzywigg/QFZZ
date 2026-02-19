@@ -6,7 +6,7 @@ import hashlib
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional
 
 
 @dataclass
@@ -147,14 +147,21 @@ class Block:
         block_string = json.dumps(block_data, sort_keys=True)
         return hashlib.sha256(block_string.encode()).hexdigest()
 
-    def mine_block(self, difficulty: int = 2) -> None:
+    def mine_block(self, difficulty: int = 2, qrng: Optional[Any] = None) -> None:
         """
         Mine the block with proof of work.
 
         Args:
             difficulty: Number of leading zeros required in hash
+            qrng: Optional QuantumRandomNumberGenerator for nonce seeding
         """
         target = "0" * difficulty
+
+        if qrng is not None:
+            try:
+                self.nonce = qrng.random_nonce()
+            except Exception:
+                pass
 
         while not self.hash.startswith(target):
             self.nonce += 1

@@ -36,6 +36,7 @@ class QFZZStation:
         self._dataset_manager = None
         self._trust_network = None
         self._edge_optimizer = None
+        self._quantum_provider = None
         self._player = None
 
         logger.info(f"Initialized QFZZ Station: {config.station_name} ({config.station_id})")
@@ -85,12 +86,22 @@ class QFZZStation:
             self._edge_optimizer = EdgeOptimizer()
             logger.info("Edge optimization enabled")
 
+        if self.config.enable_quantum:
+            from qfzz.quantum.provider import QuantumProvider
+
+            self._quantum_provider = QuantumProvider()
+            if self._quantum_provider.is_available:
+                logger.info("Quantum provider enabled (Microsoft QDK)")
+            else:
+                logger.info("Quantum provider enabled (classical fallback)")
+
     def _cleanup_components(self) -> None:
         """Cleanup station components."""
         self._dj = None
         self._dataset_manager = None
         self._trust_network = None
         self._edge_optimizer = None
+        self._quantum_provider = None
         self._player = None
 
     def add_listener(self, user_id: str, preferences: Optional[dict[str, Any]] = None) -> None:
@@ -203,6 +214,7 @@ class QFZZStation:
             "listener_count": len(self._listeners),
             "blockchain_enabled": self.config.enable_blockchain,
             "edge_optimization_enabled": self.config.enable_edge_optimization,
+            "quantum_enabled": self.config.enable_quantum,
             "trust_threshold": self.config.trust_threshold,
             "streaming_quality": self.config.streaming_quality,
         }
