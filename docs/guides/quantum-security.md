@@ -290,12 +290,105 @@ QFZZ uses SHA-256, which is:
 - Standard for blockchain systems
 - Fast and efficient
 
+### Microsoft QDK Integration
+
+QFZZ integrates with the [Microsoft Quantum Development Kit (QDK)](https://github.com/microsoft/qdk) to provide quantum-enhanced security features. The QDK is Microsoft's open-source quantum computing framework based on the Q# programming language.
+
+#### Quantum Random Number Generation (QRNG)
+
+The `QuantumRandomNumberGenerator` uses Q# quantum operations to generate truly random numbers via qubit superposition and measurement, providing cryptographically superior randomness for blockchain operations:
+
+```python
+from qfzz.quantum import QuantumProvider, QuantumRandomNumberGenerator
+
+# Initialize the quantum provider (Microsoft QDK backend)
+provider = QuantumProvider()
+qrng = QuantumRandomNumberGenerator(provider=provider)
+
+# Check backend status
+print(f"Backend: {qrng.backend}")  # "qdk-qrng" or "classical-csprng"
+
+# Generate quantum random values
+nonce = qrng.random_nonce()        # 32-bit random nonce for mining
+value = qrng.random_int(16)        # 16-bit random integer
+data = qrng.random_bytes(32)       # 32 random bytes
+```
+
+#### Q# Source Code
+
+QFZZ includes Q# source files for quantum operations in `qfzz/quantum/qsharp_src/`:
+
+```qsharp
+// QRNG.qs - Quantum Random Number Generator
+operation GenerateRandomInt(nBits : Int) : Int {
+    use qubits = Qubit[nBits];
+    ApplyToEach(H, qubits);
+    let results = MResetEachZ(qubits);
+    ResultArrayAsInt(Reversed(results))
+}
+```
+
+#### Installation
+
+Install QFZZ with quantum support:
+
+```bash
+# Install the qsharp package for Microsoft QDK support
+pip install qsharp>=1.9.0
+
+# Or install QFZZ with the quantum extra
+pip install qfzz-radio[quantum]
+```
+
+#### Configuration
+
+Enable quantum features in your station configuration:
+
+```python
+from qfzz import QFZZStation, StationConfig
+
+config = StationConfig(
+    station_id="my_station",
+    station_name="QFZZ Quantum Radio",
+    enable_quantum=True,       # Enable Microsoft QDK quantum features
+    enable_blockchain=True,    # Blockchain benefits from QRNG
+)
+
+station = QFZZStation(config)
+station.start()
+```
+
+#### Classical Fallback
+
+When the `qsharp` package is not installed, QFZZ automatically falls back to a cryptographically secure classical PRNG (`os.urandom`). This ensures all features work without requiring a quantum backend:
+
+```python
+provider = QuantumProvider()
+print(provider.get_status())
+# Without qsharp: {"backend": "classical-fallback", "available": false, ...}
+# With qsharp:    {"backend": "microsoft-qdk", "available": true, ...}
+```
+
+#### Blockchain Integration
+
+The QRNG can seed block mining nonces for enhanced randomness:
+
+```python
+from qfzz.blockchain.models import Block
+from qfzz.quantum import QuantumRandomNumberGenerator
+
+qrng = QuantumRandomNumberGenerator()
+block = Block(index=1, timestamp="...", records=[], previous_hash="abc")
+block.mine_block(difficulty=2, qrng=qrng)  # Uses quantum nonce seeding
+```
+
 ### Future Quantum Resistance
 
 For quantum-resistant features, future versions will support:
 - **Post-quantum cryptography**: CRYSTALS-Dilithium, SPHINCS+
 - **Quantum key distribution**: For ultra-secure communications
 - **Lattice-based schemes**: Resistant to quantum attacks
+- **Azure Quantum integration**: Submit jobs to real quantum hardware via Azure
 
 ## Federation and Distribution
 
@@ -330,5 +423,6 @@ QFZZ's blockchain trust network provides:
 - ✅ Community-driven trust scoring
 - ✅ Tamper-proof history
 - ✅ Decentralized security
+- ✅ Microsoft QDK quantum-enhanced randomness
 
-This creates a foundation for a trustworthy, community-driven music platform.
+This creates a foundation for a trustworthy, community-driven music platform with quantum-ready security.
