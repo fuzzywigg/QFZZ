@@ -1,19 +1,19 @@
 ## Summary
-Brief description of changes.
+<!-- What does this PR do? -->
 
-## Type of Change
+## Type
 - [ ] Bug fix
-- [ ] New feature
+- [ ] Feature
 - [ ] Enhancement
+- [ ] Governance/CI
 - [ ] Documentation
-- [ ] CI/CD
-- [ ] Governance
 
 ## Testing
-Describe tests performed.
+- [ ] Tests pass locally
+- [ ] Build succeeds
+- [ ] Manual testing done
 
 ## Checklist
-- [ ] Code follows project style guidelines
-- [ ] Self-review completed
-- [ ] Documentation updated (if applicable)
-- [ ] No breaking changes
+- [ ] Code follows project conventions
+- [ ] No secrets or credentials committed
+- [ ] PR title follows conventional commits
