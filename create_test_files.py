@@ -483,3 +483,30 @@ Comprehensive testing infrastructure for QFZZ with 99% coverage for core modules
 
 ```bash
 pytest tests/ -v
+pytest tests/ -v --cov=qfzz --cov-report=html
+```
+
+### Run Specific Tests
+
+```bash
+pytest tests/test_honeycomb_state.py -v
+pytest tests/test_env_loader.py -v
+```
+
+## Coverage
+
+All core modules target 99% coverage.
+''';
+    
+    filepath = Path("docs/TESTING.md")
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    filepath.write_text(content, encoding='utf-8')
+    print(f"✅ Created: {filepath}")
+
+
+if __name__ == "__main__":
+    print("Creating test infrastructure files...")
+    create_test_honeycomb_state()
+    create_test_env_loader()
+    create_docs_testing()
+    print("\nAll files created successfully!")
