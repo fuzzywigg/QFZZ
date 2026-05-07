@@ -155,6 +155,13 @@ Thumbs.db
 # Audio cache and content directories
 qfzz_audio_content/
 audio_content/
+tests/temp_downloads/
+*.mp3
+*.wav
+*.flac
+*.m4a
+*.aac
+*.ogg
 
 # Model cache
 models/
