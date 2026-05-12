@@ -6,7 +6,7 @@ numpy>=1.24.0,<3.0.0
 networkx>=3.0,<4.0.0
 
 # Optional: YouTube content fetching (for future music source integration)
-yt-dlp>=2023.10.0,<2027.0.0
+yt-dlp>=2026.3.17,<2027.0.0
 
 # Optional: LLM providers (install based on your needs)
 # Uncomment the provider(s) you want to use:
