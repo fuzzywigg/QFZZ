@@ -174,7 +174,6 @@
     },
     {
       "type": "track",
-      "id": "Broke_For_Free_-_01_-_Night_Owl.mp3",
       "filename": "Broke_For_Free_-_01_-_Night_Owl.mp3",
       "title": "Night Owl",
       "artist": "Broke For Free",
@@ -188,7 +187,8 @@
         "danceability": 3.1034,
         "loudness": 0.1884
       },
-      "ingested_at": "2026-01-25T15:02:38.272343"
+      "ingested_at": "2026-01-25T15:02:38.272343",
+      "id": "Broke_For_Free_-_01_-_Night_Owl.mp3"
     },
     {
       "type": "artist",
@@ -217,7 +217,6 @@
     },
     {
       "type": "track",
-      "id": "Tours_-_01_-_Enthusiast.mp3",
       "filename": "Tours_-_01_-_Enthusiast.mp3",
       "title": "Enthusiast",
       "artist": "Tours",
@@ -231,7 +230,8 @@
         "danceability": 0.7479,
         "loudness": 0.1706
       },
-      "ingested_at": "2026-01-25T15:02:44.553142"
+      "ingested_at": "2026-01-25T15:02:44.553142",
+      "id": "Tours_-_01_-_Enthusiast.mp3"
     },
     {
       "type": "artist",
@@ -252,6 +252,24 @@
       "type": "musical_key",
       "name": "A",
       "id": "key:A"
+    },
+    {
+      "type": "track",
+      "id": "direct_983fde79.mp3",
+      "filename": "direct_983fde79.mp3",
+      "title": "Sentinel",
+      "artist": "Kai Engel",
+      "album": "Satin",
+      "genre": "Classical",
+      "fingerprint": {
+        "bpm": 99.4,
+        "duration": 183.06,
+        "key": "C#",
+        "energy": 0.1502,
+        "danceability": 0.9092,
+        "loudness": 0.1502
+      },
+      "ingested_at": "2026-01-26T15:21:37.493756"
     }
   ],
   "edges": [
@@ -505,6 +523,41 @@
       "weight": 0.9,
       "source": "Tours_-_01_-_Enthusiast.mp3",
       "target": "key:A",
+      "key": 0
+    },
+    {
+      "relationship": "PERFORMED_BY",
+      "weight": 1.0,
+      "source": "direct_983fde79.mp3",
+      "target": "artist:kai_engel",
+      "key": 0
+    },
+    {
+      "relationship": "BELONGS_TO",
+      "weight": 1.0,
+      "source": "direct_983fde79.mp3",
+      "target": "genre:classical",
+      "key": 0
+    },
+    {
+      "relationship": "EVOKES",
+      "weight": 1.0,
+      "source": "direct_983fde79.mp3",
+      "target": "concept:sentinel",
+      "key": 0
+    },
+    {
+      "relationship": "HAS_TEMPO",
+      "weight": 0.8,
+      "source": "direct_983fde79.mp3",
+      "target": "tempo:90s BPM",
+      "key": 0
+    },
+    {
+      "relationship": "IN_KEY",
+      "weight": 0.9,
+      "source": "direct_983fde79.mp3",
+      "target": "key:C#",
       "key": 0
     }
   ]

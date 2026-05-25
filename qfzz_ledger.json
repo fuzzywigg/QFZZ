@@ -267,5 +267,17 @@
     },
     "prev_hash": "db111c36b45334d9a0472705eeb773870cac3c5befe82502e73ef548fb598a35",
     "hash": "c6fe8c01a6dc8ccc6d6fcda80c454955cf80f8f4bf844798ddeee818a371ad09"
+  },
+  {
+    "index": 23,
+    "timestamp": "2026-01-26T15:21:42.504477",
+    "event_type": "SEGUE_GENERATION",
+    "data": {
+      "prev_track": "intro",
+      "next_track": "test_tone",
+      "prompt_hash": 3070107925428973702
+    },
+    "prev_hash": "c6fe8c01a6dc8ccc6d6fcda80c454955cf80f8f4bf844798ddeee818a371ad09",
+    "hash": "96fafdabd79b716940802017086407d87b6b649167b3e140b98ddb102365821f"
   }
 ]
