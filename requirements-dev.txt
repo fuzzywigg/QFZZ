@@ -26,4 +26,4 @@ pymdown-extensions>=10.21.2,<11.0
 
 # Security scanning
 safety>=2.3.0,<4.0.0
-bandit>=1.7.0,<2.0.0
+bandit>=1.9.4,<2.0.0
