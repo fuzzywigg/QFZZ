@@ -224,6 +224,7 @@ Before completing each phase:
 
 **Quality gate checklist**:
 - Security scan (CodeQL, dependencies)
+- Dependabot alerts baseline verified (alerts + automated security fixes enabled)
 - Test coverage >80%
 - Documentation complete
 - No critical bugs
