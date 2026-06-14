@@ -235,7 +235,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - name: Verify Ledger
         run: python scripts/verify-ledger.py qfzz_ledger.json
 ```
