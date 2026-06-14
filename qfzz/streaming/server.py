@@ -3,13 +3,13 @@ Simple streaming server for QFZZ.
 """
 
 import http.server
+import json
 import logging
 import socketserver
 import threading
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
-
-import json
 
 
 class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -22,10 +22,22 @@ class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
     GRAPH_PAYLOAD = {}
     DJ_MESSAGE = {"message": "Welcome to QFZZ, the Pulse of the Quantum Realm."}
     LEDGER_STATS = {"height": 0, "status": "Waiting"}
+    STREAM_STATUS = {
+        "state": "stopped",
+        "current_track": None,
+        "prefetch_tracks": [],
+        "buffer_seconds": 8,
+        "reconnect": {"attempts": 0, "max_attempts": 3},
+        "error": None,
+    }
+    STREAM_STATUS_PROVIDER = None
+    STREAM_MANIFEST_PROVIDER = None
+    STREAM_ERROR_HANDLER = None
 
     def do_POST(self):
         """Handle content requests."""
-        if self.path == "/request":
+        parsed = urlparse(self.path)
+        if parsed.path == "/request":
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             try:
@@ -56,37 +68,73 @@ class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
 
             self.send_response(400)
             self.end_headers()
+        elif parsed.path == "/stream/reconnect":
+            if callable(AudioRequestHandler.STREAM_ERROR_HANDLER):
+                recovered = AudioRequestHandler.STREAM_ERROR_HANDLER(
+                    "client-reconnect-request", recoverable=True
+                )
+                payload = {"recovered": bool(recovered)}
+                self.send_response(200 if recovered else 503)
+                self.send_header("Content-type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps(payload).encode("utf-8"))
+            else:
+                self.send_response(503)
+                self.end_headers()
         else:
             self.send_error(404)
 
     def do_GET(self):
-        if self.path == "/playlist.json":
+        parsed = urlparse(self.path)
+        path = parsed.path
+
+        if path == "/playlist.json":
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
             response = json.dumps(AudioRequestHandler.PAYLOAD)
             self.wfile.write(response.encode("utf-8"))
 
-        elif self.path == "/graph.json":
+        elif path == "/graph.json":
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
             response = json.dumps(AudioRequestHandler.GRAPH_PAYLOAD)
             self.wfile.write(response.encode("utf-8"))
 
-        elif self.path == "/dj_message.json":
+        elif path == "/dj_message.json":
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
             response = json.dumps(AudioRequestHandler.DJ_MESSAGE)
             self.wfile.write(response.encode("utf-8"))
 
-        elif self.path == "/ledger.json":
+        elif path == "/ledger.json":
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
             response = json.dumps(AudioRequestHandler.LEDGER_STATS)
             self.wfile.write(response.encode("utf-8"))
+        elif path == "/stream/session.json":
+            if callable(AudioRequestHandler.STREAM_STATUS_PROVIDER):
+                AudioRequestHandler.STREAM_STATUS = (
+                    AudioRequestHandler.STREAM_STATUS_PROVIDER()
+                    or AudioRequestHandler.STREAM_STATUS
+                )
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.end_headers()
+            response = json.dumps(AudioRequestHandler.STREAM_STATUS)
+            self.wfile.write(response.encode("utf-8"))
+        elif path == "/stream/manifest.m3u8":
+            if callable(AudioRequestHandler.STREAM_MANIFEST_PROVIDER):
+                manifest = AudioRequestHandler.STREAM_MANIFEST_PROVIDER()
+            else:
+                manifest = "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-ENDLIST\n"
+            self.send_response(200)
+            self.send_header("Content-type", "application/vnd.apple.mpegurl")
+            self.end_headers()
+            self.wfile.write(manifest.encode("utf-8"))
 
         else:
             # Fallback to serving files
@@ -96,7 +144,16 @@ class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
+
+        parsed = urlparse(self.path)
+        path = parsed.path.lower()
+        audio_extensions = (".wav", ".mp3", ".ogg", ".flac", ".aac", ".m4a")
+        if path.endswith(audio_extensions):
+            self.send_header("Cache-Control", "public, max-age=300")
+            self.send_header("Accept-Ranges", "bytes")
+        else:
+            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
+
         if self.command == "OPTIONS":
             self.send_response(200)
             return super().end_headers()
@@ -147,6 +204,22 @@ class StreamingServer:
         """Update the ledger stats."""
         AudioRequestHandler.LEDGER_STATS = stats
 
+    def set_stream_status(self, status: dict):
+        """Update stream status payload served by the API."""
+        AudioRequestHandler.STREAM_STATUS = status
+
+    def set_stream_status_provider(self, provider):
+        """Attach callable provider for stream status."""
+        AudioRequestHandler.STREAM_STATUS_PROVIDER = provider
+
+    def set_stream_manifest_provider(self, provider):
+        """Attach callable provider for HLS manifest content."""
+        AudioRequestHandler.STREAM_MANIFEST_PROVIDER = provider
+
+    def set_stream_error_handler(self, handler):
+        """Attach callable recover handler for stream reconnect endpoint."""
+        AudioRequestHandler.STREAM_ERROR_HANDLER = handler
+
     def start(self):
         """Start the streaming server in a background thread."""
         try:
@@ -172,6 +245,7 @@ class StreamingServer:
             Handler.PLAYER_INSTANCE = self.player if hasattr(self, "player") else None
 
             self.httpd = socketserver.TCPServer(("", self.port), Handler)
+            self.port = self.httpd.server_address[1]
             self.thread = threading.Thread(target=self.httpd.serve_forever)
             self.thread.daemon = True
             self.thread.start()

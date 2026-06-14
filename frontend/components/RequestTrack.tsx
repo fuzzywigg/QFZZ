@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { Download, AlertCircle, CheckCircle } from 'lucide-react';
 
+const API_BASE = process.env.NEXT_PUBLIC_QFZZ_API_BASE || 'http://localhost:8000';
+
 export default function RequestTrack() {
     const [url, setUrl] = useState('');
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -26,7 +28,7 @@ export default function RequestTrack() {
         setMessage('Ingesting content...');
 
         try {
-            const res = await fetch('http://localhost:8001/request', {
+            const res = await fetch(`${API_BASE}/request`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url })
@@ -45,7 +47,7 @@ export default function RequestTrack() {
                 setStatus('error');
                 setMessage('Failed to process request. Check server logs.');
             }
-        } catch (err) {
+        } catch {
             setStatus('error');
             setMessage('Connection failed.');
         }

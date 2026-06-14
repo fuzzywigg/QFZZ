@@ -1,6 +1,7 @@
 # Streaming API
 
-The streaming module provides audio playback capabilities (placeholder).
+The streaming module provides local HTTP audio streaming with playlist APIs,
+buffer/prefetch session metadata, and reconnect support.
 
 ## MusicPlayer
 
@@ -9,58 +10,36 @@ The streaming module provides audio playback capabilities (placeholder).
       show_root_heading: true
       show_source: true
 
-## Future Implementation
+## Implemented Endpoints
 
-The current implementation is a placeholder. Future versions will include:
+- `GET /playlist.json`
+  - Returns current queue with streamable URLs.
+- `GET /stream/session.json`
+  - Returns active stream state, current track, prefetch tracks, buffer settings, reconnect counters, and last error.
+- `GET /stream/manifest.m3u8`
+  - Returns an HLS-compatible playlist manifest generated from the loaded queue.
+- `POST /stream/reconnect`
+  - Triggers server-side reconnect/recovery logic and returns `{ "recovered": true|false }`.
+- `GET /ledger.json`, `GET /dj_message.json`, `GET /graph.json`
+  - Ancillary metadata APIs for UI integration.
 
-- **WebRTC Streaming**: Real-time peer-to-peer audio streaming
-- **HLS/DASH Support**: Adaptive bitrate streaming protocols
-- **DRM Integration**: Digital rights management
-- **P2P Distribution**: Distributed content delivery
-- **Buffer Management**: Smart buffering strategies
-- **Format Support**: Multiple audio formats (MP3, OGG, FLAC, etc.)
+Audio files are served with `Accept-Ranges` and short-lived cache headers for playback buffering on slow/noisy networks.
 
 ## Usage Example
 
 ```python
 from qfzz import MusicPlayer
+from qfzz.datasets import DatasetManager
 
 # Create player
-player = MusicPlayer()
+manager = DatasetManager()
+player = MusicPlayer(dataset_manager=manager)
 
-# Play track
-player.play_track("track_001")
+# Load from dataset-backed library
+player.load_playlist_from_datasets()
+player.play()
 
-# Pause
-player.pause()
-
-# Resume
-player.resume()
-
-# Stop
-player.stop()
-```
-
-## Planned API
-
-Future versions will support:
-
-```python
-# Advanced playback controls
-player.seek(position_seconds)
-player.set_volume(0.8)
-player.set_playback_rate(1.0)
-
-# Queue management
-player.enqueue("track_002")
-player.clear_queue()
-
-# Events
-@player.on('play')
-def on_play(track_id):
-    print(f"Playing: {track_id}")
-
-@player.on('ended')
-def on_ended(track_id):
-    print(f"Ended: {track_id}")
+# Inspect streaming session metadata
+session = player.get_stream_status()
+print(session["buffer_seconds"], session["prefetch_tracks"])
 ```

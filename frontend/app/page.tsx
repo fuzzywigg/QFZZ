@@ -24,6 +24,20 @@ interface Track {
   genre: string;
 }
 
+interface StreamSession {
+  state: string;
+  current_track: Track | null;
+  prefetch_tracks: Track[];
+  buffer_seconds: number;
+  reconnect: {
+    attempts: number;
+    max_attempts: number;
+  };
+  error: string | null;
+}
+
+const API_BASE = process.env.NEXT_PUBLIC_QFZZ_API_BASE || 'http://localhost:8000';
+
 export default function AudioPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.8);
@@ -34,34 +48,72 @@ export default function AudioPlayer() {
   // DJ Message is now handled by HiveTerminal, but we might want to keep track of "Now Playing" context if needed.
   // We'll keep the poller for playlist updates/ledger.
   const [ledgerStats, setLedgerStats] = useState({ height: 0, status: "Init" });
+  const [streamSession, setStreamSession] = useState<StreamSession | null>(null);
+  const [streamStatus, setStreamStatus] = useState('Connecting');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    // 1. Fetch playlist
-    fetch('http://localhost:8001/playlist.json')
+    const loadSession = () => {
+      fetch(`${API_BASE}/stream/session.json`)
+        .then(res => res.json())
+        .then((data: StreamSession) => {
+          setStreamSession(data);
+          setStreamStatus(data.state);
+          const merged: Track[] = [];
+          if (data.current_track) {
+            merged.push(data.current_track);
+          }
+          if (Array.isArray(data.prefetch_tracks)) {
+            merged.push(...data.prefetch_tracks);
+          }
+          if (merged.length > 0) {
+            setPlaylist(merged);
+            setCurrentTrackIndex(0);
+          }
+        })
+        .catch(() => setStreamStatus('Offline'));
+    };
+
+    // 1. Fetch playlist/session
+    fetch(`${API_BASE}/playlist.json`)
       .then(res => res.json())
       .then(data => {
-        if (data && data.length > 0) {
+        if (Array.isArray(data) && data.length > 0) {
           setPlaylist(data);
-          console.log("Loaded playlist:", data);
         }
       })
-      .catch(err => console.error("Failed to load playlist:", err));
+      .catch(() => undefined);
+    loadSession();
 
     // 2. Poll for Ledger (every 5 seconds)
     const pollStats = setInterval(() => {
-      fetch('http://localhost:8001/ledger.json')
+      fetch(`${API_BASE}/ledger.json`)
         .then(res => res.json())
         .then(data => {
           if (data) setLedgerStats(data);
         })
-        .catch(e => console.error("Ledger poll failed", e));
+        .catch(() => undefined);
+      loadSession();
     }, 5000);
 
     return () => clearInterval(pollStats);
   }, []);
+
+  useEffect(() => {
+    if (!streamSession || streamSession.prefetch_tracks.length === 0) {
+      return;
+    }
+    streamSession.prefetch_tracks.slice(0, 2).forEach((track) => {
+      if (!track.url) {
+        return;
+      }
+      const prefetchAudio = new Audio();
+      prefetchAudio.preload = 'auto';
+      prefetchAudio.src = track.url;
+    });
+  }, [streamSession]);
 
   const currentTrack = playlist[currentTrackIndex] || {
     title: "Connecting to Quantum Stream...",
@@ -108,6 +160,28 @@ export default function AudioPlayer() {
         setIsPlaying(true);
       }
     }, 100);
+  };
+
+  const handleAudioError = () => {
+    setStreamStatus('Reconnecting');
+    fetch(`${API_BASE}/stream/reconnect`, { method: 'POST' })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('reconnect failed');
+        }
+        return res.json() as Promise<{ recovered: boolean }>;
+      })
+      .then((body) => {
+        if (!body.recovered || !audioRef.current) {
+          return;
+        }
+        setTimeout(() => {
+          audioRef.current?.load();
+          audioRef.current?.play().catch(() => undefined);
+          setStreamStatus('Playing');
+        }, 400);
+      })
+      .catch(() => setStreamStatus('Error'));
   };
 
   const formatTime = (time: number) => {
@@ -173,6 +247,9 @@ export default function AudioPlayer() {
         <div className="text-center mb-8 space-y-1">
           <h2 className="text-xl font-bold text-white truncate">{currentTrack.title}</h2>
           <p className="text-purple-300 text-sm">{currentTrack.artist}</p>
+          <p className="text-xs text-slate-400 uppercase tracking-wider">
+            {streamStatus} • Buffer {streamSession?.buffer_seconds ?? 0}s
+          </p>
           <span className="inline-block px-2 py-0.5 mt-2 bg-purple-500/10 border border-purple-500/20 rounded text-[10px] text-purple-300 uppercase tracking-wider">
             {currentTrack.genre || 'Unknown'}
           </span>
@@ -235,8 +312,10 @@ export default function AudioPlayer() {
         <audio
           ref={audioRef}
           src={currentTrack.url || undefined}
+          preload="auto"
           onTimeUpdate={handleTimeUpdate}
           onEnded={handleNext}
+          onError={handleAudioError}
         />
       </div>
 
