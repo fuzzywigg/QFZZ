@@ -9,6 +9,7 @@ import sys
 import time
 
 from qfzz import PersonalizedDJ, QFZZStation, StationConfig
+from qfzz.datasets import Dataset, DatasetLicense, DatasetManager
 from qfzz.streaming import MusicPlayer
 
 # Configure output folder
@@ -26,8 +27,9 @@ def main():
 
     # 1. Initialize Components
 
-    # Music Player (Port 8000)
-    player = MusicPlayer(content_dir=AUDIO_DIR, port=8000)
+    # Dataset Manager and Music Player (Port 8000)
+    dataset_manager = DatasetManager()
+    player = MusicPlayer(content_dir=AUDIO_DIR, port=8000, dataset_manager=dataset_manager)
 
     # Initialize Playlist
     playlist = [
@@ -75,7 +77,19 @@ def main():
 
         # Merge or replace? Let's just append for now to keep Intro
         playlist.extend(new_playlist)
-        player.load_playlist(playlist)
+
+    dataset = Dataset(
+        dataset_id="local_open_audio",
+        name="Local Open Audio",
+        description="Locally scanned and generated station tracks",
+        version="1.0",
+        license=DatasetLicense(license_type="CC0", license_url="https://creativecommons.org/publicdomain/zero/1.0/"),
+        creator_id="qfzz_station",
+        tracks=playlist,
+    )
+    dataset_manager.add_dataset(dataset)
+    loaded = player.load_playlist_from_datasets(dataset_ids=[dataset.dataset_id], min_quality=0.0)
+    logger.info("Loaded %s streamable tracks from DatasetManager", loaded)
 
     # Populate Knowledge Graph with ALL tracks (including deep features)
     for track in playlist:

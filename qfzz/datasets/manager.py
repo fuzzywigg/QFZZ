@@ -3,7 +3,8 @@ Dataset management with quality scoring and validation.
 """
 
 import logging
-from typing import Any, Optional
+import os
+from typing import Any
 
 from .models import Dataset, DatasetLicense
 
@@ -15,7 +16,7 @@ class DatasetManager:
     Manages music datasets with quality scoring and license validation.
     """
 
-    def __init__(self, allowed_licenses: Optional[list[str]] = None):
+    def __init__(self, allowed_licenses: list[str] | None = None):
         """
         Initialize Dataset Manager.
 
@@ -70,7 +71,7 @@ class DatasetManager:
         logger.warning(f"Dataset {dataset_id} not found")
         return False
 
-    def get_dataset(self, dataset_id: str) -> Optional[Dataset]:
+    def get_dataset(self, dataset_id: str) -> Dataset | None:
         """
         Get a dataset by ID.
 
@@ -82,7 +83,7 @@ class DatasetManager:
         """
         return self._datasets.get(dataset_id)
 
-    def list_datasets(self, min_quality: Optional[float] = None) -> list[Dataset]:
+    def list_datasets(self, min_quality: float | None = None) -> list[Dataset]:
         """
         List all datasets, optionally filtered by minimum quality.
 
@@ -153,6 +154,64 @@ class DatasetManager:
             score = score / weights_sum
 
         return min(1.0, max(0.0, score))
+
+    def build_streamable_playlist(
+        self,
+        content_dir: str,
+        dataset_ids: list[str] | None = None,
+        min_quality: float = 0.0,
+    ) -> list[dict[str, Any]]:
+        """
+        Build a playlist of tracks that can be streamed from local content.
+
+        Args:
+            content_dir: Base directory for relative track filenames
+            dataset_ids: Optional list of dataset ids to include
+            min_quality: Minimum dataset quality threshold
+
+        Returns:
+            List of normalized track dictionaries that are stream-ready
+        """
+        selected_ids = set(dataset_ids) if dataset_ids else None
+        base_dir = os.path.abspath(content_dir)
+        streamable: list[dict[str, Any]] = []
+
+        for dataset in self.list_datasets(min_quality=min_quality):
+            if selected_ids and dataset.dataset_id not in selected_ids:
+                continue
+
+            for index, track in enumerate(dataset.tracks):
+                filename = track.get("filename")
+                filepath = track.get("filepath")
+
+                resolved_path = ""
+                if filepath:
+                    resolved_path = (
+                        filepath
+                        if os.path.isabs(filepath)
+                        else os.path.join(base_dir, filepath)
+                    )
+                elif filename:
+                    resolved_path = os.path.join(base_dir, filename)
+
+                if not resolved_path or not os.path.isfile(resolved_path):
+                    continue
+
+                normalized_filename = os.path.basename(resolved_path)
+                streamable.append(
+                    {
+                        "title": track.get("title", normalized_filename),
+                        "artist": track.get("artist", "Unknown Artist"),
+                        "genre": track.get("genre", "Unknown"),
+                        "duration": int(track.get("duration", 0) or 0),
+                        "filename": normalized_filename,
+                        "filepath": resolved_path,
+                        "dataset_id": dataset.dataset_id,
+                        "dataset_track_index": index,
+                    }
+                )
+
+        return streamable
 
     def _score_metadata_completeness(self, dataset: Dataset) -> float:
         """

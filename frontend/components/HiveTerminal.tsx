@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Terminal, Send, Hexagon } from 'lucide-react';
 
+const API_BASE = process.env.NEXT_PUBLIC_QFZZ_API_BASE || 'http://localhost:8000';
+
 export default function HiveTerminal() {
     const [messages, setMessages] = useState<{ sender: 'AI' | 'USER' | 'SYSTEM', text: string }[]>([
         { sender: 'SYSTEM', text: 'CONNECTING TO HIVE NET...' },
@@ -23,7 +25,7 @@ export default function HiveTerminal() {
     // Poll for real DJ Messages and inject them as AI chatter
     useEffect(() => {
         const poll = setInterval(() => {
-            fetch('http://localhost:8001/dj_message.json')
+            fetch(`${API_BASE}/dj_message.json`)
                 .then(res => res.json())
                 .then(data => {
                     if (data && data.message) {
