@@ -1,13 +1,6 @@
 name: Deploy Documentation
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'docs/**'
-      - 'mkdocs.yml'
-      - 'qfzz/**'
   workflow_dispatch:
 
 jobs:
@@ -32,6 +25,7 @@ jobs:
         run: mkdocs build
 
       - name: Deploy to Firebase
+        if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' }}
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
