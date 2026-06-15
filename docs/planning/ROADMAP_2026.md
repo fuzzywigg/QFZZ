@@ -11,6 +11,7 @@
 - [x] **Strict Whitelist Implementation**: Enforced verified domains (`archive.org`, `freemusicarchive.org`) to mitigate copyright liability.
 - [x] **Smart Metadata Parsing**: Heuristics for direct MP3 downloads to eliminate "Unknown Artist" artifacts.
 - [x] **Agentic Terminal UI**: Deployed `HiveTerminal` for interactive user feedback.
+- [x] **Security Baseline Set**: Dependabot vulnerability alerts and automated security fixes confirmed enabled, with security modernization labels applied.
 
 ### Sprint 1.2: Broadcast Stability (Next Priority)
 
