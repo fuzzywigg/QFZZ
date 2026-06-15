@@ -4,6 +4,7 @@ Personalized DJ with user profiling and recommendations.
 
 import logging
 import random
+from base64 import b64encode
 from datetime import datetime
 from typing import Any
 
@@ -590,3 +591,113 @@ class PersonalizedDJ:
 
         # Fallback
         return "You're listening to QFZZ FuzzyRadio!"
+
+    def generate_llm_recommendation_response(
+        self,
+        user_id: str,
+        message: str = "",
+        preferences: dict[str, Any] | None = None,
+        max_tracks: int = 5,
+        include_tts: bool = False,
+    ) -> dict[str, Any]:
+        """
+        Generate an LLM-powered recommendation response with robust fallback.
+
+        Args:
+            user_id: User identifier
+            message: Listener prompt/context for recommendations
+            preferences: Optional real-time preference overrides
+            max_tracks: Number of recommendation tracks to include in payload
+            include_tts: Whether to include base64-encoded TTS audio
+
+        Returns:
+            API-friendly recommendation payload
+        """
+        max_tracks = max(1, min(max_tracks, 20))
+        profile = self.get_or_create_profile(user_id, preferences)
+        recommendations = self.recommend(user_id, preferences)
+        selected_tracks = recommendations[:max_tracks]
+
+        fallback_text = self._build_fallback_recommendation_text(selected_tracks, profile)
+        llm_prompt = self._build_llm_recommendation_prompt(
+            message=message, user_id=user_id, profile=profile, tracks=selected_tracks
+        )
+
+        result = self.llm_router.generate(
+            llm_prompt,
+            system_prompt=(
+                "You are QFZZ, a personalized radio DJ. Recommend tracks briefly with clear reasoning."
+            ),
+            max_tokens=220,
+        )
+
+        provider = result.get("provider", "fallback")
+        llm_online = bool(
+            result.get("success")
+            and result.get("text")
+            and provider not in {"Mock", "None", "fallback"}
+        )
+        response_text = result["text"] if llm_online else fallback_text
+
+        if llm_online and provider == "Ollama":
+            execution_mode = "edge-local"
+        elif llm_online:
+            execution_mode = "cloud"
+        else:
+            execution_mode = "fallback"
+
+        payload: dict[str, Any] = {
+            "user_id": user_id,
+            "response": response_text,
+            "provider": provider,
+            "llm_online": llm_online,
+            "used_fallback": not llm_online,
+            "execution_mode": execution_mode,
+            "recommendations": selected_tracks,
+        }
+
+        if include_tts:
+            payload["tts_included"] = False
+            if self.ai_dj:
+                audio = self.ai_dj.synthesize_speech(response_text)
+                if audio:
+                    payload["tts_included"] = True
+                    payload["tts_audio_base64"] = b64encode(audio).decode("ascii")
+                    payload["tts_format"] = "mp3"
+
+        return payload
+
+    def _build_llm_recommendation_prompt(
+        self, message: str, user_id: str, profile: UserProfile, tracks: list[dict[str, Any]]
+    ) -> str:
+        """Build prompt for recommendation summaries."""
+        formatted_tracks = "\n".join(
+            f"- {track.get('title', 'Unknown')} by {track.get('artist', 'Unknown')} ({track.get('genre', 'Unknown')})"
+            for track in tracks[:5]
+        )
+        if not formatted_tracks:
+            formatted_tracks = "- No tracks currently available."
+
+        listener_request = message.strip() or "Recommend tracks for my current vibe."
+        top_genres = ", ".join(list(profile.genres.keys())[:4]) if profile.genres else "mixed"
+
+        return (
+            f"Listener ID: {user_id}\n"
+            f"Listener request: {listener_request}\n"
+            f"Known preferred genres: {top_genres}\n"
+            f"Candidate tracks:\n{formatted_tracks}\n\n"
+            "Return a short radio-ready recommendation (max 80 words)."
+        )
+
+    def _build_fallback_recommendation_text(
+        self, tracks: list[dict[str, Any]], profile: UserProfile
+    ) -> str:
+        """Build deterministic recommendation text when LLM is unavailable."""
+        if not tracks:
+            return "I couldn't fetch tracks yet. Add more music and I'll queue suggestions."
+
+        top_titles = ", ".join(track.get("title", "Unknown") for track in tracks[:3])
+        favorite_genre = max(profile.genres, key=profile.genres.get) if profile.genres else None
+        if favorite_genre:
+            return f"Try {top_titles}. I leaned into your {favorite_genre} preference."
+        return f"Try {top_titles}. I'll refine this list as you share more feedback."

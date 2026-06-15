@@ -12,7 +12,8 @@ This guide covers the PersonalizedDJ system in QFZZ, an AI agent that learns you
 6. [Music Recommendation Logic](#music-recommendation-logic)
 7. [Community Connections](#community-connections)
 8. [Usage Examples](#usage-examples)
-9. [Best Practices](#best-practices)
+9. [LLM and Backend API Integration](#llm-and-backend-api-integration)
+10. [Best Practices](#best-practices)
 
 ## Overview
 
@@ -25,6 +26,36 @@ The PersonalizedDJ is an AI agent that serves as your personal radio DJ, learnin
 - **Connects** you with a community of music lovers
 
 See the [DJ API Documentation](../api/dj.md) for detailed API reference.
+
+## LLM and Backend API Integration
+
+`PersonalizedDJ` now exposes an API-friendly recommendation payload generator:
+
+```python
+payload = dj.generate_llm_recommendation_response(
+    user_id="user_001",
+    message="recommend upbeat tracks",
+    max_tracks=5,
+    include_tts=True,
+)
+```
+
+Response fields include:
+
+- `response`: DJ recommendation text
+- `provider`: provider used for generation
+- `execution_mode`: `edge-local`, `cloud`, or `fallback`
+- `used_fallback`: true when LLM was unavailable/offline
+- `recommendations`: selected tracks used for recommendation context
+- optional `tts_audio_base64` and `tts_format` when TTS is requested and available
+
+When used with `StreamingServer` and attached DJ instance, backend endpoints are available:
+
+- `POST /api/dj/chat`
+- `POST /api/dj/recommendations`
+- `GET /api/llm/providers`
+
+This enables local-first model execution (Ollama on edge) with automatic fallback behavior.
 
 ### Key Features
 

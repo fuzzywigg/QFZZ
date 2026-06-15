@@ -7,6 +7,7 @@ import json
 import logging
 import socketserver
 import threading
+from base64 import b64encode
 from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
@@ -34,14 +35,27 @@ class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
     STREAM_MANIFEST_PROVIDER = None
     STREAM_ERROR_HANDLER = None
 
+    def _read_json_body(self):
+        """Read JSON body from request."""
+        content_length = int(self.headers.get("Content-Length", "0"))
+        if content_length <= 0:
+            return {}
+        body = self.rfile.read(content_length).decode("utf-8")
+        return json.loads(body) if body else {}
+
+    def _send_json(self, payload, status: int = 200):
+        """Send JSON response."""
+        self.send_response(status)
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps(payload).encode("utf-8"))
+
     def do_POST(self):
         """Handle content requests."""
         parsed = urlparse(self.path)
         if parsed.path == "/request":
-            content_length = int(self.headers["Content-Length"])
-            post_data = self.rfile.read(content_length)
             try:
-                data = json.loads(post_data.decode("utf-8"))
+                data = self._read_json_body()
                 url = data.get("url")
                 if url and hasattr(AudioRequestHandler, "DJ_INSTANCE"):
                     # Async or Sync? For demo, sync.
@@ -51,12 +65,7 @@ class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
 
                     track = AudioRequestHandler.DJ_INSTANCE.request_track(url)
                     if track:
-                        self.send_response(200)
-                        self.send_header("Content-type", "application/json")
-                        self.end_headers()
-                        self.wfile.write(
-                            json.dumps({"status": "queued", "track": track}).encode("utf-8")
-                        )
+                        self._send_json({"status": "queued", "track": track}, 200)
 
                         # Add to playlist? We need a reference to Player too.
                         if hasattr(AudioRequestHandler, "PLAYER_INSTANCE"):
@@ -68,16 +77,76 @@ class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
 
             self.send_response(400)
             self.end_headers()
+        elif parsed.path == "/api/dj/chat":
+            try:
+                data = self._read_json_body()
+                user_id = str(data.get("user_id", "anonymous"))
+                message = str(data.get("message", "")).strip()
+                include_tts = bool(data.get("include_tts", False))
+
+                if not message:
+                    self._send_json({"error": "message is required"}, 400)
+                    return
+
+                dj = getattr(AudioRequestHandler, "DJ_INSTANCE", None)
+                if not dj or not hasattr(dj, "interact"):
+                    self._send_json({"error": "DJ instance is not available"}, 503)
+                    return
+
+                response_text = dj.interact(user_id, message)
+                payload = {"user_id": user_id, "response": response_text}
+
+                if include_tts and getattr(dj, "ai_dj", None):
+                    audio = dj.ai_dj.synthesize_speech(response_text)
+                    if audio:
+                        payload["tts_included"] = True
+                        payload["tts_audio_base64"] = b64encode(audio).decode("ascii")
+                        payload["tts_format"] = "mp3"
+                    else:
+                        payload["tts_included"] = False
+
+                self._send_json(payload, 200)
+            except Exception as e:
+                logger.error(f"DJ chat request failed: {e}")
+                self._send_json({"error": "Failed to process DJ chat request"}, 500)
+        elif parsed.path == "/api/dj/recommendations":
+            try:
+                data = self._read_json_body()
+                user_id = str(data.get("user_id", "anonymous"))
+                message = str(data.get("message", ""))
+                preferences = data.get("preferences")
+                if preferences is not None and not isinstance(preferences, dict):
+                    self._send_json({"error": "preferences must be an object"}, 400)
+                    return
+
+                max_tracks = int(data.get("max_tracks", 5))
+                include_tts = bool(data.get("include_tts", False))
+
+                dj = getattr(AudioRequestHandler, "DJ_INSTANCE", None)
+                if not dj or not hasattr(dj, "generate_llm_recommendation_response"):
+                    self._send_json(
+                        {"error": "DJ recommendation integration is not available"},
+                        503,
+                    )
+                    return
+
+                payload = dj.generate_llm_recommendation_response(
+                    user_id=user_id,
+                    message=message,
+                    preferences=preferences,
+                    max_tracks=max_tracks,
+                    include_tts=include_tts,
+                )
+                self._send_json(payload, 200)
+            except Exception as e:
+                logger.error(f"DJ recommendation request failed: {e}")
+                self._send_json({"error": "Failed to process recommendation request"}, 500)
         elif parsed.path == "/stream/reconnect":
             if callable(AudioRequestHandler.STREAM_ERROR_HANDLER):
                 recovered = AudioRequestHandler.STREAM_ERROR_HANDLER(
                     "client-reconnect-request", recoverable=True
                 )
-                payload = {"recovered": bool(recovered)}
-                self.send_response(200 if recovered else 503)
-                self.send_header("Content-type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps(payload).encode("utf-8"))
+                self._send_json({"recovered": bool(recovered)}, 200 if recovered else 503)
             else:
                 self.send_response(503)
                 self.end_headers()
@@ -135,6 +204,21 @@ class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Content-type", "application/vnd.apple.mpegurl")
             self.end_headers()
             self.wfile.write(manifest.encode("utf-8"))
+        elif path == "/api/llm/providers":
+            dj = getattr(AudioRequestHandler, "DJ_INSTANCE", None)
+            if dj and getattr(dj, "llm_router", None) and hasattr(dj.llm_router, "get_status"):
+                payload = dj.llm_router.get_status()
+                self._send_json(payload, 200)
+            else:
+                self._send_json(
+                    {
+                        "total_providers": 0,
+                        "available_providers": [],
+                        "unavailable_providers": [],
+                        "providers": [],
+                    },
+                    200,
+                )
 
         else:
             # Fallback to serving files
