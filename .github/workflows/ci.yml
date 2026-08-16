@@ -16,12 +16,11 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: pip install -e . 2>/dev/null || pip install -r requirements.txt 2>/dev/null || echo "No standard install method found"
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install -r requirements.txt
       - name: Lint
-        run: |
-          pip install ruff
-          ruff check . || true
+        run: ruff check .
       - name: Test
-        run: |
-          pip install pytest
-          pytest || echo "No tests found"
+        run: pytest

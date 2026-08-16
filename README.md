@@ -1,7 +1,6 @@
 # QFZZ: The Pulse of the Quantum Realm 🎵🤖
 
 [![CI](https://github.com/fuzzywigg/QFZZ/actions/workflows/ci.yml/badge.svg)](https://github.com/fuzzywigg/QFZZ/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/fuzzywigg/QFZZ/branch/main/graph/badge.svg)](https://codecov.io/gh/fuzzywigg/QFZZ)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -58,7 +57,7 @@ QFZZ is an AI radio station inspired by projects like Andon Labs Radio Eval, des
 
 #### Windows Users (PowerShell)
 
-**📘 For a complete Windows guide with PowerShell commands, see [WINDOWS_SETUP.md](WINDOWS_SETUP.md)**
+**📘 For a complete Windows guide with PowerShell commands, see [docs/QUICK_START_WINDOWS.md](docs/QUICK_START_WINDOWS.md)**
 
 Quick start for Windows:
 ```powershell
@@ -117,7 +116,7 @@ npm run dev
 # Open http://localhost:3000 in your browser
 ```
 
-For Windows PowerShell instructions, see [WINDOWS_SETUP.md](WINDOWS_SETUP.md).
+For Windows PowerShell instructions, see [docs/QUICK_START_WINDOWS.md](docs/QUICK_START_WINDOWS.md).
 
 #### Using Python API
 
@@ -160,7 +159,8 @@ QFZZ uses environment variables for configuration.
    ```
 
 2. Edit `.env` and add your API keys:
-   - **Required**: At least `GOOGLE_AI_API_KEY` for LLM functionality
+   - **`GEMINI_API_KEY`**: used by `run_server.py` and `qfzz/config/settings.py` for the local demo runners
+   - **`GOOGLE_AI_API_KEY`**: used by `qfzz/core/llm_router.py` (and `qfzz/app_config.py`) for the multi-provider router
    - **Recommended**: Also add `GROQ_API_KEY` for free tier backup
    - **Optional**: Add other providers for maximum reliability
 
@@ -304,7 +304,8 @@ score = blockchain.get_trust_score("user_001")
 
 ## 🛠️ Technology Stack
 
-- **Python 3.8+** - Core implementation
+- **Python 3.10+** (`requires-python = ">=3.10"` in `pyproject.toml`) - Core implementation
+- **Next.js 16** (`frontend/`) - Local web player UI
 - **Dataclasses** - Data structure definitions
 - **Logging** - Comprehensive logging
 - **Hashlib** - Blockchain hashing
@@ -345,12 +346,12 @@ We welcome contributions! This is an open source project aimed at democratizing 
 
 ### Areas for Contribution
 
-1. **LLM Integration** - Connect real LLM models for DJ interactions
-2. **Music Player** - Implement actual audio streaming
+1. **LLM Integration** - Expand providers and harden DJ chat beyond recommendations
+2. **Music Player** - Improve streaming reliability and library UX
 3. **Blockchain Integration** - Connect to real blockchain networks
 4. **Dataset Loaders** - Add loaders for popular open datasets
 5. **6G Protocol** - Implement 6G network protocols
-6. **UI/Frontend** - Build user interfaces
+6. **UI/Frontend** - Polish the Next.js player and station controls
 7. **Testing** - Add comprehensive test coverage
 8. **Documentation** - Improve and expand docs
 
@@ -361,9 +362,9 @@ We welcome contributions! This is an open source project aimed at democratizing 
 - [x] Dataset management with quality scoring
 - [x] Blockchain trust network
 - [x] Edge device optimization
-- [ ] Real LLM integration (e.g., Llama, Mistral)
-- [ ] Actual music streaming implementation
-- [ ] Web UI for user interaction
+- [x] Real LLM integration (#45 / #100) — Gemini/router-backed DJ recommendations
+- [x] Actual music streaming implementation (#44 / #95) — streaming API + player
+- [x] Web UI for user interaction (`frontend/` Next.js 16 local player)
 - [ ] Mobile app for edge devices
 - [ ] Integration with public blockchains
 - [ ] Community dataset marketplace
