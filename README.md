@@ -6,6 +6,9 @@
 
 **AI Radio for the Individual** - A next-generation radio station powered by AI, running on edge devices, secured with blockchain, and built on open source datasets.
 
+> **Honesty:** The vision copy talks about 6G, public-chain security, and a shipping AI radio. What is in this tree is a local Python station demo plus a Next.js `frontend/` player. `qfzz/blockchain/` is an in-process / `qfzz_ledger.json` hash chain, not a public network. `qfzz/edge/` and `qfzz/quantum/` are local helpers. No mobile app, no 6G protocol, no federation. CI honesty pass: #101.
+
+
 ## 🌟 Vision
 
 QFZZ is an AI radio station inspired by projects like Andon Labs Radio Eval, designed to create a personalized music experience where:
@@ -360,8 +363,8 @@ We welcome contributions! This is an open source project aimed at democratizing 
 - [x] Core architecture and components
 - [x] Personalized DJ system
 - [x] Dataset management with quality scoring
-- [x] Blockchain trust network
-- [x] Edge device optimization
+- [x] Local hash-chain ledger (`qfzz/blockchain/`, `qfzz_ledger.json`) — not a public chain
+- [x] Local `qfzz/edge/` helpers (not a shipping edge appliance)
 - [x] Real LLM integration (#45 / #100) — Gemini/router-backed DJ recommendations
 - [x] Actual music streaming implementation (#44 / #95) — streaming API + player
 - [x] Web UI for user interaction (`frontend/` Next.js 16 local player)
@@ -374,9 +377,9 @@ We welcome contributions! This is an open source project aimed at democratizing 
 ## 🔐 Security
 
 QFZZ takes security seriously:
-- Blockchain-verified datasets
-- Trust-based community system
-- Secure user identity management
+- Local hash-chain ledger for station events (`qfzz_ledger.json`)
+- In-memory trust records (`qfzz/blockchain/trust_network.py`)
+- No public-chain verification and no identity product
 - No proprietary data collection
 - Open source transparency
 
