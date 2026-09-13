@@ -273,4 +273,20 @@ describe("HiveTerminal", () => {
     render(<HiveTerminal />);
     expect(screen.getAllByText("SYSTEM").length).toBeGreaterThanOrEqual(1);
   });
+
+  it("ignores null DJ poll JSON body", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => null,
+    } as Response);
+    render(<HiveTerminal />);
+    const before = screen.getAllByText(/CONNECTING TO HIVE NET|QUEEN NODE|Greetings/).length;
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    const after = screen.getAllByText(/CONNECTING TO HIVE NET|QUEEN NODE|Greetings/).length;
+    expect(after).toBe(before);
+    expect(screen.getByText("QUEEN NODE: ONLINE")).toBeInTheDocument();
+  });
 });

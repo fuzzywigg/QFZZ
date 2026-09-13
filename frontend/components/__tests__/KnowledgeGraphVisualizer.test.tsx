@@ -194,4 +194,19 @@ describe("KnowledgeGraphVisualizer", () => {
     widthSpy.mockRestore();
     heightSpy.mockRestore();
   });
+
+  it("links-only payload defaults nodes to empty array", async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        links: [{ source: "a", target: "b" }],
+      }),
+    } as Response);
+
+    const { getByTestId } = render(<KnowledgeGraphVisualizer />);
+    await waitFor(() => {
+      expect(getByTestId("force-graph").getAttribute("data-node-count")).toBe("0");
+    });
+    expect(getByTestId("force-graph").getAttribute("data-link-count")).toBe("1");
+  });
 });
