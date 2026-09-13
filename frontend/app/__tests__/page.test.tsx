@@ -459,4 +459,268 @@ describe("AudioPlayer page", () => {
     });
     errSpy.mockRestore();
   });
+
+  it("leaves Reconnecting when recovered is false", async () => {
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/reconnect")) {
+        return {
+          ok: true,
+          json: async () => ({ recovered: false }),
+        } as Response;
+      }
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "playing",
+            current_track: {
+              title: "Stuck",
+              artist: "A",
+              url: "http://localhost/s.wav",
+              genre: "x",
+            },
+            prefetch_tracks: [],
+            buffer_seconds: 1,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    const { container } = render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("Stuck")).toBeInTheDocument());
+    const loadCalls = vi.mocked(window.HTMLAudioElement.prototype.load).mock.calls.length;
+    fireEvent.error(container.querySelector("audio")!);
+    await waitFor(() => {
+      expect(screen.getByText(/Reconnecting/)).toBeInTheDocument();
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(screen.getByText(/Reconnecting/)).toBeInTheDocument();
+    expect(screen.queryByText(/^Error$/)).not.toBeInTheDocument();
+    expect(vi.mocked(window.HTMLAudioElement.prototype.load).mock.calls.length).toBe(
+      loadCalls,
+    );
+  });
+
+  it("sets Error when reconnect fetch rejects", async () => {
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/reconnect")) {
+        return Promise.reject(new Error("network"));
+      }
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "playing",
+            current_track: {
+              title: "Fail",
+              artist: "A",
+              url: "http://localhost/f.wav",
+              genre: "x",
+            },
+            prefetch_tracks: [],
+            buffer_seconds: 1,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    const { container } = render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("Fail")).toBeInTheDocument());
+    fireEvent.error(container.querySelector("audio")!);
+    await waitFor(() => {
+      expect(screen.getByText(/Error/)).toBeInTheDocument();
+    });
+  });
+
+  it("POSTs /stream/reconnect on audio error", async () => {
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/reconnect")) {
+        return {
+          ok: true,
+          json: async () => ({ recovered: true }),
+        } as Response;
+      }
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "playing",
+            current_track: {
+              title: "Post",
+              artist: "A",
+              url: "http://localhost/p.wav",
+              genre: "x",
+            },
+            prefetch_tracks: [],
+            buffer_seconds: 1,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    const { container } = render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("Post")).toBeInTheDocument());
+    fireEvent.error(container.querySelector("audio")!);
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "http://localhost:8000/stream/reconnect",
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
+  });
+
+  it("builds playlist from prefetch_tracks only", async () => {
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "stopped",
+            current_track: null,
+            prefetch_tracks: [
+              {
+                title: "OnlyPrefetch",
+                artist: "P",
+                url: "http://localhost/only.wav",
+                genre: "ambient",
+              },
+            ],
+            buffer_seconds: 2,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    render(<AudioPlayer />);
+    await waitFor(() => {
+      expect(screen.getByText("OnlyPrefetch")).toBeInTheDocument();
+    });
+    expect(screen.queryByText("Connecting to Quantum Stream...")).not.toBeInTheDocument();
+  });
+
+  it("sets audio src from current track url", async () => {
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "playing",
+            current_track: {
+              title: "Src",
+              artist: "A",
+              url: "http://localhost/src.wav",
+              genre: "g",
+            },
+            prefetch_tracks: [],
+            buffer_seconds: 1,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    const { container } = render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("Src")).toBeInTheDocument());
+    expect(container.querySelector("audio")?.getAttribute("src")).toBe(
+      "http://localhost/src.wav",
+    );
+  });
+
+  it("formats 0:00 when duration is missing", async () => {
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "playing",
+            current_track: {
+              title: "NaNDur",
+              artist: "A",
+              url: "http://localhost/n.wav",
+              genre: "g",
+            },
+            prefetch_tracks: [],
+            buffer_seconds: 1,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    const { container } = render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("NaNDur")).toBeInTheDocument());
+    const audio = container.querySelector("audio") as HTMLAudioElement;
+    Object.defineProperty(audio, "currentTime", { configurable: true, value: 0 });
+    Object.defineProperty(audio, "duration", { configurable: true, value: NaN });
+    fireEvent.timeUpdate(audio);
+    await waitFor(() => {
+      expect(screen.getAllByText("0:00").length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  it("stops ledger polling on unmount", async () => {
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/ledger.json")) {
+        return {
+          ok: true,
+          json: async () => ({ height: 1, status: "Ok" }),
+        } as Response;
+      }
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "Offline",
+            current_track: null,
+            prefetch_tracks: [],
+            buffer_seconds: 0,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    const { unmount } = render(<AudioPlayer />);
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    const callsBefore = vi.mocked(fetch).mock.calls.length;
+    unmount();
+    await act(async () => {
+      vi.advanceTimersByTime(15000);
+    });
+    expect(vi.mocked(fetch).mock.calls.length).toBe(callsBefore);
+  });
+
+  it("renders three client-island dynamic stubs", async () => {
+    render(<AudioPlayer />);
+    expect(screen.getAllByTestId("dynamic-stub")).toHaveLength(3);
+  });
 });

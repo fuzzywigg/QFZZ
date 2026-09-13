@@ -51,4 +51,15 @@ describe("static marketing pages", () => {
       "/",
     );
   });
+
+  it("About mentions Hive Mind and public domain", () => {
+    render(<AboutPage />);
+    expect(screen.getByText(/Hive/i)).toBeInTheDocument();
+    expect(screen.getByText(/public domain/i)).toBeInTheDocument();
+  });
+
+  it("Contact points users to Hive Terminal", () => {
+    render(<ContactPage />);
+    expect(screen.getByText(/Hive Terminal/i)).toBeInTheDocument();
+  });
 });
