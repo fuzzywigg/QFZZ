@@ -81,4 +81,32 @@ describe("KnowledgeGraphVisualizer", () => {
     expect(getByTestId("force-graph").getAttribute("data-node-count")).toBe("0");
     errSpy.mockRestore();
   });
+
+  it("ignores null JSON payload", async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => null,
+    } as Response);
+    const { getByTestId } = render(<KnowledgeGraphVisualizer />);
+    await waitFor(() => {
+      expect(getByTestId("force-graph").getAttribute("data-node-count")).toBe("0");
+    });
+  });
+
+  it("defaults missing links and colors unknown node types grey", async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        nodes: [{ id: "n1" }, { id: "n2", type: "track" }],
+      }),
+    } as Response);
+    const { getByTestId } = render(<KnowledgeGraphVisualizer />);
+    await waitFor(() => {
+      expect(getByTestId("force-graph").getAttribute("data-node-count")).toBe("2");
+    });
+    expect(getByTestId("force-graph").getAttribute("data-link-count")).toBe("0");
+    const colors = getByTestId("force-graph").getAttribute("data-colors") || "";
+    expect(colors).toContain("#94a3b8");
+    expect(colors).toContain("#8b5cf6");
+  });
 });

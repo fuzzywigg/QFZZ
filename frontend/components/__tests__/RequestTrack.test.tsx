@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import RequestTrack from "@/components/RequestTrack";
 
@@ -77,6 +77,72 @@ describe("RequestTrack", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Connection failed.")).toBeInTheDocument();
+    });
+  });
+
+  it("ignores empty URL submit", async () => {
+    const user = userEvent.setup();
+    render(<RequestTrack />);
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    expect(fetch).not.toHaveBeenCalled();
+    expect(screen.queryByText(/queued|blocked|failed|Ingesting/i)).not.toBeInTheDocument();
+  });
+
+  it("shows server failure when response is not ok", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: async () => ({}),
+    } as Response);
+
+    render(<RequestTrack />);
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://freemusicarchive.org/track/1",
+    );
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Failed to process request. Check server logs."),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("shows loading state then resets after success timeout", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    let resolveFetch: (value: Response) => void = () => undefined;
+    vi.mocked(fetch).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        }),
+    );
+
+    render(<RequestTrack />);
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://librivox.org/book/1",
+    );
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+
+    expect(screen.getByRole("button", { name: "..." })).toBeDisabled();
+    expect(screen.getByText("Ingesting content...")).toBeInTheDocument();
+
+    await act(async () => {
+      resolveFetch({ ok: true, json: async () => ({}) } as Response);
+    });
+    await waitFor(() => {
+      expect(screen.getByText("Track queued successfully!")).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(3000);
+    });
+    await waitFor(() => {
+      expect(screen.queryByText("Track queued successfully!")).not.toBeInTheDocument();
     });
   });
 });
