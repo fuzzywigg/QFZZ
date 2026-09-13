@@ -7,7 +7,6 @@ import json
 import logging
 import urllib.error
 import urllib.request
-from typing import Optional
 
 from qfzz.exceptions import LLMAuthenticationError, LLMConnectionError, LLMGenerationError
 
@@ -38,7 +37,7 @@ class GroqProvider:
         return self._available and self.api_key is not None
 
     def generate(
-        self, prompt: str, system_prompt: Optional[str] = None, max_tokens: int = 500
+        self, prompt: str, system_prompt: str | None = None, max_tokens: int = 500
     ) -> str:
         """
         Generate text using Groq API.
