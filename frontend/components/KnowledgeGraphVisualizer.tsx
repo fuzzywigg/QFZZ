@@ -3,6 +3,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 
+// MusicPlayer / streaming API historically serves graph.json on :8001
+const API_BASE = process.env.NEXT_PUBLIC_QFZZ_API_BASE || 'http://localhost:8001';
+
 export default function KnowledgeGraphVisualizer() {
     const [graphData, setGraphData] = useState({ nodes: [], links: [] });
     const [dimensions, setDimensions] = useState({ width: 500, height: 400 });
@@ -17,7 +20,7 @@ export default function KnowledgeGraphVisualizer() {
             });
         }
 
-        fetch('http://localhost:8001/graph.json')
+        fetch(`${API_BASE}/graph.json`)
             .then(res => res.json())
             .then(data => {
                 if (data) {

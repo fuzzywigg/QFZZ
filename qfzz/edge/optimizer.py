@@ -344,8 +344,14 @@ class EdgeOptimizer:
             logger.warning(f"Device {device_id} is not battery powered")
             return
 
-        device.battery_level = battery_level
-        logger.debug(f"Updated battery for {device_id}: {battery_level:.1%}")
+        # Clamp to valid range so later EdgeDeviceConfig.validate() stays consistent
+        clamped = max(0.0, min(1.0, float(battery_level)))
+        if clamped != battery_level:
+            logger.warning(
+                f"Battery level {battery_level} for {device_id} out of range; clamped to {clamped}"
+            )
+        device.battery_level = clamped
+        logger.debug(f"Updated battery for {device_id}: {clamped:.1%}")
 
     def get_statistics(self) -> dict[str, Any]:
         """

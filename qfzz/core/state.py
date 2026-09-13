@@ -35,33 +35,16 @@ class StateManager:
 
     def _initialize_state_files(self):
         """Initialize empty state files with default structures."""
-        default_states = {
-            "current_track.json": None,
-            "playlist.json": {"queue": []},
-            "listener_state.json": {
-                "active_listeners": 0,
-                "recent_requests": [],
-                "preferences": {},
-            },
-            "tasks.json": {"pending": []},
-            "dj_memory.json": {
-                "conversation_history": [],
-                "learned_patterns": {},
-                "banned_phrases": [
-                    "AI",
-                    "LLM",
-                    "language model",
-                    "I am an AI",
-                    "as an artificial intelligence",
-                    "I don't have feelings",
-                ],
-            },
-        }
-
-        for filename, default_data in default_states.items():
+        for filename in (
+            "current_track.json",
+            "playlist.json",
+            "listener_state.json",
+            "tasks.json",
+            "dj_memory.json",
+        ):
             filepath = self.honeycomb_dir / filename
             if not filepath.exists():
-                self._write_file(filepath, default_data)
+                self._write_file(filepath, self._default_state(filename))
 
     def _get_lock_path(self, filepath: Path) -> Path:
         """Get lock file path for a given file."""
@@ -144,9 +127,48 @@ class StateManager:
         self._write_file(self.honeycomb_dir / "current_track.json", track_data)
 
     # Playlist Operations
+    def _default_state(self, filename: str) -> Any:
+        """Return the default structure for a honeycomb state file."""
+        defaults: dict[str, Any] = {
+            "current_track.json": None,
+            "playlist.json": {"queue": []},
+            "listener_state.json": {
+                "active_listeners": 0,
+                "recent_requests": [],
+                "preferences": {},
+            },
+            "tasks.json": {"pending": []},
+            "dj_memory.json": {
+                "conversation_history": [],
+                "learned_patterns": {},
+                "banned_phrases": [
+                    "AI",
+                    "LLM",
+                    "language model",
+                    "I am an AI",
+                    "as an artificial intelligence",
+                    "I don't have feelings",
+                ],
+            },
+        }
+        return defaults[filename]
+
+    def _read_or_restore(self, filename: str) -> Any:
+        """
+        Read a state file, restoring the default structure if the file is missing.
+
+        Avoids TypeError on mutators when honeycomb JSON was deleted after init.
+        """
+        filepath = self.honeycomb_dir / filename
+        data = self._read_file(filepath)
+        if data is None and filename != "current_track.json":
+            data = self._default_state(filename)
+            self._write_file(filepath, data)
+        return data
+
     def get_playlist(self) -> dict[str, list[dict[str, Any]]]:
         """Get current playlist queue."""
-        return self._read_file(self.honeycomb_dir / "playlist.json")
+        return self._read_or_restore("playlist.json")
 
     def update_playlist(self, queue: list[dict[str, Any]]) -> None:
         """
@@ -182,7 +204,7 @@ class StateManager:
     # Listener State Operations
     def get_listener_state(self) -> dict[str, Any]:
         """Get listener state."""
-        return self._read_file(self.honeycomb_dir / "listener_state.json")
+        return self._read_or_restore("listener_state.json")
 
     def update_listener_count(self, count: int) -> None:
         """Update active listener count."""
@@ -219,7 +241,7 @@ class StateManager:
     # Task Operations
     def get_tasks(self) -> dict[str, list[dict[str, Any]]]:
         """Get pending tasks."""
-        return self._read_file(self.honeycomb_dir / "tasks.json")
+        return self._read_or_restore("tasks.json")
 
     def add_task(
         self, action: str, args: dict[str, Any] | None = None, task_id: str | None = None
@@ -276,7 +298,7 @@ class StateManager:
     # DJ Memory Operations
     def get_dj_memory(self) -> dict[str, Any]:
         """Get DJ memory (conversation history, learned patterns, banned phrases)."""
-        return self._read_file(self.honeycomb_dir / "dj_memory.json")
+        return self._read_or_restore("dj_memory.json")
 
     def add_conversation(self, role: str, content: str) -> None:
         """

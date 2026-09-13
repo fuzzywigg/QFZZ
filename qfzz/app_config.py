@@ -13,6 +13,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def _env_int(name: str, default: int) -> int:
+    """Parse an integer env var; keep default on missing/invalid values."""
+    raw = os.getenv(name)
+    if raw is None or raw == "":
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
 class Config:
     """Central configuration for QFZZ."""
 
@@ -20,7 +31,7 @@ class Config:
     STATION_NAME: str = os.getenv("QFZZ_STATION_NAME", "QFZZ")
     AUDIO_CONTENT_DIR: Path = Path(os.getenv("QFZZ_AUDIO_CONTENT_DIR", "./qfzz_audio_content"))
     CACHE_DIR: Path = Path(os.getenv("QFZZ_CACHE_DIR", "./cache"))
-    PORT: int = int(os.getenv("QFZZ_PORT", "8080"))
+    PORT: int = _env_int("QFZZ_PORT", 8080)
 
     # AI/LLM Provider Keys
     GOOGLE_AI_API_KEY: str | None = os.getenv("GOOGLE_AI_API_KEY")
@@ -58,8 +69,8 @@ class Config:
 
     # Advanced Options
     STRICT_LICENSING: bool = os.getenv("QFZZ_STRICT_LICENSING", "true").lower() == "true"
-    CACHE_EXPIRY_DAYS: int = int(os.getenv("QFZZ_CACHE_EXPIRY_DAYS", "30"))
-    MAX_DOWNLOADS: int = int(os.getenv("QFZZ_MAX_DOWNLOADS", "3"))
+    CACHE_EXPIRY_DAYS: int = _env_int("QFZZ_CACHE_EXPIRY_DAYS", 30)
+    MAX_DOWNLOADS: int = _env_int("QFZZ_MAX_DOWNLOADS", 3)
 
     @classmethod
     def is_configured(cls) -> bool:

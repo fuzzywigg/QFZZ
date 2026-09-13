@@ -169,6 +169,18 @@ class ConfigManager:
                 if hasattr(settings.advanced, key):
                     setattr(settings.advanced, key, value)
 
+    @staticmethod
+    def _env_int(name: str, default: int) -> int:
+        """Parse an integer env var; keep default on missing/invalid values."""
+        raw = os.getenv(name)
+        if raw is None or raw == "":
+            return default
+        try:
+            return int(raw)
+        except ValueError:
+            logger.warning("Invalid integer for %s=%r; keeping %s", name, raw, default)
+            return default
+
     def _apply_env_config(self, settings: QFZZSettings):
         """Apply environment variable configuration to settings."""
         # Station settings
@@ -177,7 +189,7 @@ class ConfigManager:
             "QFZZ_AUDIO_CONTENT_DIR", settings.station.audio_content_dir
         )
         settings.station.cache_dir = os.getenv("QFZZ_CACHE_DIR", settings.station.cache_dir)
-        settings.station.port = int(os.getenv("QFZZ_PORT", str(settings.station.port)))
+        settings.station.port = self._env_int("QFZZ_PORT", settings.station.port)
         settings.station.edge_mode = os.getenv("QFZZ_EDGE_MODE", "").lower() == "true"
         settings.station.enable_6g = os.getenv("QFZZ_ENABLE_6G", "").lower() == "true"
         settings.station.blockchain_enabled = (
@@ -214,11 +226,11 @@ class ConfigManager:
         settings.advanced.strict_licensing = (
             os.getenv("QFZZ_STRICT_LICENSING", "true").lower() == "true"
         )
-        settings.advanced.cache_expiry_days = int(
-            os.getenv("QFZZ_CACHE_EXPIRY_DAYS", str(settings.advanced.cache_expiry_days))
+        settings.advanced.cache_expiry_days = self._env_int(
+            "QFZZ_CACHE_EXPIRY_DAYS", settings.advanced.cache_expiry_days
         )
-        settings.advanced.max_downloads = int(
-            os.getenv("QFZZ_MAX_DOWNLOADS", str(settings.advanced.max_downloads))
+        settings.advanced.max_downloads = self._env_int(
+            "QFZZ_MAX_DOWNLOADS", settings.advanced.max_downloads
         )
 
     def _validate_config(self, settings: QFZZSettings):
