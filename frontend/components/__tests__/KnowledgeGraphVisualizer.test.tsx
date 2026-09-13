@@ -140,4 +140,32 @@ describe("KnowledgeGraphVisualizer", () => {
     });
     expect(getByTestId("force-graph").getAttribute("data-link-count")).toBe("2");
   });
+
+  it("coerces null nodes and links to empty arrays", async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({ nodes: null, links: null }),
+    } as Response);
+    const { getByTestId } = render(<KnowledgeGraphVisualizer />);
+    await waitFor(() => {
+      expect(getByTestId("force-graph").getAttribute("data-node-count")).toBe("0");
+    });
+    expect(getByTestId("force-graph").getAttribute("data-link-count")).toBe("0");
+  });
+
+  it("survives json() throw and logs error", async () => {
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => {
+        throw new Error("parse fail");
+      },
+    } as Response);
+    const { getByTestId } = render(<KnowledgeGraphVisualizer />);
+    await waitFor(() => {
+      expect(getByTestId("force-graph").getAttribute("data-node-count")).toBe("0");
+    });
+    expect(errSpy).toHaveBeenCalled();
+    errSpy.mockRestore();
+  });
 });

@@ -247,4 +247,140 @@ describe("RequestTrack", () => {
       );
     });
   });
+
+  it("submits allowlisted URL on Enter", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    } as Response);
+    render(<RequestTrack />);
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://archive.org/details/enter{Enter}",
+    );
+    await waitFor(() => {
+      expect(screen.getByText("Track queued successfully!")).toBeInTheDocument();
+    });
+  });
+
+  it("does not double-fetch while Queue is disabled", async () => {
+    const user = userEvent.setup();
+    let resolveFetch: (value: Response) => void = () => undefined;
+    vi.mocked(fetch).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        }),
+    );
+    render(<RequestTrack />);
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://archive.org/details/once",
+    );
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    expect(screen.getByRole("button", { name: "..." })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "..." }));
+    expect(fetch).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      resolveFetch({ ok: true, json: async () => ({}) } as Response);
+    });
+  });
+
+  it("whitespace-only URL hits whitelist error not empty short-circuit", async () => {
+    const user = userEvent.setup();
+    render(<RequestTrack />);
+    await user.type(screen.getByPlaceholderText(/Paste URL/), "   ");
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    expect(
+      screen.getByText(/URL blocked. Only trusted public domain sources/),
+    ).toBeInTheDocument();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("recovers from error to success on retry", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({}),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      } as Response);
+
+    render(<RequestTrack />);
+    const input = screen.getByPlaceholderText(/Paste URL/);
+    await user.type(input, "https://musopen.org/music/retry");
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    await waitFor(() => {
+      expect(
+        screen.getByText("Failed to process request. Check server logs."),
+      ).toBeInTheDocument();
+    });
+    await user.clear(input);
+    await user.type(input, "https://musopen.org/music/retry");
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    await waitFor(() => {
+      expect(screen.getByText("Track queued successfully!")).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByText("Failed to process request. Check server logs."),
+    ).not.toBeInTheDocument();
+  });
+
+  it("re-enables Queue after success idle reset", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    } as Response);
+
+    render(<RequestTrack />);
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://archive.org/details/reset",
+    );
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    await waitFor(() => {
+      expect(screen.getByText("Track queued successfully!")).toBeInTheDocument();
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(screen.getByRole("button", { name: "Queue" })).toBeEnabled();
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://archive.org/details/again",
+    );
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it("sends Content-Type application/json", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    } as Response);
+    render(<RequestTrack />);
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://librivox.org/book/headers",
+    );
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "http://localhost:8000/request",
+        expect.objectContaining({
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+    });
+  });
 });

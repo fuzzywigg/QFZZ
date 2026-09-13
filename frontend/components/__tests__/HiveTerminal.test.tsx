@@ -156,4 +156,96 @@ describe("HiveTerminal", () => {
     });
     expect(vi.mocked(fetch).mock.calls.length).toBe(callsBefore);
   });
+
+  it("transmits on Enter key", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<HiveTerminal />);
+    await user.type(
+      screen.getByPlaceholderText("Transmit to Hive..."),
+      "enter-msg{Enter}",
+    );
+    expect(screen.getByText("enter-msg")).toBeInTheDocument();
+  });
+
+  it("appends distinct successive DJ poll messages", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ message: "msg-a" }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ message: "msg-b" }),
+      } as Response);
+
+    render(<HiveTerminal />);
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getByText("msg-a")).toBeInTheDocument();
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getByText("msg-b")).toBeInTheDocument();
+  });
+
+  it("dedupes only against last bubble so USER in between allows repeat AI", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({ message: "repeat-me" }),
+    } as Response);
+
+    render(<HiveTerminal />);
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getAllByText("repeat-me")).toHaveLength(1);
+
+    await user.type(screen.getByPlaceholderText("Transmit to Hive..."), "break{Enter}");
+    expect(screen.getByText("break")).toBeInTheDocument();
+
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getAllByText("repeat-me").length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("survives poll json() rejection", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => {
+        throw new Error("bad json");
+      },
+    } as Response);
+    render(<HiveTerminal />);
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getByText("QUEEN NODE: ONLINE")).toBeInTheDocument();
+  });
+
+  it("rapid double-send yields two USER and two AI replies", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.spyOn(Math, "random").mockReturnValue(0.25);
+    render(<HiveTerminal />);
+
+    await user.type(screen.getByPlaceholderText("Transmit to Hive..."), "one{Enter}");
+    await user.type(screen.getByPlaceholderText("Transmit to Hive..."), "two{Enter}");
+    expect(screen.getByText("one")).toBeInTheDocument();
+    expect(screen.getByText("two")).toBeInTheDocument();
+
+    await act(async () => {
+      vi.advanceTimersByTime(1100);
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(1100);
+    });
+    expect(screen.getAllByText("The Queen acknowledges your input.")).toHaveLength(2);
+  });
 });
