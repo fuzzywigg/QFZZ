@@ -8,6 +8,9 @@
 
 > **Honesty:** The vision copy talks about 6G, public-chain security, and a shipping AI radio. What is in this tree is a local Python station demo plus a Next.js `frontend/` player. `qfzz/blockchain/` is an in-process / `qfzz_ledger.json` hash chain, not a public network. `qfzz/edge/` and `qfzz/quantum/` are local helpers. No mobile app, no 6G protocol, no federation. CI honesty pass: #101.
 
+## Cloud agents
+
+Bootstrap lives in [`.cursor/environment.json`](.cursor/environment.json) (`install` verifies keeper files; no `start` services, no secrets in the file). PR CI is [`.github/workflows/ci.yml`](.github/workflows/ci.yml) (hygiene + lint + test). Agent routing: [AGENTS.md](AGENTS.md). Env placeholders only: [`.env.example`](.env.example).
 
 ## 🌟 Vision
 

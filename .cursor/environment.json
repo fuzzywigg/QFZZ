@@ -1,0 +1,4 @@
+{
+  "name": "QFZZ",
+  "install": "test -f README.md && test -f LICENSE && test -f AGENTS.md && test -f CONTRIBUTING.md && test -f requirements.txt && test -f pyproject.toml && test -f main.py && test -f run_server.py && test -f .env.example && test -f .github/workflows/ci.yml && test -f frontend/package.json"
+}
