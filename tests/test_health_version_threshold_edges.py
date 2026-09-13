@@ -6,11 +6,7 @@ from unittest.mock import MagicMock, patch
 from qfzz.utils.health import HealthChecker, HealthStatus
 
 
-def test_get_version_reads_version_file(tmp_path, monkeypatch):
-    version_file = tmp_path / "VERSION"
-    version_file.write_text("9.9.9\n", encoding="utf-8")
-    # HealthChecker looks at Path(__file__).parent.parent / "VERSION"
-    # which is qfzz/VERSION — patch Path.read_text on that resolution via monkeypatch
+def test_get_version_reads_version_file():
     checker = HealthChecker()
     with patch.object(Path, "exists", return_value=True), patch.object(
         Path, "read_text", return_value="2.3.4\n"
