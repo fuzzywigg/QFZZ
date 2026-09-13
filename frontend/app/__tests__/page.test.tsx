@@ -852,4 +852,303 @@ describe("AudioPlayer page", () => {
       playBefore,
     );
   });
+
+  it("session poll resets currentTrackIndex to 0 after Next", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "playing",
+            current_track: {
+              title: "Anchor",
+              artist: "A",
+              url: "http://localhost/a.wav",
+              genre: "g",
+            },
+            prefetch_tracks: [
+              {
+                title: "NextUp",
+                artist: "B",
+                url: "http://localhost/b.wav",
+                genre: "g",
+              },
+            ],
+            buffer_seconds: 4,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("Anchor")).toBeInTheDocument());
+    await user.click(screen.getByTitle("Next Track"));
+    await waitFor(() => expect(screen.getByText("NextUp")).toBeInTheDocument());
+
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    await waitFor(() => expect(screen.getByText("Anchor")).toBeInTheDocument());
+  });
+
+  it("non-array prefetch_tracks keeps only current_track", async () => {
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "playing",
+            current_track: {
+              title: "Solo",
+              artist: "One",
+              url: "http://localhost/solo.wav",
+              genre: "solo",
+            },
+            // Array.isArray false → merge skips; length===0 → preload effect no-ops
+            prefetch_tracks: { length: 0, title: "GhostPrefetch" },
+            buffer_seconds: 2,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("Solo")).toBeInTheDocument());
+    expect(screen.queryByText("GhostPrefetch")).not.toBeInTheDocument();
+  });
+
+  it("late non-empty playlist.json overwrites session merge", async () => {
+    let resolvePlaylist: (value: unknown) => void = () => undefined;
+    const playlistPromise = new Promise((resolve) => {
+      resolvePlaylist = resolve;
+    });
+
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/playlist.json")) {
+        return {
+          ok: true,
+          json: async () => playlistPromise,
+        } as Response;
+      }
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "playing",
+            current_track: {
+              title: "SessionTrack",
+              artist: "S",
+              url: "http://localhost/s.wav",
+              genre: "s",
+            },
+            prefetch_tracks: [],
+            buffer_seconds: 1,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ({}) } as Response;
+    });
+
+    render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("SessionTrack")).toBeInTheDocument());
+
+    await act(async () => {
+      resolvePlaylist([
+        {
+          title: "PlaylistWins",
+          artist: "P",
+          url: "http://localhost/p.wav",
+          genre: "p",
+        },
+      ]);
+    });
+    await waitFor(() => expect(screen.getByText("PlaylistWins")).toBeInTheDocument());
+    expect(screen.queryByText("SessionTrack")).not.toBeInTheDocument();
+  });
+
+  it("logs Play next failed when next-track play rejects", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.mocked(window.HTMLAudioElement.prototype.play).mockRejectedValue(
+      new Error("autoplay blocked"),
+    );
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "stopped",
+            current_track: {
+              title: "Alpha",
+              artist: "A",
+              url: "http://localhost/a.wav",
+              genre: "g",
+            },
+            prefetch_tracks: [
+              {
+                title: "Beta",
+                artist: "B",
+                url: "http://localhost/b.wav",
+                genre: "g",
+              },
+            ],
+            buffer_seconds: 3,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("Alpha")).toBeInTheDocument());
+    await user.click(screen.getByTitle("Next Track"));
+    await waitFor(() => expect(screen.getByText("Beta")).toBeInTheDocument());
+    await act(async () => {
+      vi.advanceTimersByTime(120);
+    });
+    await waitFor(() => {
+      expect(errSpy).toHaveBeenCalledWith(
+        "Play next failed:",
+        expect.any(Error),
+      );
+    });
+    errSpy.mockRestore();
+  });
+
+  it("recovered play rejection stays Playing without Error status", async () => {
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.mocked(window.HTMLAudioElement.prototype.play).mockRejectedValue(
+      new Error("silent fail"),
+    );
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/reconnect")) {
+        return {
+          ok: true,
+          json: async () => ({ recovered: true }),
+        } as Response;
+      }
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "playing",
+            current_track: {
+              title: "SilentRecover",
+              artist: "A",
+              url: "http://localhost/r.wav",
+              genre: "x",
+            },
+            prefetch_tracks: [],
+            buffer_seconds: 1,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    const { container } = render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("SilentRecover")).toBeInTheDocument());
+    fireEvent.error(container.querySelector("audio")!);
+    await waitFor(() => {
+      expect(screen.getByText(/Reconnecting/)).toBeInTheDocument();
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(400);
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/Playing/)).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/Error/)).not.toBeInTheDocument();
+    expect(errSpy).not.toHaveBeenCalledWith(
+      "Play next failed:",
+      expect.anything(),
+    );
+    errSpy.mockRestore();
+  });
+
+  it("falsy ledger.json body leaves Init stats", async () => {
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/ledger.json")) {
+        return { ok: true, json: async () => null } as Response;
+      }
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "Offline",
+            current_track: null,
+            prefetch_tracks: [],
+            buffer_seconds: 0,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    render(<AudioPlayer />);
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getByText("Ledger Height: 0")).toBeInTheDocument();
+    expect(screen.getByText("Trust Status: Init")).toBeInTheDocument();
+  });
+
+  it("progress bar width tracks timeupdate ratio", async () => {
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "playing",
+            current_track: {
+              title: "Progress",
+              artist: "A",
+              url: "http://localhost/p.wav",
+              genre: "g",
+            },
+            prefetch_tracks: [],
+            buffer_seconds: 1,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    const { container } = render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("Progress")).toBeInTheDocument());
+    const audio = container.querySelector("audio") as HTMLAudioElement;
+    Object.defineProperty(audio, "currentTime", { configurable: true, value: 65 });
+    Object.defineProperty(audio, "duration", { configurable: true, value: 125 });
+    fireEvent.timeUpdate(audio);
+    await waitFor(() => {
+      const bar = container.querySelector(
+        ".bg-gradient-to-r.from-purple-500.to-blue-500",
+      ) as HTMLElement;
+      expect(bar.style.width).toBe("52%");
+    });
+  });
 });

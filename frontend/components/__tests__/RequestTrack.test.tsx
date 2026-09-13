@@ -383,4 +383,27 @@ describe("RequestTrack", () => {
       );
     });
   });
+
+  it("re-enables Queue immediately while success message still shows", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    } as Response);
+
+    render(<RequestTrack />);
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://archive.org/details/mid-success",
+    );
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Track queued successfully!")).toBeInTheDocument();
+    });
+    // status leaves 'loading' before the 3s idle clear — Queue is usable again
+    expect(screen.getByRole("button", { name: "Queue" })).toBeEnabled();
+    expect(screen.getByText("Track queued successfully!")).toBeInTheDocument();
+  });
 });
