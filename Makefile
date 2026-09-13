@@ -1,16 +1,17 @@
-.PHONY: help install install-dev test lint format run deploy clean
+.PHONY: help install install-dev test test-frontend lint format run deploy clean
 
 help:
 	@echo "QFZZ FuzzyRadio - Development Commands"
 	@echo ""
-	@echo "  make install      Install dependencies"
-	@echo "  make install-dev  Install dev dependencies"
-	@echo "  make test         Run tests"
-	@echo "  make lint         Run linting"
-	@echo "  make format       Format code"
-	@echo "  make run          Start server"
-	@echo "  make deploy       Deploy to Firebase"
-	@echo "  make clean        Clean build artifacts"
+	@echo "  make install        Install dependencies"
+	@echo "  make install-dev    Install dev dependencies"
+	@echo "  make test           Run pytest"
+	@echo "  make test-frontend  Run frontend Vitest"
+	@echo "  make lint           Run linting"
+	@echo "  make format         Format code"
+	@echo "  make run            Start server"
+	@echo "  make deploy         Deploy to Firebase"
+	@echo "  make clean          Clean build artifacts"
 
 install:
 	pip install -e .
@@ -20,6 +21,9 @@ install-dev:
 
 test:
 	pytest --cov=qfzz --cov-report=html --cov-report=term
+
+test-frontend:
+	cd frontend && npm test
 
 lint:
 	ruff check qfzz/ tests/

@@ -29,7 +29,7 @@ class LLMProvider(ABC):
 class MockLLMClient(LLMProvider):
     """Fallback LLM that returns static responses."""
 
-    def generate(self, prompt: str, system_prompt: str | None = None) -> str:
+    def generate(self, prompt: str, system_prompt: str | None = None, **kwargs) -> str:
         return (
             f"I'm a placeholder DJ. I heard you say: '{prompt}'. (Connect a real LLM to hear more!)"
         )
