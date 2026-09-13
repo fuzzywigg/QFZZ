@@ -145,4 +145,49 @@ describe("RequestTrack", () => {
       expect(screen.queryByText("Track queued successfully!")).not.toBeInTheDocument();
     });
   });
+
+  it("clears input on success and blocks double submit while loading", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    let resolveFetch: (value: Response) => void = () => undefined;
+    vi.mocked(fetch).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        }),
+    );
+
+    render(<RequestTrack />);
+    const input = screen.getByPlaceholderText(/Paste URL/);
+    await user.type(input, "https://archive.org/details/x");
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    expect(screen.getByRole("button", { name: "..." })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "..." }));
+    expect(fetch).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveFetch({ ok: true, json: async () => ({}) } as Response);
+    });
+    await waitFor(() => {
+      expect(screen.getByText("Track queued successfully!")).toBeInTheDocument();
+    });
+    expect(input).toHaveValue("");
+  });
+
+  it("documents substring whitelist quirk for archive.org in query", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    } as Response);
+    render(<RequestTrack />);
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://evil.com/?q=archive.org",
+    );
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalled();
+    });
+  });
 });

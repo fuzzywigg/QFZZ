@@ -109,4 +109,18 @@ describe("KnowledgeGraphVisualizer", () => {
     expect(colors).toContain("#94a3b8");
     expect(colors).toContain("#8b5cf6");
   });
+
+  it("defaults missing nodes when only links are present", async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        links: [{ source: "a", target: "b" }, { source: "b", target: "c" }],
+      }),
+    } as Response);
+    const { getByTestId } = render(<KnowledgeGraphVisualizer />);
+    await waitFor(() => {
+      expect(getByTestId("force-graph").getAttribute("data-node-count")).toBe("0");
+    });
+    expect(getByTestId("force-graph").getAttribute("data-link-count")).toBe("2");
+  });
 });
