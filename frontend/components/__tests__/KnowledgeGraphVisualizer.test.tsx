@@ -6,6 +6,8 @@ vi.mock("react-force-graph-2d", () => ({
   default: (props: {
     graphData: { nodes: unknown[]; links: unknown[] };
     nodeColor?: (node: { type?: string }) => string;
+    width?: number;
+    height?: number;
   }) => {
     const colors = (props.graphData.nodes as { id: string; type?: string }[]).map((n) =>
       props.nodeColor ? props.nodeColor(n) : "",
@@ -16,6 +18,8 @@ vi.mock("react-force-graph-2d", () => ({
         data-node-count={props.graphData.nodes.length}
         data-link-count={props.graphData.links.length}
         data-colors={colors.join(",")}
+        data-width={String(props.width ?? "")}
+        data-height={String(props.height ?? "")}
       />
     );
   },
@@ -167,5 +171,27 @@ describe("KnowledgeGraphVisualizer", () => {
     });
     expect(errSpy).toHaveBeenCalled();
     errSpy.mockRestore();
+  });
+
+  it("passes container offsetWidth/offsetHeight to ForceGraph2D", async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({ nodes: [], links: [] }),
+    } as Response);
+
+    const widthSpy = vi
+      .spyOn(HTMLElement.prototype, "offsetWidth", "get")
+      .mockReturnValue(640);
+    const heightSpy = vi
+      .spyOn(HTMLElement.prototype, "offsetHeight", "get")
+      .mockReturnValue(320);
+
+    const { getByTestId } = render(<KnowledgeGraphVisualizer />);
+    await waitFor(() => {
+      expect(getByTestId("force-graph").getAttribute("data-width")).toBe("640");
+    });
+    expect(getByTestId("force-graph").getAttribute("data-height")).toBe("320");
+    widthSpy.mockRestore();
+    heightSpy.mockRestore();
   });
 });

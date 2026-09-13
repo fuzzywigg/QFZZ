@@ -62,4 +62,16 @@ describe("static marketing pages", () => {
     render(<ContactPage />);
     expect(screen.getByText(/Hive Terminal/i)).toBeInTheDocument();
   });
+
+  it("Guide welcomes Quantum Realm and names Queen Node", () => {
+    render(<GuidePage />);
+    expect(screen.getByText(/Quantum Realm/i)).toBeInTheDocument();
+    expect(screen.getByText(/Queen Node/i)).toBeInTheDocument();
+    expect(screen.getByText(/Semantic Knowledge Graph/i)).toBeInTheDocument();
+  });
+
+  it("Library mentions searchable catalog placeholder", () => {
+    render(<LibraryPage />);
+    expect(screen.getByText(/searchable catalog/i)).toBeInTheDocument();
+  });
 });

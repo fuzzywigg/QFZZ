@@ -248,4 +248,29 @@ describe("HiveTerminal", () => {
     });
     expect(screen.getAllByText("The Queen acknowledges your input.")).toHaveLength(2);
   });
+
+  it.each([
+    [0.0, "Processing signal..."],
+    [0.25, "The Queen acknowledges your input."],
+    [0.5, "Frequency aligned. Scanning..."],
+    [0.75, "Pattern recognized."],
+  ] as const)("Math.random %s maps to canned reply %#", async (rand, reply) => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.spyOn(Math, "random").mockReturnValue(rand);
+    render(<HiveTerminal />);
+
+    await user.type(screen.getByPlaceholderText("Transmit to Hive..."), `msg-${rand}`);
+    await user.click(screen.getByRole("button", { name: "Send Message" }));
+    await act(async () => {
+      vi.advanceTimersByTime(1100);
+    });
+    expect(screen.getByText(reply)).toBeInTheDocument();
+    expect(screen.getAllByText("QUEEN").length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("labels SYSTEM bubbles with SYSTEM sender text", () => {
+    render(<HiveTerminal />);
+    expect(screen.getAllByText("SYSTEM").length).toBeGreaterThanOrEqual(1);
+  });
 });
