@@ -56,4 +56,44 @@ describe("HiveTerminal", () => {
     const after = screen.getAllByText(/CONNECTING TO HIVE NET|QUEEN NODE|Greetings/).length;
     expect(after).toBe(before);
   });
+
+  it("ignores whitespace-only transmits", async () => {
+    const user = userEvent.setup();
+    render(<HiveTerminal />);
+    await user.type(screen.getByPlaceholderText("Transmit to Hive..."), "   ");
+    await user.click(screen.getByRole("button", { name: "Send Message" }));
+    expect(screen.queryByText("   ")).not.toBeInTheDocument();
+  });
+
+  it("injects DJ poll messages and dedupes identical ones", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({ message: "Queen broadcast" }),
+    } as Response);
+
+    render(<HiveTerminal />);
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getAllByText("Queen broadcast")).toHaveLength(1);
+
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getAllByText("Queen broadcast")).toHaveLength(1);
+  });
+
+  it("survives junk poll payloads", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    } as Response);
+    render(<HiveTerminal />);
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getByText("QUEEN NODE: ONLINE")).toBeInTheDocument();
+  });
 });

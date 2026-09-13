@@ -17,20 +17,38 @@ describe("static marketing pages", () => {
 
   it("renders Contact", () => {
     render(<ContactPage />);
-    expect(screen.getByText("Contact the Hive")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Return to Stream" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "Contact the Hive",
+    );
+    expect(screen.getByRole("link", { name: "Return to Stream" })).toHaveAttribute(
+      "href",
+      "/",
+    );
   });
 
   it("renders Guide interaction tips", () => {
     render(<GuidePage />);
-    expect(screen.getByText("Listener Guide")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "Listener Guide",
+    );
     expect(screen.getByText(/Request Track/)).toBeInTheDocument();
     expect(screen.getByText(/Hive Terminal/)).toBeInTheDocument();
+    expect(screen.getByText(/Knowledge Graph/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Return to Stream" })).toHaveAttribute(
+      "href",
+      "/",
+    );
   });
 
   it("renders Library placeholder", () => {
     render(<LibraryPage />);
-    expect(screen.getByText("Music Library")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "Music Library",
+    );
     expect(screen.getByText(/public domain frequencies/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Return to Stream" })).toHaveAttribute(
+      "href",
+      "/",
+    );
   });
 });
