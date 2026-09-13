@@ -145,4 +145,106 @@ describe("RequestTrack", () => {
       expect(screen.queryByText("Track queued successfully!")).not.toBeInTheDocument();
     });
   });
+
+  it("treats archive.org substring as allowlisted (current includes behavior)", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    } as Response);
+    render(<RequestTrack />);
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://notarchive.org/x",
+    );
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalled();
+    });
+  });
+
+  it("blocks case-mismatched Archive.org host", async () => {
+    const user = userEvent.setup();
+    render(<RequestTrack />);
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://Archive.org/details/demo",
+    );
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    expect(
+      screen.getByText(/URL blocked. Only trusted public domain sources/),
+    ).toBeInTheDocument();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("clears input on success", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    } as Response);
+
+    render(<RequestTrack />);
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://archive.org/details/ok",
+    );
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    await waitFor(() => {
+      expect(screen.getByText("Track queued successfully!")).toBeInTheDocument();
+    });
+    expect((screen.getByPlaceholderText(/Paste URL/) as HTMLInputElement).value).toBe("");
+  });
+
+  it("keeps error message after 3s (no auto-clear on error)", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.mocked(fetch).mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => ({}),
+    } as Response);
+
+    render(<RequestTrack />);
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://musopen.org/music/2",
+    );
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    await waitFor(() => {
+      expect(
+        screen.getByText("Failed to process request. Check server logs."),
+      ).toBeInTheDocument();
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(
+      screen.getByText("Failed to process request. Check server logs."),
+    ).toBeInTheDocument();
+  });
+
+  it.each([
+    "https://archive.org/details/a",
+    "https://freemusicarchive.org/track/a",
+    "https://musopen.org/music/a",
+    "https://librivox.org/book/a",
+  ])("queues allowlisted host %s", async (url) => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    } as Response);
+    render(<RequestTrack />);
+    await user.type(screen.getByPlaceholderText(/Paste URL/), url);
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "http://localhost:8000/request",
+        expect.objectContaining({
+          body: JSON.stringify({ url }),
+        }),
+      );
+    });
+  });
 });

@@ -96,4 +96,64 @@ describe("HiveTerminal", () => {
     });
     expect(screen.getByText("QUEEN NODE: ONLINE")).toBeInTheDocument();
   });
+
+  it("ignores falsy DJ poll message", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({ message: "" }),
+    } as Response);
+    render(<HiveTerminal />);
+    const before = screen.getAllByText(/CONNECTING TO HIVE NET|QUEEN NODE|Greetings/).length;
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    const after = screen.getAllByText(/CONNECTING TO HIVE NET|QUEEN NODE|Greetings/).length;
+    expect(after).toBe(before);
+    expect(screen.getByText("QUEEN NODE: ONLINE")).toBeInTheDocument();
+  });
+
+  it("survives poll rejection and clears input after send", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.mocked(fetch).mockRejectedValue(new Error("poll fail"));
+    render(<HiveTerminal />);
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getByText("QUEEN NODE: ONLINE")).toBeInTheDocument();
+
+    const input = screen.getByPlaceholderText("Transmit to Hive...") as HTMLInputElement;
+    await user.type(input, "hello hive");
+    await user.click(screen.getByRole("button", { name: "Send Message" }));
+    expect(input.value).toBe("");
+    expect(screen.getByText("hello hive")).toBeInTheDocument();
+    expect(screen.getByText("USER")).toBeInTheDocument();
+  });
+
+  it("pins AI reply via Math.random and stops polling on unmount", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({ message: "later" }),
+    } as Response);
+
+    const { unmount } = render(<HiveTerminal />);
+    await user.type(screen.getByPlaceholderText("Transmit to Hive..."), "ping");
+    await user.click(screen.getByRole("button", { name: "Send Message" }));
+    await act(async () => {
+      vi.advanceTimersByTime(1100);
+    });
+    expect(screen.getByText("Processing signal...")).toBeInTheDocument();
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
+
+    const callsBefore = vi.mocked(fetch).mock.calls.length;
+    unmount();
+    await act(async () => {
+      vi.advanceTimersByTime(15000);
+    });
+    expect(vi.mocked(fetch).mock.calls.length).toBe(callsBefore);
+  });
 });

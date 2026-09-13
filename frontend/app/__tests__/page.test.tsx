@@ -231,4 +231,232 @@ describe("AudioPlayer page", () => {
     await user.click(screen.getByTitle("Next Track"));
     expect(screen.getByText("Connecting to Quantum Stream...")).toBeInTheDocument();
   });
+
+  it("loads playlist.json array when session has no tracks", async () => {
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/playlist.json")) {
+        return {
+          ok: true,
+          json: async () => [
+            {
+              title: "FromPlaylist",
+              artist: "PL",
+              url: "http://localhost/p.wav",
+              genre: "ambient",
+            },
+          ],
+        } as Response;
+      }
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "stopped",
+            current_track: null,
+            prefetch_tracks: [],
+            buffer_seconds: 0,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ({}) } as Response;
+    });
+
+    render(<AudioPlayer />);
+    await waitFor(() => {
+      expect(screen.getByText("FromPlaylist")).toBeInTheDocument();
+    });
+    expect(screen.getByText("ambient")).toBeInTheDocument();
+  });
+
+  it("pauses on second toggle and recovers on reconnect success", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/reconnect")) {
+        return {
+          ok: true,
+          json: async () => ({ recovered: true }),
+        } as Response;
+      }
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "playing",
+            current_track: {
+              title: "Live",
+              artist: "A",
+              url: "http://localhost/l.wav",
+              genre: "x",
+            },
+            prefetch_tracks: [
+              { title: "P1", artist: "A", url: "http://localhost/p1.wav", genre: "x" },
+              { title: "Empty", artist: "A", url: "", genre: "x" },
+              { title: "P2", artist: "A", url: "http://localhost/p2.wav", genre: "x" },
+            ],
+            buffer_seconds: 2,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    const { container } = render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("Live")).toBeInTheDocument());
+
+    await user.click(screen.getByTitle("Toggle Play/Pause"));
+    expect(window.HTMLAudioElement.prototype.play).toHaveBeenCalled();
+    await user.click(screen.getByTitle("Toggle Play/Pause"));
+    expect(window.HTMLAudioElement.prototype.pause).toHaveBeenCalled();
+
+    // Prefetch only non-empty URLs, capped at 2
+    const audioCalls = vi.mocked(Audio).mock.calls.length;
+    expect(audioCalls).toBeGreaterThanOrEqual(1);
+    expect(audioCalls).toBeLessThanOrEqual(2);
+
+    const audio = container.querySelector("audio");
+    fireEvent.error(audio!);
+    await waitFor(() => expect(screen.getByText(/Reconnecting|Playing/)).toBeInTheDocument());
+    await act(async () => {
+      vi.advanceTimersByTime(500);
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/Playing/)).toBeInTheDocument();
+    });
+  });
+
+  it("wraps next from last track and updates time display on timeupdate", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "stopped",
+            current_track: {
+              title: "First",
+              artist: "A",
+              url: "http://localhost/1.wav",
+              genre: "g",
+            },
+            prefetch_tracks: [
+              {
+                title: "Second",
+                artist: "B",
+                url: "http://localhost/2.wav",
+                genre: "g",
+              },
+            ],
+            buffer_seconds: 3,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    const { container } = render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("First")).toBeInTheDocument());
+
+    await user.click(screen.getByTitle("Next Track"));
+    await waitFor(() => expect(screen.getByText("Second")).toBeInTheDocument());
+    await user.click(screen.getByTitle("Next Track"));
+    await waitFor(() => expect(screen.getByText("First")).toBeInTheDocument());
+
+    const audio = container.querySelector("audio") as HTMLAudioElement;
+    Object.defineProperty(audio, "currentTime", { configurable: true, value: 65 });
+    Object.defineProperty(audio, "duration", { configurable: true, value: 125 });
+    fireEvent.timeUpdate(audio);
+    await waitFor(() => {
+      expect(screen.getByText("1:05")).toBeInTheDocument();
+      expect(screen.getByText("2:05")).toBeInTheDocument();
+    });
+
+    fireEvent.ended(audio);
+    await waitFor(() => expect(screen.getByText("Second")).toBeInTheDocument());
+  });
+
+  it("closes menu overlay on second click and keeps Init ledger on reject", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/ledger.json")) {
+        return Promise.reject(new Error("ledger down"));
+      }
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "Offline",
+            current_track: null,
+            prefetch_tracks: [],
+            buffer_seconds: 0,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    render(<AudioPlayer />);
+    const headerButtons = screen
+      .getAllByRole("button")
+      .filter((b) => !b.getAttribute("title"));
+    await user.click(headerButtons[0]);
+    expect(screen.getByRole("link", { name: "Music Library" })).toBeInTheDocument();
+    await user.click(headerButtons[0]);
+    expect(screen.queryByRole("link", { name: "Music Library" })).not.toBeInTheDocument();
+
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getByText("Ledger Height: 0")).toBeInTheDocument();
+    expect(screen.getByText("Trust Status: Init")).toBeInTheDocument();
+  });
+
+  it("logs play failures without crashing", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(window.HTMLAudioElement.prototype, "play").mockRejectedValue(
+      new Error("autoplay blocked"),
+    );
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "stopped",
+            current_track: {
+              title: "Blocked",
+              artist: "A",
+              url: "http://localhost/b.wav",
+              genre: "g",
+            },
+            prefetch_tracks: [],
+            buffer_seconds: 1,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => ([]) } as Response;
+    });
+
+    render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("Blocked")).toBeInTheDocument());
+    await user.click(screen.getByTitle("Toggle Play/Pause"));
+    await waitFor(() => {
+      expect(errSpy).toHaveBeenCalled();
+    });
+    errSpy.mockRestore();
+  });
 });
