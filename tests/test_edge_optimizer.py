@@ -110,3 +110,90 @@ class TestEdgeOptimizer:
         stats = opt.get_statistics()
         assert stats["total_devices"] == 2
         assert "balanced" in stats["available_profiles"]
+
+    def test_auto_select_cellular_and_low_bandwidth(self):
+        opt = EdgeOptimizer()
+        opt.register_device(
+            _device(
+                device_id="cell",
+                network_type=NetworkType.CELLULAR_4G,
+                bandwidth_mbps=8.0,
+                battery_powered=False,
+            )
+        )
+        cell = opt.optimize_streaming("cell")
+        assert cell["profile"] == "bandwidth_save"
+
+        opt.register_device(
+            _device(
+                device_id="slow",
+                network_type=NetworkType.WIFI,
+                bandwidth_mbps=0.5,
+                battery_powered=False,
+            )
+        )
+        slow = opt.optimize_streaming("slow")
+        assert slow["profile"] == "bandwidth_save"
+
+    def test_auto_select_balanced_default(self):
+        opt = EdgeOptimizer()
+        opt.register_device(
+            _device(
+                device_id="phone-wifi",
+                device_type=DeviceType.SMARTPHONE,
+                network_type=NetworkType.WIFI,
+                bandwidth_mbps=3.0,
+                battery_powered=True,
+                battery_level=0.8,
+            )
+        )
+        result = opt.optimize_streaming("phone-wifi")
+        assert result["profile"] == "balanced"
+
+    def test_quality_preference_capped_by_profile(self):
+        opt = EdgeOptimizer()
+        opt.register_device(
+            _device(
+                device_id="desk",
+                device_type=DeviceType.DESKTOP,
+                network_type=NetworkType.ETHERNET,
+                bandwidth_mbps=10.0,
+            )
+        )
+        capped = opt.optimize_streaming(
+            "desk", preferences={"profile": "bandwidth_save", "quality": "lossless"}
+        )
+        # bandwidth_save max_quality is low
+        assert capped["profile"] == "bandwidth_save"
+        assert capped["quality"] == "low"
+
+        allowed = opt.optimize_streaming(
+            "desk", preferences={"profile": "bandwidth_save", "quality": "low"}
+        )
+        assert allowed["quality"] == "low"
+
+    def test_cache_size_tiers_by_storage(self):
+        opt = EdgeOptimizer()
+        opt.register_device(
+            _device(
+                device_id="tiny",
+                storage_mb=50,
+                network_type=NetworkType.CELLULAR_4G,
+                bandwidth_mbps=2.0,
+            )
+        )
+        tiny = opt.optimize_streaming("tiny", preferences={"profile": "bandwidth_save"})
+        assert tiny["cache_enabled"] is False
+        assert tiny["cache_size_mb"] == 0
+
+        opt.register_device(
+            _device(
+                device_id="mid",
+                storage_mb=600,
+                network_type=NetworkType.CELLULAR_4G,
+                bandwidth_mbps=2.0,
+            )
+        )
+        mid = opt.optimize_streaming("mid", preferences={"profile": "bandwidth_save"})
+        assert mid["cache_enabled"] is True
+        assert mid["cache_size_mb"] == 100

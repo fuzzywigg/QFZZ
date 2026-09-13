@@ -102,3 +102,32 @@ class TestBlockchainTrustNetwork:
         assert net.get_block(0) is not None
         assert net.get_block(99) is None
         assert net.get_latest_block().index == 1
+
+    def test_pending_cleared_after_mine_and_metadata_stored(self):
+        net = BlockchainTrustNetwork(difficulty=1)
+        record = net.add_trust_record(
+            "c-meta", "u-meta", initial_score=0.55, metadata={"source": "unit"}
+        )
+        assert record.metadata["source"] == "unit"
+        assert net.get_statistics()["pending_records"] == 1
+        block = net.mine_pending_records()
+        assert block is not None
+        assert net.get_statistics()["pending_records"] == 0
+
+    def test_is_chain_valid_false_on_tampered_hash(self):
+        net = BlockchainTrustNetwork(difficulty=1)
+        net.add_trust_record("c1", "u1")
+        net.mine_pending_records()
+        assert net.is_chain_valid() is True
+        net._chain[1].hash = "tampered-hash"
+        assert net.is_chain_valid() is False
+
+    def test_is_chain_valid_false_on_broken_previous_hash(self):
+        net = BlockchainTrustNetwork(difficulty=1)
+        net.add_trust_record("c1", "u1")
+        net.mine_pending_records()
+        net._chain[1].previous_hash = "not-the-genesis-hash"
+        # Recompute so is_valid() on the block itself still passes hash self-check
+        net._chain[1].hash = net._chain[1].calculate_hash()
+        assert net._chain[1].is_valid() is True
+        assert net.is_chain_valid() is False

@@ -56,4 +56,54 @@ describe("HiveTerminal", () => {
     const after = screen.getAllByText(/CONNECTING TO HIVE NET|QUEEN NODE|Greetings/).length;
     expect(after).toBe(before);
   });
+
+  it("polls dj_message.json and injects AI chatter", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({ message: "Queen pulse detected" }),
+    } as Response);
+
+    render(<HiveTerminal />);
+
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(screen.getByText("Queen pulse detected")).toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringMatching(/\/dj_message\.json$/),
+    );
+  });
+
+  it("dedupes poll when last AI message matches", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        message:
+          "Greetings, Drone. The Hive is listening. What is your frequency?",
+      }),
+    } as Response);
+
+    render(<HiveTerminal />);
+
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(
+      screen.getAllByText(
+        "Greetings, Drone. The Hive is listening. What is your frequency?",
+      ),
+    ).toHaveLength(1);
+  });
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import RequestTrack from "@/components/RequestTrack";
 
@@ -78,5 +78,52 @@ describe("RequestTrack", () => {
     await waitFor(() => {
       expect(screen.getByText("Connection failed.")).toBeInTheDocument();
     });
+  });
+
+  it("shows server failure when response is not ok", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockResolvedValue({
+      ok: false,
+      json: async () => ({}),
+    } as Response);
+
+    render(<RequestTrack />);
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://archive.org/details/demo",
+    );
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Failed to process request. Check server logs."),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("resets success status to idle after 3 seconds", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    } as Response);
+
+    render(<RequestTrack />);
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://librivox.org/demo",
+    );
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Track queued successfully!")).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(3000);
+    });
+
+    expect(screen.queryByText("Track queued successfully!")).not.toBeInTheDocument();
   });
 });
