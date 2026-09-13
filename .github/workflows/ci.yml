@@ -2,11 +2,48 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, development]
   pull_request:
-    branches: [main]
+    branches: [main, development]
 
 jobs:
+  hygiene:
+    name: hygiene
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check required files
+        run: |
+          test -f README.md
+          test -f LICENSE
+          test -f AGENTS.md
+          test -f CONTRIBUTING.md
+          test -f requirements.txt
+          test -f pyproject.toml
+          test -f main.py
+          test -f run_server.py
+          test -f .env.example
+          test -f .cursor/environment.json
+          test -f .github/workflows/ci.yml
+          test -f frontend/package.json
+      - name: Check for committed secret material
+        run: |
+          # Skip docs/yaml/example env and Python sources (api_key= params are not secrets).
+          ! grep -RInE '(api[_-]?key|secret|token|password)\s*[:=]\s*["'\'']?[A-Za-z0-9_\-]{20,}' \
+            --exclude-dir=.git \
+            --exclude-dir=node_modules \
+            --exclude-dir=.venv \
+            --exclude-dir=venv \
+            --exclude='*.md' \
+            --exclude='*.yml' \
+            --exclude='*.yaml' \
+            --exclude='*.py' \
+            --exclude='.env.example' \
+            --exclude='.secrets.baseline' \
+            .
+
   lint:
     name: lint
     runs-on: ubuntu-latest

@@ -95,10 +95,12 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
-# Environments
+# Environments / secrets (never commit real credentials)
 .env
 .env.*
 !.env.example
+*.pem
+*.key
 .venv
 env/
 venv/

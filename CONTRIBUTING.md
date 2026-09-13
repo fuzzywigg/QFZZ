@@ -108,6 +108,11 @@ cp .env.example .env
 
 # 5. Run tests to verify setup
 make test
+
+# Same keeper-file checks Cloud Agents run via .cursor/environment.json
+test -f README.md && test -f LICENSE && test -f AGENTS.md && test -f CONTRIBUTING.md
+test -f requirements.txt && test -f pyproject.toml && test -f main.py && test -f run_server.py
+test -f .env.example && test -f .github/workflows/ci.yml && test -f frontend/package.json
 ```
 
 ### Understanding the Codebase
@@ -183,10 +188,16 @@ Fix gradually by adding type hints.
 
 ### 2. Create a Branch
 
+Default branch is `main`. Feature work targets `development` (there is no `develop` branch). Agent thin PRs may use `cursor/<task>`.
+
 ```bash
+git checkout development
+git pull
 git checkout -b feature/your-feature-name
 # or
 git checkout -b fix/bug-description
+# or (Cloud Agent hygiene)
+git checkout -b cursor/your-task-name
 ```
 
 ### 3. Make Changes
