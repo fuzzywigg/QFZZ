@@ -247,4 +247,32 @@ describe("RequestTrack", () => {
       );
     });
   });
+
+  it("blocks double submit while loading", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    let resolveFetch: (value: Response) => void = () => undefined;
+    vi.mocked(fetch).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        }),
+    );
+    render(<RequestTrack />);
+    await user.type(
+      screen.getByPlaceholderText(/Paste URL/),
+      "https://archive.org/details/x",
+    );
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    expect(screen.getByRole("button", { name: "..." })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "..." }));
+    expect(fetch).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      resolveFetch({ ok: true, json: async () => ({}) } as Response);
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/queued successfully|Track queued/i)).toBeInTheDocument();
+    });
+  });
+
 });

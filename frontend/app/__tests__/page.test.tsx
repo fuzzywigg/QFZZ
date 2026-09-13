@@ -459,4 +459,73 @@ describe("AudioPlayer page", () => {
     });
     errSpy.mockRestore();
   });
+
+  it("stays Reconnecting when recovered is false", async () => {
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/reconnect")) {
+        return {
+          ok: true,
+          json: async () => ({ recovered: false }),
+        } as Response;
+      }
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "playing",
+            current_track: {
+              title: "Stuck",
+              artist: "A",
+              url: "http://localhost/s.wav",
+              genre: "x",
+            },
+            prefetch_tracks: [],
+            buffer_seconds: 1,
+            reconnect: { attempts: 1, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => [] } as Response;
+    });
+
+    const { container } = render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("Stuck")).toBeInTheDocument());
+    fireEvent.error(container.querySelector("audio")!);
+    await waitFor(() => expect(screen.getByText(/Reconnecting/)).toBeInTheDocument());
+    await act(async () => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(screen.getByText(/Reconnecting/)).toBeInTheDocument();
+  });
+
+  it("does not prefetch Audio when prefetch_tracks is empty", async () => {
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/stream/session.json")) {
+        return {
+          ok: true,
+          json: async () => ({
+            state: "playing",
+            current_track: {
+              title: "Solo",
+              artist: "A",
+              url: "http://localhost/solo.wav",
+              genre: "x",
+            },
+            prefetch_tracks: [],
+            buffer_seconds: 2,
+            reconnect: { attempts: 0, max_attempts: 3 },
+            error: null,
+          }),
+        } as Response;
+      }
+      return { ok: true, json: async () => [] } as Response;
+    });
+    render(<AudioPlayer />);
+    await waitFor(() => expect(screen.getByText("Solo")).toBeInTheDocument());
+    expect(Audio).not.toHaveBeenCalled();
+  });
+
 });

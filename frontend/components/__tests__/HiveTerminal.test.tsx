@@ -156,4 +156,36 @@ describe("HiveTerminal", () => {
     });
     expect(vi.mocked(fetch).mock.calls.length).toBe(callsBefore);
   });
+
+  it("labels AI as QUEEN and USER as USER", async () => {
+    const user = userEvent.setup();
+    render(<HiveTerminal />);
+    expect(screen.getByText("QUEEN")).toBeInTheDocument();
+    expect(screen.getAllByText("SYSTEM").length).toBeGreaterThanOrEqual(1);
+    await user.type(screen.getByPlaceholderText("Transmit to Hive..."), "hi");
+    await user.click(screen.getByRole("button", { name: "Send Message" }));
+    expect(screen.getByText("USER")).toBeInTheDocument();
+  });
+
+  it("appends successive different DJ poll messages", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    let n = 0;
+    vi.mocked(fetch).mockImplementation(async () => {
+      n += 1;
+      return {
+        ok: true,
+        json: async () => ({ message: n === 1 ? "First pulse" : "Second pulse" }),
+      } as Response;
+    });
+    render(<HiveTerminal />);
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getByText("First pulse")).toBeInTheDocument();
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getByText("Second pulse")).toBeInTheDocument();
+  });
+
 });
