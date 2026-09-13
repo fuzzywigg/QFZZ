@@ -6,7 +6,7 @@ Centralizes all configuration with environment variable support.
 import logging
 import os
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 from dotenv import load_dotenv
@@ -37,19 +37,19 @@ class LLMSettings:
 
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "llama3"
-    gemini_api_key: Optional[str] = None
-    groq_api_key: Optional[str] = None
-    together_api_key: Optional[str] = None
-    huggingface_api_key: Optional[str] = None
+    gemini_api_key: str | None = None
+    groq_api_key: str | None = None
+    together_api_key: str | None = None
+    huggingface_api_key: str | None = None
 
 
 @dataclass
 class MusicSourceSettings:
     """Music source API configuration."""
 
-    jamendo_client_id: Optional[str] = None
-    internet_archive_access_key: Optional[str] = None
-    internet_archive_secret_key: Optional[str] = None
+    jamendo_client_id: str | None = None
+    internet_archive_access_key: str | None = None
+    internet_archive_secret_key: str | None = None
 
 
 @dataclass
@@ -83,7 +83,7 @@ class QFZZSettings:
 class ConfigManager:
     """Manages QFZZ configuration from multiple sources."""
 
-    def __init__(self, config_file: Optional[str] = None):
+    def __init__(self, config_file: str | None = None):
         """
         Initialize configuration manager.
 
@@ -91,10 +91,10 @@ class ConfigManager:
             config_file: Path to YAML config file (optional)
         """
         self.config_file = config_file or self._find_config_file()
-        self._settings: Optional[QFZZSettings] = None
+        self._settings: QFZZSettings | None = None
         self._load_config()
 
-    def _find_config_file(self) -> Optional[str]:
+    def _find_config_file(self) -> str | None:
         """Find configuration file in standard locations."""
         search_paths = [
             "config/default.yaml",
@@ -249,7 +249,7 @@ class ConfigManager:
 
 
 # Global configuration instance
-_config_manager: Optional[ConfigManager] = None
+_config_manager: ConfigManager | None = None
 
 
 def get_config() -> QFZZSettings:

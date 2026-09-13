@@ -11,6 +11,14 @@ updates:
       - "tech-debt"
       - "modernization"
       - "docs"
+    # Intentionally leave major toolchain bumps for separate migration PRs.
+    ignore:
+      - dependency-name: "pre-commit"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "pytest-asyncio"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "mypy"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "npm"
     directory: "/frontend"
@@ -23,6 +31,27 @@ updates:
       - "tech-debt"
       - "modernization"
       - "docs"
+    ignore:
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint-config-next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "lucide-react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react-dom"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -38,4 +67,3 @@ updates:
       github_actions:
         patterns:
           - "*"
-

@@ -4,7 +4,7 @@ Main QFZZ Station orchestrator.
 
 import logging
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from .config import StationConfig
 
@@ -104,7 +104,7 @@ class QFZZStation:
         self._quantum_provider = None
         self._player = None
 
-    def add_listener(self, user_id: str, preferences: Optional[dict[str, Any]] = None) -> None:
+    def add_listener(self, user_id: str, preferences: dict[str, Any] | None = None) -> None:
         """
         Add a listener to the station.
 
@@ -178,7 +178,7 @@ class QFZZStation:
         return playlist
 
     def record_interaction(
-        self, user_id: str, track_id: str, interaction_type: str, rating: Optional[float] = None
+        self, user_id: str, track_id: str, interaction_type: str, rating: float | None = None
     ) -> None:
         """
         Record user interaction with a track.

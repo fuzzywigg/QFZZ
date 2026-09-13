@@ -5,7 +5,7 @@ Uses yt-dlp to download audio from various hosting services (YouTube, SoundCloud
 
 import logging
 import os
-from typing import Any, Optional
+from typing import Any
 
 import yt_dlp
 
@@ -19,13 +19,13 @@ class ContentFetcher:
         self.download_dir = download_dir
         os.makedirs(download_dir, exist_ok=True)
 
-    def fetch_from_url(self, url: str) -> Optional[dict[str, Any]]:
+    def fetch_from_url(self, url: str) -> dict[str, Any] | None:
         """
         Download audio from a URL.
         Relaxed Mode: Warns on non-whitelisted domains but allows specific user overrides.
         """
         # Trusted Public Domain / CC Sources (Verified Safe)
-        VERIFIED_DOMAINS = [
+        verified_domains = [
             # Archives
             "archive.org",
             "freemusicarchive.org",
@@ -51,7 +51,7 @@ class ContentFetcher:
         ]
 
         # Check domain whitelist
-        is_verified = any(domain in url for domain in VERIFIED_DOMAINS)
+        is_verified = any(domain in url for domain in verified_domains)
 
         if not is_verified:
             logger.warning(
@@ -140,7 +140,7 @@ class ContentFetcher:
                     # Decode URL encoding
                     try:
                         clean_name = unquote(original_name)
-                    except:
+                    except Exception:
                         clean_name = original_name
 
                     # Remove extension

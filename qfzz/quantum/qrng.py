@@ -8,7 +8,6 @@ classical CSPRNG (os.urandom) when qsharp is not available.
 
 import logging
 import os
-from typing import Optional
 
 from .provider import QuantumProvider
 
@@ -25,7 +24,7 @@ class QuantumRandomNumberGenerator:
     PRNG (os.urandom).
     """
 
-    def __init__(self, provider: Optional[QuantumProvider] = None):
+    def __init__(self, provider: QuantumProvider | None = None):
         """
         Initialize the QRNG.
 

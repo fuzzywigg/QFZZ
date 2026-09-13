@@ -6,7 +6,7 @@ import hashlib
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -147,7 +147,7 @@ class Block:
         block_string = json.dumps(block_data, sort_keys=True)
         return hashlib.sha256(block_string.encode()).hexdigest()
 
-    def mine_block(self, difficulty: int = 2, qrng: Optional[Any] = None) -> None:
+    def mine_block(self, difficulty: int = 2, qrng: Any | None = None) -> None:
         """
         Mine the block with proof of work.
 

@@ -8,7 +8,7 @@ classical fallback (qsharp not required for testing).
 import unittest
 from unittest.mock import MagicMock, patch
 
-from qfzz.quantum.provider import QuantumProvider, _is_qsharp_available
+from qfzz.quantum.provider import QuantumProvider
 from qfzz.quantum.qrng import QuantumRandomNumberGenerator
 
 

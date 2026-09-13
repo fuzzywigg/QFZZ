@@ -3,7 +3,7 @@ Edge optimization for different device types.
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from .config import DeviceType, EdgeDeviceConfig, NetworkType
 
@@ -90,7 +90,7 @@ class EdgeOptimizer:
         logger.warning(f"Device not found: {device_id}")
         return False
 
-    def get_device_config(self, device_id: str) -> Optional[EdgeDeviceConfig]:
+    def get_device_config(self, device_id: str) -> EdgeDeviceConfig | None:
         """
         Get device configuration.
 
@@ -103,7 +103,7 @@ class EdgeOptimizer:
         return self._devices.get(device_id)
 
     def optimize_streaming(
-        self, device_id: str, preferences: Optional[dict[str, Any]] = None
+        self, device_id: str, preferences: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """
         Get optimized streaming parameters for a device.
@@ -147,7 +147,7 @@ class EdgeOptimizer:
         return optimization
 
     def _select_profile(
-        self, device: EdgeDeviceConfig, preferences: Optional[dict[str, Any]]
+        self, device: EdgeDeviceConfig, preferences: dict[str, Any] | None
     ) -> str:
         """
         Select optimization profile based on device and preferences.
@@ -187,7 +187,7 @@ class EdgeOptimizer:
         self,
         device: EdgeDeviceConfig,
         profile: dict[str, Any],
-        preferences: Optional[dict[str, Any]],
+        preferences: dict[str, Any] | None,
     ) -> str:
         """
         Calculate optimal quality setting.
