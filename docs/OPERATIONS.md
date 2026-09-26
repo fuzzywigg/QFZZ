@@ -361,9 +361,6 @@ truncate -s 0 /opt/qfzz/logs/*.log
 # Check logs
 journalctl -u qfzz -n 50
 
-# Check configuration
-python -m qfzz.config validate
-
 # Check permissions
 ls -la /opt/qfzz
 
