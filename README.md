@@ -127,27 +127,21 @@ For Windows PowerShell instructions, see [docs/QUICK_START_WINDOWS.md](docs/QUIC
 #### Using Python API
 
 ```python
-from qfzz import QFZZStation, PersonalizedDJ
-from qfzz.core import StationConfig
+from qfzz import QFZZStation, PersonalizedDJ, StationConfig
 
-# Create and start a station
+# Create and start a station (kwargs match live qfzz.core.config.StationConfig)
 config = StationConfig(
+    station_id="qfzz",
     station_name="QFZZ",
-    edge_mode=True,
-    enable_6g=False,
-    blockchain_enabled=True
+    enable_blockchain=True,
+    enable_edge_optimization=True,
 )
 
 station = QFZZStation(config)
-station.initialize()
 station.start()
 
-# Create a personalized DJ
-dj = PersonalizedDJ(name="DJ Quantum", edge_mode=True)
-
-# Interact with the DJ
-greeting = dj.greet_user("user_001", "Alex")
-print(greeting)
+# Create a personalized DJ (no name=/edge_mode= on live PersonalizedDJ)
+dj = PersonalizedDJ(dj_persona="energetic")
 
 response = dj.interact("user_001", "Can you recommend some music?")
 print(response)
