@@ -176,23 +176,15 @@ docker run qfzz
 
 ### Configuration File
 
-Create `config.yaml`:
+Create `config.yaml` with keys that match live `qfzz.core.config.StationConfig`
+(required `station_id`; no `name` / `edge_mode` / `enable_6g` / `blockchain_enabled`):
 
 ```yaml
 station:
-  name: "My QFZZ Station"
-  edge_mode: true
-  enable_6g: false
-  blockchain_enabled: true
-
-datasets:
-  opensource_only: true
-  min_quality: 0.7
-
-edge:
-  device_type: "smartphone"
-  max_memory_mb: 512
-  max_model_size_mb: 100
+  station_id: "qfzz"
+  station_name: "My QFZZ Station"
+  enable_blockchain: true
+  enable_edge_optimization: true
 ```
 
 Load in code:
@@ -203,6 +195,7 @@ from qfzz import QFZZStation, StationConfig
 with open('config.yaml') as f:
     config_data = yaml.safe_load(f)
 
+# Kwargs match live StationConfig (see docs/api/core.md)
 config = StationConfig(**config_data['station'])
 station = QFZZStation(config)
 ```
@@ -238,21 +231,21 @@ logging.basicConfig(
 
 ```python
 def health_check(station):
-    """Check station health"""
-    status = station.get_status()
+    """Check station health via live get_station_stats() (no get_status() on tip)"""
+    stats = station.get_station_stats()
 
     checks = {
-        'running': status['running'],
-        'blockchain': status['blockchain_enabled'],
-        'edge_mode': status['edge_mode']
+        'running': stats['running'],
+        'blockchain': stats['blockchain_enabled'],
+        'edge': stats['edge_optimization_enabled'],
     }
 
     return all(checks.values())
 
 if health_check(station):
-    print("✅ Station healthy")
+    print("Station healthy")
 else:
-    print("❌ Station unhealthy")
+    print("Station unhealthy")
 ```
 
 ## Scaling
@@ -262,11 +255,11 @@ else:
 Deploy multiple edge nodes:
 
 ```python
-# Node 1
-station1 = QFZZStation(StationConfig(station_name="Node 1"))
+# Node 1 — station_id required on tip
+station1 = QFZZStation(StationConfig(station_id="node-1", station_name="Node 1"))
 
 # Node 2
-station2 = QFZZStation(StationConfig(station_name="Node 2"))
+station2 = QFZZStation(StationConfig(station_id="node-2", station_name="Node 2"))
 
 # Federation (future feature)
 # station1.federate_with(station2)
