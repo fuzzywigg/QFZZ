@@ -809,7 +809,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 EXPOSE 8000
 
 # Run application
-CMD ["python", "-m", "qfzz.server"]
+CMD ["python", "run_server.py"]
 ```
 
 ### Docker Compose Production
@@ -1103,7 +1103,7 @@ Type=simple
 User=qfzz
 WorkingDirectory=/opt/qfzz
 Environment="PATH=/opt/qfzz/venv/bin"
-ExecStart=/opt/qfzz/venv/bin/python -m qfzz.server
+ExecStart=/opt/qfzz/venv/bin/python run_server.py
 Restart=always
 RestartSec=10
 
