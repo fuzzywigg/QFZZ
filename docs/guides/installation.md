@@ -665,7 +665,7 @@ FROM python:3.10-slim
 WORKDIR /app
 RUN pip install qfzz[firebase,aws]
 COPY . .
-CMD ["python", "-m", "qfzz.cli"]
+CMD ["python", "run_server.py"]
 EOF
 
 # Build image
