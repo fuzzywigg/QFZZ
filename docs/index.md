@@ -29,11 +29,12 @@ Unlike traditional radio or simple recommendation engines, QFZZ employs an **age
 ```python
 from qfzz import QFZZStation, StationConfig
 
-# Create your personalized station
+# Create your personalized station (required station_id on live tip)
 config = StationConfig(
+    station_id="qfzz",
     station_name="My Quantum Station",
     enable_blockchain=True,
-    enable_edge_optimization=True
+    enable_edge_optimization=True,
 )
 
 station = QFZZStation(config)
@@ -98,8 +99,11 @@ Create a simple QFZZ station in under 10 lines:
 ```python
 from qfzz import QFZZStation, StationConfig
 
-# Configure and start station
-config = StationConfig(station_name="My First Station")
+# Configure and start station (kwargs match live StationConfig)
+config = StationConfig(
+    station_id="qfzz",
+    station_name="My First Station",
+)
 station = QFZZStation(config)
 station.start()
 
