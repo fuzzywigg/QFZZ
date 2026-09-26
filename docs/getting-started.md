@@ -192,6 +192,7 @@ Enable blockchain-based content verification:
 
 ```python
 config = StationConfig(
+    station_id="secure_001",  # required on live tip
     station_name="Secure Station",
     enable_blockchain=True,
     trust_threshold=0.6  # Only play content with trust >= 0.6
@@ -226,8 +227,9 @@ Enable device-aware streaming optimization:
 from qfzz.edge import EdgeOptimizer, EdgeDeviceConfig, DeviceType, NetworkType
 
 config = StationConfig(
+    station_id="optimized_001",  # required on live tip
     station_name="Optimized Station",
-    enable_edge_optimization=True
+    enable_edge_optimization=True,
 )
 
 station = QFZZStation(config)
