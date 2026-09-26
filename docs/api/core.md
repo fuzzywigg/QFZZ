@@ -21,22 +21,21 @@ The core module provides the main station orchestrator and configuration.
 ```python
 from qfzz import QFZZStation, StationConfig
 
-# Create configuration
+# Kwargs match live qfzz.core.config.StationConfig (no edge_mode=/blockchain_enabled=)
 config = StationConfig(
+    station_id="qfzz",
     station_name="My Station",
-    edge_mode=True,
-    blockchain_enabled=True
+    enable_blockchain=True,
+    enable_edge_optimization=True,
 )
 
-# Initialize and start station
+# Start station (no station.initialize() on tip)
 station = QFZZStation(config)
-station.initialize()
 station.start()
 
-# Get status
-status = station.get_status()
-print(status)
+# Live stats accessor (no get_status() on tip)
+stats = station.get_station_stats()
+print(stats)
 
-# Stop station
 station.stop()
 ```
