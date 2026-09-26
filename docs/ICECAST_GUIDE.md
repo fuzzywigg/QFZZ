@@ -455,6 +455,7 @@ icecast.connect()
 
 # Start QFZZ station
 station_config = StationConfig(
+    station_id="icecast_001",  # required on live tip
     station_name="QFZZ Prime",
     enable_blockchain=True
 )
