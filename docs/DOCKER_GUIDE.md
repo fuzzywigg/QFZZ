@@ -7,8 +7,10 @@ Complete guide for deploying QFZZ using Docker and Docker Compose.
 QFZZ provides a comprehensive Docker setup with:
 - **Multi-stage builds** for development, testing, and production
 - **Docker Compose** orchestration for all services
-- **Optional services** via profiles (frontend, monitoring)
+- **Optional frontend** via Compose profile
 - **Production-ready** configuration with health checks and restart policies
+
+> **Honesty:** Tip has no `config/prometheus.yml` or `config/grafana/` keepers and no HTTP `/metrics` route on the live streaming server. There is no runnable monitoring profile on tip — use `GET /playlist.json` or `python -m qfzz.utils.health` instead.
 
 ## Architecture
 
@@ -29,10 +31,10 @@ QFZZ provides a comprehensive Docker setup with:
 │  └──────────────────────────────────────┘            │
 │        │             │                                 │
 │        ▼             ▼                                 │
-│  ┌───────────┐  ┌──────────┐  ┌──────────┐          │
-│  │ PostgreSQL│  │  Redis   │  │Prometheus│          │
-│  │   :5432   │  │  :6379   │  │  :9090   │          │
-│  └───────────┘  └──────────┘  └──────────┘          │
+│  ┌───────────┐  ┌──────────┐                          │
+│  │ PostgreSQL│  │  Redis   │                          │
+│  │   :5432   │  │  :6379   │                          │
+│  └───────────┘  └──────────┘                          │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -128,15 +130,17 @@ docker compose --profile frontend up -d
 - **URL**: http://localhost:3001
 
 #### Monitoring Stack
+
+Not available on tip. `docker-compose.yml` does not ship a `monitoring` profile; tip lacks `config/prometheus.yml` / `config/grafana/`, and the live app has no `/metrics` scrape target. For health, use:
+
 ```bash
-docker compose --profile monitoring up -d
+curl -f http://localhost:8001/playlist.json
+python -m qfzz.utils.health
 ```
-- **Prometheus**: http://localhost:9090
-- **Grafana**: http://localhost:3002 (admin/admin)
 
 #### All Services
 ```bash
-docker compose --profile frontend --profile monitoring up -d
+docker compose --profile frontend up -d
 ```
 
 ## Configuration
@@ -337,16 +341,14 @@ docker compose exec qfzz-app tail -f /app/logs/qfzz.log
 docker compose exec icecast tail -f /var/log/icecast2/error.log
 ```
 
-### Metrics (with monitoring profile)
+### Metrics
 
-1. **Prometheus**: http://localhost:9090
-   - Metrics collection
-   - Query interface
+Tip has no Prometheus/Grafana stack and no HTTP `/metrics` endpoint. Prefer:
 
-2. **Grafana**: http://localhost:3002
-   - Dashboards
-   - Alerts
-   - Login: admin/admin
+```bash
+curl -f http://localhost:8001/playlist.json
+python -m qfzz.utils.health
+```
 
 ## Troubleshooting
 

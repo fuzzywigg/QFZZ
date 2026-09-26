@@ -139,43 +139,8 @@ services:
     profiles:
       - frontend  # Only start with --profile frontend
 
-  # Monitoring with Prometheus (optional)
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: qfzz-prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus-data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-    restart: unless-stopped
-    networks:
-      - qfzz-network
-    profiles:
-      - monitoring  # Only start with --profile monitoring
-
-  # Grafana Dashboard (optional)
-  grafana:
-    image: grafana/grafana:latest
-    container_name: qfzz-grafana
-    ports:
-      - "3002:3000"
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./config/grafana:/etc/grafana/provisioning:ro
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
-    depends_on:
-      - prometheus
-    restart: unless-stopped
-    networks:
-      - qfzz-network
-    profiles:
-      - monitoring  # Only start with --profile monitoring
+  # No monitoring profile on tip: config/prometheus.yml and config/grafana/
+  # are absent, and StreamingServer has no /metrics route. Do not invent them.
 
 # Volumes for persistent data
 volumes:
@@ -186,10 +151,6 @@ volumes:
   icecast-logs:
     driver: local
   qfzz-logs:
-    driver: local
-  prometheus-data:
-    driver: local
-  grafana-data:
     driver: local
 
 # Networks
