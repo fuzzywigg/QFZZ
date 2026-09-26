@@ -234,13 +234,8 @@ docker compose up -d qfzz-app
 
 ### Development Mode
 
-Use the development target for hot-reloading:
+There is no `docker-compose.dev.yml` overlay in this tree (only `docker-compose.yml` and `docker-compose.prod.yml`). Use the Dockerfile `development` target for a local image with bind-mount:
 
-```bash
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up
-```
-
-Or build development image:
 ```bash
 docker build --target development -t qfzz:dev .
 docker run -it -v $(pwd):/app -p 8001:8001 qfzz:dev
