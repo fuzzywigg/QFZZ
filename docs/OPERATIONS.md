@@ -50,15 +50,17 @@ python -m qfzz.utils.health
 
 ### Integration with Monitoring
 
-#### Prometheus
+#### HTTP health (live tip)
 
-Add to scrape config:
-```yaml
-scrape_configs:
-  - job_name: 'qfzz'
-    metrics_path: '/metrics'
-    static_configs:
-      - targets: ['localhost:8001']
+Tip has no HTTP `/metrics` scrape target on `StreamingServer` and no Prometheus
+exporter. Prefer the live health surfaces:
+
+```bash
+# Streaming process liveness (matches Dockerfile / compose healthcheck)
+curl -f http://localhost:8001/playlist.json
+
+# Component health (disk, memory, CPU, ledger, knowledge graph, audio)
+python -m qfzz.utils.health
 ```
 
 #### Nagios/Icinga
