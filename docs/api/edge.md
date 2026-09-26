@@ -11,7 +11,7 @@ The edge module optimizes QFZZ for edge device deployment.
 
 ## EdgeDeviceConfig
 
-::: qfzz.edge.device_config.EdgeDeviceConfig
+::: qfzz.edge.config.EdgeDeviceConfig
     options:
       show_root_heading: true
       show_source: true
@@ -19,30 +19,30 @@ The edge module optimizes QFZZ for edge device deployment.
 ## Usage Example
 
 ```python
-from qfzz import EdgeOptimizer, EdgeDeviceConfig
+from qfzz import EdgeOptimizer
+from qfzz.edge.config import DeviceType, EdgeDeviceConfig, NetworkType
 
-# Configure device
+# Kwargs match live qfzz.edge.config.EdgeDeviceConfig
+# (not the orphan qfzz.edge.device_config schema; no max_memory_mb=/enable_6g=)
 config = EdgeDeviceConfig(
     device_id="edge_001",
-    device_type="smartphone",
-    max_memory_mb=512,
-    max_model_size_mb=100,
-    enable_6g=True,
-    network_bandwidth_mbps=1000
+    device_type=DeviceType.SMARTPHONE,
+    network_type=NetworkType.WIFI,
+    bandwidth_mbps=10.0,
+    memory_mb=512,
+    battery_powered=True,
+    battery_level=0.8,
 )
 
-# Create optimizer
-optimizer = EdgeOptimizer(config)
+# Live constructor takes no config arg; register devices after init
+optimizer = EdgeOptimizer()
+optimizer.register_device(config)
 
-# Optimize model
-model_opt = optimizer.optimize_model(250.0)
-print(model_opt)
+# Optimize streaming for a registered device_id
+# (no optimize_model / add_to_cache / get_from_cache on tip)
+streaming = optimizer.optimize_streaming("edge_001")
+print(streaming)
 
-# Optimize streaming
-streaming_config = optimizer.optimize_streaming(320)
-print(streaming_config)
-
-# Cache data
-optimizer.add_to_cache("track_001", {"title": "Test"}, 5.0)
-data = optimizer.get_from_cache("track_001")
+stats = optimizer.get_statistics()
+print(stats)
 ```
