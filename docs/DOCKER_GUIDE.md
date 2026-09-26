@@ -105,7 +105,7 @@ docker compose ps
 - **Port**: 8001 (API), 3000 (alt)
 - **Purpose**: Main radio application
 - **API**: http://localhost:8001/playlist.json
-- **Health**: http://localhost:8001/status
+- **Healthcheck**: http://localhost:8001/playlist.json (matches live Dockerfile/compose; no `/status` route)
 
 #### 3. PostgreSQL
 - **Port**: 5432
