@@ -1,14 +1,18 @@
 # Deployment
 
-This guide covers deploying QFZZ documentation to Firebase and setting up CI/CD.
+This guide covers building QFZZ documentation, optional local Firebase Hosting,
+and the tip GitHub Actions workflow for Cloudflare Pages.
 
-## Firebase Hosting Setup
+## Firebase Hosting Setup (manual)
+
+Tip still ships `firebase.json` / `.firebaserc` for optional local hosting deploys.
+There is **no** tip GitHub Actions workflow that deploys docs to Firebase.
 
 ### Prerequisites
 
 - Firebase CLI installed
 - Firebase project created
-- GitHub repository access
+- Access to the `qfzz-radio` Firebase project (or your own)
 
 ### 1. Install Firebase CLI
 
@@ -33,7 +37,7 @@ Select:
 - Use existing project: `qfzz-radio`
 - Public directory: `site`
 - Configure as single-page app: No
-- Set up automatic builds: No (we'll use GitHub Actions)
+- Set up automatic builds: No (tip CI/CD uses Cloudflare Pages — see below)
 
 ### 4. Build Documentation
 
@@ -58,75 +62,48 @@ firebase deploy --only hosting
 
 Your documentation will be available at: `https://qfzz-radio.web.app`
 
-## GitHub Actions CI/CD
+## GitHub Actions CI/CD (Cloudflare Pages)
 
-### Setup Firebase Service Account
+### Required GitHub Secrets
 
-1. Go to Firebase Console
-2. Project Settings → Service Accounts
-3. Generate new private key
-4. Save as JSON
-
-### Add to GitHub Secrets
+Tip's docs deploy workflow expects:
 
 1. Go to your GitHub repository
 2. Settings → Secrets and variables → Actions
-3. Add secret: `FIREBASE_SERVICE_ACCOUNT`
-4. Paste the JSON content
+3. Add secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
 
 ### Workflow Configuration
 
-The workflow is already configured in `.github/workflows/deploy-docs.yml`:
+The workflow on tip is `.github/workflows/deploy-cloudflare-pages.yml`
+(not a phantom `deploy-docs.yml` / Firebase Action):
 
 ```yaml
-name: Deploy Documentation
+name: Deploy Docs to Cloudflare Pages
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'docs/**'
-      - 'mkdocs.yml'
-      - 'qfzz/**'
   workflow_dispatch:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.9'
-
-      - name: Install dependencies
-        run: |
-          pip install mkdocs-material mkdocstrings[python] pymdown-extensions
-
-      - name: Build documentation
-        run: mkdocs build
-
-      - name: Deploy to Firebase
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          channelId: live
-          projectId: qfzz-radio
+    uses: fuzzywigg/project-template/.github/workflows/reusable-pages-static.yml@main
+    with:
+      project_name: qfzz-pappas-work
+      output_dir: 'site'
+      build_command: 'python -m pip install --upgrade pip && python -m pip install mkdocs-material "mkdocstrings[python]" && mkdocs build --site-dir site'
+      production_branch: 'main'
+    secrets:
+      CLOUDFLARE_API_TOKEN:  ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 ```
 
 ### Trigger Deployment
 
-Push to main branch to automatically deploy:
+On tip this workflow is **manual** (`workflow_dispatch` only — no push-to-`main` auto-deploy):
 
-```bash
-git add .
-git commit -m "Update documentation"
-git push origin main
-```
+1. GitHub → Actions → **Deploy Docs to Cloudflare Pages**
+2. Run workflow
+
+For broader Cloudflare DNS / Pages context, see [CLOUDFLARE_DEPLOYMENT.md](CLOUDFLARE_DEPLOYMENT.md).
 
 ## Production Deployment
 
@@ -390,12 +367,15 @@ Before deploying to production:
 - [ ] Backup strategy in place
 - [ ] Security review completed
 - [ ] Performance tested
-- [ ] Firebase credentials secured
-- [ ] CI/CD pipeline tested
+- [ ] Firebase credentials secured (only if using manual Firebase Hosting)
+- [ ] Cloudflare Pages secrets set (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`) when using tip Actions
+- [ ] CI/CD pipeline tested (`workflow_dispatch` on `deploy-cloudflare-pages.yml`)
 
 ## Resources
 
 - [MkDocs Documentation](https://www.mkdocs.org/)
-- [Firebase Hosting](https://firebase.google.com/docs/hosting)
+- [Firebase Hosting](https://firebase.google.com/docs/hosting) (manual optional path on tip)
+- [CLOUDFLARE_DEPLOYMENT.md](CLOUDFLARE_DEPLOYMENT.md) (tip Pages / DNS context)
+- Tip workflow: [`.github/workflows/deploy-cloudflare-pages.yml`](../.github/workflows/deploy-cloudflare-pages.yml)
 - [GitHub Actions](https://docs.github.com/en/actions)
 - [QFZZ Repository](https://github.com/fuzzywigg/QFZZ)
