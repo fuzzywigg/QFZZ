@@ -258,26 +258,29 @@ edge_datasets = manager.get_edge_optimized_datasets(max_size_mb=100)
 ### Edge Device Optimization
 
 ```python
-from qfzz.edge import EdgeOptimizer, EdgeDeviceConfig
+from qfzz.edge import EdgeOptimizer
+from qfzz.edge.config import DeviceType, EdgeDeviceConfig, NetworkType
 
-# Configure edge device
+# Kwargs match live qfzz.edge.config.EdgeDeviceConfig
+# (not the orphan qfzz.edge.device_config schema; no max_memory_mb=/enable_6g=)
 config = EdgeDeviceConfig(
     device_id="edge_001",
-    device_type="smartphone",
-    max_memory_mb=512,
-    max_model_size_mb=100,
-    enable_6g=True,
-    network_bandwidth_mbps=1000
+    device_type=DeviceType.SMARTPHONE,
+    network_type=NetworkType.WIFI,
+    bandwidth_mbps=10.0,
+    memory_mb=512,
+    battery_powered=True,
+    battery_level=0.8,
 )
 
-# Create optimizer
-optimizer = EdgeOptimizer(config)
+# Live constructor takes no config arg; register devices after init
+optimizer = EdgeOptimizer()
+optimizer.register_device(config)
 
-# Optimize model for edge deployment
-optimization = optimizer.optimize_model(250.0)
-
-# Get streaming configuration
-streaming = optimizer.optimize_streaming(320)
+# Optimize streaming for a registered device_id
+# (no optimize_model on tip)
+streaming = optimizer.optimize_streaming("edge_001")
+print(streaming)
 ```
 
 ### Blockchain Trust Network
