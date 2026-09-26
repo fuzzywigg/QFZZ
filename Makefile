@@ -33,7 +33,7 @@ format:
 	isort qfzz/ tests/
 
 run:
-	python -m qfzz.main
+	python run_server.py
 
 deploy:
 	firebase deploy --only hosting
