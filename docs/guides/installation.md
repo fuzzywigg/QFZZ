@@ -632,7 +632,7 @@ services:
       - ./config:/app/config
     ports:
       - "8000:8000"
-    command: python app.py
+    command: python run_server.py
 
   # Optional: Add Redis for caching
   redis:
