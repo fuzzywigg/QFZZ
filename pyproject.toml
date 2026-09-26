@@ -51,8 +51,7 @@ dev = [
 Homepage = "https://github.com/fuzzywigg/QFZZ"
 Repository = "https://github.com/fuzzywigg/QFZZ"
 
-[project.scripts]
-qfzz = "qfzz.main:run"
+# Entry points: use root `run_server.py` / `main.py` (no qfzz.main module).
 
 [tool.setuptools.packages.find]
 include = ["qfzz*"]
