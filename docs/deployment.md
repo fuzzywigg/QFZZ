@@ -85,7 +85,7 @@ on:
 
 jobs:
   deploy:
-    uses: fuzzywigg/project-template/.github/workflows/reusable-pages-static.yml@main
+    uses: fuzzywigg/project-template/.github/workflows/reusable-pages-static.yml@v1.0.0
     with:
       project_name: qfzz-pappas-work
       output_dir: 'site'
