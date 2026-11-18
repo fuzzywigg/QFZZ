@@ -8,7 +8,6 @@ import logging
 import urllib.error
 import urllib.request
 from abc import ABC, abstractmethod
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +16,7 @@ class LLMProvider(ABC):
     """Abstract base class for LLM providers."""
 
     @abstractmethod
-    def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
+    def generate(self, prompt: str, system_prompt: str | None = None) -> str:
         """Generate text from a prompt."""
         pass
 
@@ -30,7 +29,7 @@ class LLMProvider(ABC):
 class MockLLMClient(LLMProvider):
     """Fallback LLM that returns static responses."""
 
-    def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
+    def generate(self, prompt: str, system_prompt: str | None = None) -> str:
         return (
             f"I'm a placeholder DJ. I heard you say: '{prompt}'. (Connect a real LLM to hear more!)"
         )
@@ -61,7 +60,7 @@ class OllamaClient(LLMProvider):
     def is_available(self) -> bool:
         return self._available
 
-    def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
+    def generate(self, prompt: str, system_prompt: str | None = None) -> str:
         if not self._available:
             return "Ollama is not connected."
 
@@ -111,7 +110,7 @@ class GeminiClient(LLMProvider):
     def is_available(self) -> bool:
         return self._available
 
-    def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
+    def generate(self, prompt: str, system_prompt: str | None = None) -> str:
         if not self._available:
             return "Gemini API is not available."
 

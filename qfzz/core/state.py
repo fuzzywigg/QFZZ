@@ -6,6 +6,7 @@ Thread-safe operations with schema validation.
 """
 
 import json
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -67,24 +68,41 @@ class StateManager:
         """Get lock file path for a given file."""
         return filepath.parent / f".{filepath.name}.lock"
 
+    def _load_json(self, filepath: Path) -> Any:
+        """Read JSON without taking the file lock."""
+        if not filepath.exists():
+            return None
+
+        with open(filepath) as f:
+            return json.load(f)
+
+    def _dump_json(self, filepath: Path, data: Any) -> None:
+        """Write JSON without taking the file lock."""
+        with open(filepath, "w") as f:
+            json.dump(data, f, indent=2, default=str)
+
     def _read_file(self, filepath: Path) -> Any:
         """Read JSON file with file locking."""
-        lock_path = self._get_lock_path(filepath)
+        with FileLock(self._get_lock_path(filepath), timeout=10):
+            return self._load_json(filepath)
 
-        with FileLock(lock_path, timeout=10):
-            if not filepath.exists():
-                return None
-
-            with open(filepath) as f:
-                return json.load(f)
-
-    def _write_file(self, filepath: Path, data: Any):
+    def _write_file(self, filepath: Path, data: Any) -> None:
         """Write JSON file with file locking."""
-        lock_path = self._get_lock_path(filepath)
+        with FileLock(self._get_lock_path(filepath), timeout=10):
+            self._dump_json(filepath, data)
 
-        with FileLock(lock_path, timeout=10):
-            with open(filepath, "w") as f:
-                json.dump(data, f, indent=2, default=str)
+    def _mutate_file(self, filepath: Path, mutator: Callable[[Any], Any]) -> Any:
+        """Read, mutate, and write JSON while holding a single file lock.
+
+        Separate read and write locks drop concurrent updates: another writer
+        can commit between them. Callers that append or edit existing state
+        use this so the whole change is atomic.
+        """
+        with FileLock(self._get_lock_path(filepath), timeout=10):
+            data = self._load_json(filepath)
+            result = mutator(data)
+            self._dump_json(filepath, data)
+            return result
 
     def _validate_schema(self, data: Any, schema_name: str) -> bool:
         """
@@ -129,7 +147,7 @@ class StateManager:
             genre: Music genre
             duration: Track duration in seconds
         """
-        track_data = {
+        track_data: dict[str, Any] = {
             "track_id": track_id,
             "title": title,
             "artist": artist,
@@ -167,7 +185,6 @@ class StateManager:
             artist: Artist name
             priority: Priority level (0-10, higher is more important)
         """
-        playlist = self.get_playlist()
         track = {
             "track_id": track_id,
             "title": title,
@@ -176,8 +193,10 @@ class StateManager:
             "added_at": datetime.utcnow().isoformat(),
         }
 
-        playlist["queue"].append(track)
-        self.update_playlist(playlist["queue"])
+        def append_track(playlist: dict[str, list[dict[str, Any]]]) -> None:
+            playlist["queue"].append(track)
+
+        self._mutate_file(self.honeycomb_dir / "playlist.json", append_track)
 
     # Listener State Operations
     def get_listener_state(self) -> dict[str, Any]:
@@ -186,9 +205,11 @@ class StateManager:
 
     def update_listener_count(self, count: int) -> None:
         """Update active listener count."""
-        state = self.get_listener_state()
-        state["active_listeners"] = count
-        self._write_file(self.honeycomb_dir / "listener_state.json", state)
+
+        def set_count(state: dict[str, Any]) -> None:
+            state["active_listeners"] = count
+
+        self._mutate_file(self.honeycomb_dir / "listener_state.json", set_count)
 
     def add_listener_request(self, listener_id: str, request_type: str, content: str) -> None:
         """
@@ -199,7 +220,6 @@ class StateManager:
             request_type: Type of request (e.g., 'song_request', 'shoutout', 'question')
             content: Request content
         """
-        state = self.get_listener_state()
         request = {
             "request_id": f"{listener_id}_{datetime.utcnow().timestamp()}",
             "listener_id": listener_id,
@@ -208,13 +228,12 @@ class StateManager:
             "timestamp": datetime.utcnow().isoformat(),
         }
 
-        state["recent_requests"].append(request)
+        def append_request(state: dict[str, Any]) -> None:
+            state["recent_requests"].append(request)
+            if len(state["recent_requests"]) > 100:
+                state["recent_requests"] = state["recent_requests"][-100:]
 
-        # Keep only last 100 requests
-        if len(state["recent_requests"]) > 100:
-            state["recent_requests"] = state["recent_requests"][-100:]
-
-        self._write_file(self.honeycomb_dir / "listener_state.json", state)
+        self._mutate_file(self.honeycomb_dir / "listener_state.json", append_request)
 
     # Task Operations
     def get_tasks(self) -> dict[str, list[dict[str, Any]]]:
@@ -238,7 +257,6 @@ class StateManager:
         if task_id is None:
             task_id = f"task_{datetime.utcnow().timestamp()}"
 
-        tasks = self.get_tasks()
         task = {
             "task_id": task_id,
             "action": action,
@@ -247,8 +265,10 @@ class StateManager:
             "status": "pending",
         }
 
-        tasks["pending"].append(task)
-        self._write_file(self.honeycomb_dir / "tasks.json", tasks)
+        def append_task(tasks: dict[str, list[dict[str, Any]]]) -> None:
+            tasks["pending"].append(task)
+
+        self._mutate_file(self.honeycomb_dir / "tasks.json", append_task)
 
         return task_id
 
@@ -263,15 +283,18 @@ class StateManager:
         Returns:
             True if task was found and updated, False otherwise
         """
-        tasks = self.get_tasks()
+        found = False
 
-        for task in tasks["pending"]:
-            if task["task_id"] == task_id:
-                task["status"] = status
-                self._write_file(self.honeycomb_dir / "tasks.json", tasks)
-                return True
+        def set_status(tasks: dict[str, list[dict[str, Any]]]) -> None:
+            nonlocal found
+            for task in tasks["pending"]:
+                if task["task_id"] == task_id:
+                    task["status"] = status
+                    found = True
+                    return
 
-        return False
+        self._mutate_file(self.honeycomb_dir / "tasks.json", set_status)
+        return found
 
     # DJ Memory Operations
     def get_dj_memory(self) -> dict[str, Any]:
@@ -286,17 +309,14 @@ class StateManager:
             role: Speaker role ('dj', 'listener', 'system')
             content: Message content
         """
-        memory = self.get_dj_memory()
-
         entry = {"timestamp": datetime.utcnow().isoformat(), "role": role, "content": content}
 
-        memory["conversation_history"].append(entry)
+        def append_entry(memory: dict[str, Any]) -> None:
+            memory["conversation_history"].append(entry)
+            if len(memory["conversation_history"]) > 1000:
+                memory["conversation_history"] = memory["conversation_history"][-1000:]
 
-        # Keep only last 1000 messages
-        if len(memory["conversation_history"]) > 1000:
-            memory["conversation_history"] = memory["conversation_history"][-1000:]
-
-        self._write_file(self.honeycomb_dir / "dj_memory.json", memory)
+        self._mutate_file(self.honeycomb_dir / "dj_memory.json", append_entry)
 
     def update_learned_pattern(self, pattern_key: str, pattern_data: Any) -> None:
         """
@@ -306,9 +326,11 @@ class StateManager:
             pattern_key: Pattern identifier
             pattern_data: Pattern data
         """
-        memory = self.get_dj_memory()
-        memory["learned_patterns"][pattern_key] = pattern_data
-        self._write_file(self.honeycomb_dir / "dj_memory.json", memory)
+
+        def set_pattern(memory: dict[str, Any]) -> None:
+            memory["learned_patterns"][pattern_key] = pattern_data
+
+        self._mutate_file(self.honeycomb_dir / "dj_memory.json", set_pattern)
 
 
 # Convenience functions for common operations

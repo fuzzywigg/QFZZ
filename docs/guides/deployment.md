@@ -1502,8 +1502,8 @@ cursor.execute(
 ## Next Steps
 
 1. **[Configuration Guide](configuration.md)** - Configure your deployment
-2. **[Monitoring Guide](../monitoring.md)** - Set up monitoring
-3. **[Security Guide](../security.md)** - Additional security hardening
+2. **[Monitoring Guide](../deployment.md#monitoring)** - Set up monitoring
+3. **[Security Guide](quantum-security.md)** - Additional security hardening
 
 ## Support
 

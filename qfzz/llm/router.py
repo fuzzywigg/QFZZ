@@ -5,7 +5,7 @@ Manages multiple LLM providers with automatic fallback and health checks.
 
 import logging
 import time
-from typing import Any, Optional
+from typing import Any
 
 from qfzz.config.settings import get_config
 from qfzz.exceptions import LLMProviderError
@@ -150,7 +150,7 @@ class LLMRouter:
             return False
 
     def generate(
-        self, prompt: str, system_prompt: Optional[str] = None, max_tokens: int = 500
+        self, prompt: str, system_prompt: str | None = None, max_tokens: int = 500
     ) -> dict[str, Any]:
         """
         Generate text using the first available provider.
@@ -163,7 +163,7 @@ class LLMRouter:
         Returns:
             Dictionary with 'text' and 'provider' keys
         """
-        last_error = None
+        last_error: Exception | None = None
 
         for provider_info in self.providers:
             provider_name = provider_info["name"]
@@ -230,7 +230,7 @@ class LLMRouter:
         Returns:
             Dictionary with provider status information
         """
-        status = {
+        status: dict[str, Any] = {
             "total_providers": len(self.providers),
             "available_providers": [],
             "unavailable_providers": [],

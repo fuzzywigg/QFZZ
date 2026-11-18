@@ -4,20 +4,19 @@ Personalized DJ with user profiling and recommendations.
 
 import logging
 import random
+from collections.abc import Iterable
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
+from qfzz.blockchain import SovereignLedger
 from qfzz.knowledge import QFZZKnowledgeGraph
+from qfzz.library import ContentScanner
+from qfzz.library.fetcher import ContentFetcher
 from qfzz.llm.router import LLMRouter
 
 from .profiles import UserProfile
 
 logger = logging.getLogger(__name__)
-
-
-from qfzz.blockchain import SovereignLedger
-from qfzz.library import ContentScanner
-from qfzz.library.fetcher import ContentFetcher
 
 
 class PersonalizedDJ:
@@ -26,7 +25,7 @@ class PersonalizedDJ:
     tailored playlists with trust-based content filtering.
     """
 
-    def __init__(self, llm_model: str = "llama3", api_key: Optional[str] = None):
+    def __init__(self, llm_model: str = "llama3", api_key: str | None = None):
         """
         Initialize the Personalized DJ.
 
@@ -56,7 +55,7 @@ class PersonalizedDJ:
                 "llm_model and api_key parameters are deprecated. Use environment variables instead."
             )
 
-    def request_track(self, url: str) -> Optional[dict[str, Any]]:
+    def request_track(self, url: str) -> dict[str, Any] | None:
         """Download and register a track from a URL."""
         track = self.fetcher.fetch_from_url(url)
         if track:
@@ -94,9 +93,7 @@ class PersonalizedDJ:
         result = self.llm_router.generate(message, system_prompt=context, max_tokens=200)
         return result["text"]
 
-    def generate_segue(
-        self, track_prev: Optional[dict[str, Any]], track_next: dict[str, Any]
-    ) -> str:
+    def generate_segue(self, track_prev: dict[str, Any] | None, track_next: dict[str, Any]) -> str:
         """
         Generate a radio segue connecting two tracks using Knowledge Graph context.
         """
@@ -174,7 +171,7 @@ class PersonalizedDJ:
         }
 
     def get_or_create_profile(
-        self, user_id: str, initial_preferences: Optional[dict[str, Any]] = None
+        self, user_id: str, initial_preferences: dict[str, Any] | None = None
     ) -> UserProfile:
         """
         Get existing user profile or create a new one.
@@ -211,7 +208,7 @@ class PersonalizedDJ:
         return self._user_profiles[user_id]
 
     def recommend(
-        self, user_id: str, preferences: Optional[dict[str, Any]] = None
+        self, user_id: str, preferences: dict[str, Any] | None = None
     ) -> list[dict[str, Any]]:
         """
         Generate personalized recommendations for a user.
@@ -296,7 +293,7 @@ class PersonalizedDJ:
         self,
         track: dict[str, Any],
         profile: UserProfile,
-        preferences: Optional[dict[str, Any]] = None,
+        preferences: dict[str, Any] | None = None,
     ) -> float:
         """
         Calculate compatibility score for a track.
@@ -316,7 +313,7 @@ class PersonalizedDJ:
         genre_weight = 0.3
         if track.get("genre") in profile.genres:
             score += profile.genres[track["genre"]] * genre_weight
-        elif track.get("genre") in self._get_similar_genres(profile.genres.keys()):
+        elif track.get("genre") in self._get_similar_genres(profile.genres):
             score += 0.5 * genre_weight
         weights_sum += genre_weight
 
@@ -352,12 +349,12 @@ class PersonalizedDJ:
 
         return min(1.0, max(0.0, score))
 
-    def _get_similar_genres(self, genres: list[str]) -> list[str]:
+    def _get_similar_genres(self, genres: Iterable[str]) -> list[str]:
         """
         Get similar genres based on genre similarity mappings.
 
         Args:
-            genres: List of genre names
+            genres: Genre names to expand
 
         Returns:
             List of similar genres
@@ -406,7 +403,7 @@ class PersonalizedDJ:
         return recommendations
 
     def record_feedback(
-        self, user_id: str, track_id: str, interaction_type: str, rating: Optional[float] = None
+        self, user_id: str, track_id: str, interaction_type: str, rating: float | None = None
     ) -> None:
         """
         Record user feedback to improve recommendations.
@@ -434,7 +431,7 @@ class PersonalizedDJ:
         logger.debug(f"Recorded feedback for user {user_id}: {interaction_type} on {track_id}")
 
     def _update_profile_from_feedback(
-        self, profile: UserProfile, track_id: str, interaction_type: str, rating: Optional[float]
+        self, profile: UserProfile, track_id: str, interaction_type: str, rating: float | None
     ) -> None:
         """
         Update user profile based on feedback.
@@ -502,7 +499,7 @@ class PersonalizedDJ:
         self._content_catalog.extend(tracks)
         logger.info(f"Added {len(tracks)} tracks to catalog. Total: {len(self._content_catalog)}")
 
-    def get_profile(self, user_id: str) -> Optional[UserProfile]:
+    def get_profile(self, user_id: str) -> UserProfile | None:
         """
         Get user profile.
 

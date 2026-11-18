@@ -152,7 +152,7 @@ class QFZZKnowledgeGraph:
         if not self.graph.has_node(track_id):
             return []
 
-        related_scores = {}
+        related_scores: dict[Any, float] = {}
 
         # 1. Direct Neighbors (Outgoing)
         for neighbor in self.graph.successors(track_id):

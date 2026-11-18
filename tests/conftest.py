@@ -5,16 +5,13 @@ Provides reusable fixtures for state management, LLM routing, and test utilities
 """
 
 import json
-import os
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import pytest
 
 from qfzz.core.llm_router import LLMResponse, LLMRouter
 from qfzz.core.state import StateManager
-
 
 # ============================================================================
 # Honeycomb State Fixtures
@@ -101,6 +98,7 @@ def mock_llm_router(mock_env, temp_config):
                 latency=0.5,
                 success=True,
             )
+
         return mock_call
 
     router._call_google = create_mock_response("google", "gemini-2.0-flash-exp", 0.000075)
@@ -115,18 +113,22 @@ def mock_llm_router(mock_env, temp_config):
 @pytest.fixture
 def mock_file_corruption():
     """Mock file corruption for testing error recovery."""
+
     def corrupt_json_file(filepath):
         with open(filepath, "w") as f:
             f.write("{invalid json content")
+
     return corrupt_json_file
 
 
 @pytest.fixture
 def assert_no_secrets_in_output():
     """Fixture to verify no secrets leak in output."""
+
     def checker(output: str, secrets: list):
         for secret in secrets:
             assert secret not in output, f"Secret '{secret}' found in output!"
+
     return checker
 
 
