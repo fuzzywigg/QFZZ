@@ -3,11 +3,13 @@ QFZZ Exception Hierarchy.
 Provides structured error handling throughout the application.
 """
 
+from typing import Any
 
-class QFZZException(Exception):
+
+class QFZZError(Exception):
     """Base exception for all QFZZ errors."""
 
-    def __init__(self, message: str, details: dict = None):
+    def __init__(self, message: str, details: dict[str, Any] | None = None):
         """
         Initialize QFZZ exception.
 
@@ -26,7 +28,11 @@ class QFZZException(Exception):
         return self.message
 
 
-class AudioProcessingError(QFZZException):
+# Historical import name for the base type.
+QFZZException = QFZZError
+
+
+class AudioProcessingError(QFZZError):
     """Raised when audio processing fails."""
 
     pass
@@ -50,7 +56,7 @@ class AudioFormatError(AudioProcessingError):
     pass
 
 
-class LLMProviderError(QFZZException):
+class LLMProviderError(QFZZError):
     """Base class for LLM provider errors."""
 
     pass
@@ -80,7 +86,7 @@ class LLMRateLimitError(LLMProviderError):
     pass
 
 
-class DatasetError(QFZZException):
+class DatasetError(QFZZError):
     """Base class for dataset-related errors."""
 
     pass
@@ -110,7 +116,7 @@ class DatasetLicenseError(DatasetError):
     pass
 
 
-class StreamingError(QFZZException):
+class StreamingError(QFZZError):
     """Base class for streaming-related errors."""
 
     pass
@@ -134,7 +140,7 @@ class StreamFormatError(StreamingError):
     pass
 
 
-class MusicSourceError(QFZZException):
+class MusicSourceError(QFZZError):
     """Base class for music source errors."""
 
     pass
@@ -164,7 +170,7 @@ class MusicSourceRateLimitError(MusicSourceError):
     pass
 
 
-class BlockchainError(QFZZException):
+class BlockchainError(QFZZError):
     """Base class for blockchain-related errors."""
 
     pass
@@ -182,7 +188,7 @@ class BlockchainSyncError(BlockchainError):
     pass
 
 
-class ConfigurationError(QFZZException):
+class ConfigurationError(QFZZError):
     """Raised when configuration is invalid or missing."""
 
     pass
@@ -200,7 +206,7 @@ class ConfigurationMissingError(ConfigurationError):
     pass
 
 
-class CacheError(QFZZException):
+class CacheError(QFZZError):
     """Base class for cache-related errors."""
 
     pass
@@ -224,7 +230,7 @@ class CacheCorruptedError(CacheError):
     pass
 
 
-class NetworkError(QFZZException):
+class NetworkError(QFZZError):
     """Base class for network-related errors."""
 
     pass

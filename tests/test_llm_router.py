@@ -1,13 +1,59 @@
 """Tests for QFZZ LLM Router"""
 
+import importlib
 import json
+import sys
 import tempfile
+import types
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from qfzz.core.llm_router import LLMResponse, LLMRouter
+
+
+def _optional_provider_module(module_name: str) -> types.ModuleType:
+    """Import an optional provider SDK, or install a stand-in when it is absent.
+
+    google-generativeai, anthropic, and openai are commented out of
+    requirements.txt. These tests patch those SDKs, so the modules must
+    import whether or not the packages are installed.
+    """
+    if module_name in sys.modules:
+        return sys.modules[module_name]
+    try:
+        return importlib.import_module(module_name)
+    except ModuleNotFoundError:
+        module = types.ModuleType(module_name)
+        sys.modules[module_name] = module
+        return module
+
+
+def _install_optional_provider_modules() -> None:
+    """Register importable modules for the optional LLM provider SDKs."""
+    google = _optional_provider_module("google")
+    if not hasattr(google, "__path__"):
+        google.__path__ = []
+    genai = _optional_provider_module("google.generativeai")
+    setattr(google, "generativeai", genai)
+    if not hasattr(genai, "configure"):
+        setattr(genai, "configure", MagicMock())
+    if not hasattr(genai, "GenerativeModel"):
+        setattr(genai, "GenerativeModel", MagicMock())
+    if not hasattr(genai, "types"):
+        setattr(genai, "types", MagicMock())
+
+    anthropic = _optional_provider_module("anthropic")
+    if not hasattr(anthropic, "Anthropic"):
+        setattr(anthropic, "Anthropic", MagicMock())
+
+    openai = _optional_provider_module("openai")
+    if not hasattr(openai, "OpenAI"):
+        setattr(openai, "OpenAI", MagicMock())
+
+
+_install_optional_provider_modules()
 
 
 @pytest.fixture

@@ -27,5 +27,8 @@ yt-dlp>=2026.10.21,<2027.0.0
 python-dotenv>=1.0.0,<2.0.0
 pyyaml>=6.0,<7.0
 
+# Thread-safe state files (qfzz.core.state)
+filelock>=3.0.0,<4.0.0
+
 # HTTP requests for API integration
 requests>=2.31.0,<3.0.0

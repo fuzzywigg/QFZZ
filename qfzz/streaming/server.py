@@ -3,13 +3,13 @@ Simple streaming server for QFZZ.
 """
 
 import http.server
+import json
 import logging
 import socketserver
 import threading
+from typing import Any
 
 logger = logging.getLogger(__name__)
-
-import json
 
 
 class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -18,8 +18,8 @@ class AudioRequestHandler(http.server.SimpleHTTPRequestHandler):
     # Static playlist for now - will be dynamic later
     # This needs access to the player instance, but we are inside the handler
     # For now, we'll hardcode or use a class variable
-    PAYLOAD = []
-    GRAPH_PAYLOAD = {}
+    PAYLOAD: list[dict[str, Any]] = []
+    GRAPH_PAYLOAD: dict[str, Any] = {}
     DJ_MESSAGE = {"message": "Welcome to QFZZ, the Pulse of the Quantum Realm."}
     LEDGER_STATS = {"height": 0, "status": "Waiting"}
 

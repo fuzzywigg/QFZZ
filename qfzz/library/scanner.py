@@ -7,7 +7,7 @@ import logging
 import os
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 import librosa
 import mutagen
@@ -40,7 +40,7 @@ class ContentScanner:
         self.library_path = os.path.abspath(library_path)
         os.makedirs(self.library_path, exist_ok=True)
 
-    def scan_file(self, filename: str) -> Optional[dict[str, Any]]:
+    def scan_file(self, filename: str) -> dict[str, Any] | None:
         """
         Deep analysis of a single audio file.
         Returns a rich metadata dictionary ready for the Knowledge Graph.

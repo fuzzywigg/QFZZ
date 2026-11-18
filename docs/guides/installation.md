@@ -1090,6 +1090,6 @@ Now that QFZZ is installed, proceed to:
 If you encounter issues not covered here:
 
 1. **Check [GitHub Issues](https://github.com/yourusername/qfzz/issues)**
-2. **Read the [FAQ](../faq.md)**
+2. **Read the [troubleshooting guide](../getting-started.md#troubleshooting)**
 3. **Ask in [GitHub Discussions](https://github.com/yourusername/qfzz/discussions)**
 4. **Join our [Discord Community](https://discord.gg/qfzz)**

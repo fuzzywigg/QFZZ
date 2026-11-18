@@ -4,7 +4,7 @@ Blockchain-based trust network for content verification.
 
 import logging
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from .models import Block, TrustRecord
 
@@ -48,7 +48,7 @@ class BlockchainTrustNetwork:
         content_id: str,
         creator_id: str,
         initial_score: float = 0.5,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> TrustRecord:
         """
         Add a new trust record to pending records.
@@ -114,7 +114,7 @@ class BlockchainTrustNetwork:
         record.add_report()
         logger.debug(f"Reported content: {content_id}")
 
-    def mine_pending_records(self) -> Optional[Block]:
+    def mine_pending_records(self) -> Block | None:
         """
         Mine pending records into a new block.
 
@@ -164,7 +164,7 @@ class BlockchainTrustNetwork:
 
         return 0.5  # Default neutral score
 
-    def get_trust_record(self, content_id: str, creator_id: str) -> Optional[TrustRecord]:
+    def get_trust_record(self, content_id: str, creator_id: str) -> TrustRecord | None:
         """
         Get trust record for content.
 
@@ -225,7 +225,7 @@ class BlockchainTrustNetwork:
         """Get length of the blockchain."""
         return len(self._chain)
 
-    def get_block(self, index: int) -> Optional[Block]:
+    def get_block(self, index: int) -> Block | None:
         """
         Get block by index.
 

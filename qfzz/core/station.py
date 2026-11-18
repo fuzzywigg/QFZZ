@@ -2,11 +2,20 @@
 Main QFZZ Station orchestrator.
 """
 
+from __future__ import annotations
+
 import logging
 from datetime import datetime
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from .config import StationConfig
+
+if TYPE_CHECKING:
+    from qfzz.blockchain.trust_network import BlockchainTrustNetwork
+    from qfzz.datasets.manager import DatasetManager
+    from qfzz.dj.personalized_dj import PersonalizedDJ
+    from qfzz.edge.optimizer import EdgeOptimizer
+    from qfzz.streaming.player import MusicPlayer
 
 logger = logging.getLogger(__name__)
 
@@ -32,11 +41,11 @@ class QFZZStation:
         self._listeners: dict[str, Any] = {}
 
         # Components will be initialized lazily
-        self._dj = None
-        self._dataset_manager = None
-        self._trust_network = None
-        self._edge_optimizer = None
-        self._player = None
+        self._dj: PersonalizedDJ | None = None
+        self._dataset_manager: DatasetManager | None = None
+        self._trust_network: BlockchainTrustNetwork | None = None
+        self._edge_optimizer: EdgeOptimizer | None = None
+        self._player: MusicPlayer | None = None
 
         logger.info(f"Initialized QFZZ Station: {config.station_name} ({config.station_id})")
 
@@ -93,7 +102,7 @@ class QFZZStation:
         self._edge_optimizer = None
         self._player = None
 
-    def add_listener(self, user_id: str, preferences: Optional[dict[str, Any]] = None) -> None:
+    def add_listener(self, user_id: str, preferences: dict[str, Any] | None = None) -> None:
         """
         Add a listener to the station.
 
@@ -143,15 +152,20 @@ class QFZZStation:
         user_data = self._listeners[user_id]
         preferences = user_data.get("preferences", {})
 
+        dj = self._dj
+        if dj is None:
+            raise RuntimeError("Station DJ is not initialized")
+
         # Get recommendations from DJ
-        recommendations = self._dj.recommend(user_id, preferences)
+        recommendations = dj.recommend(user_id, preferences)
 
         # Filter by trust threshold if blockchain is enabled
-        if self._trust_network:
+        trust_network = self._trust_network
+        if trust_network is not None:
             recommendations = [
                 track
                 for track in recommendations
-                if self._trust_network.get_trust_score(
+                if trust_network.get_trust_score(
                     track.get("content_id", ""), track.get("creator_id", "")
                 )
                 >= self.config.trust_threshold
@@ -167,7 +181,7 @@ class QFZZStation:
         return playlist
 
     def record_interaction(
-        self, user_id: str, track_id: str, interaction_type: str, rating: Optional[float] = None
+        self, user_id: str, track_id: str, interaction_type: str, rating: float | None = None
     ) -> None:
         """
         Record user interaction with a track.
@@ -184,8 +198,12 @@ class QFZZStation:
         if user_id not in self._listeners:
             raise ValueError(f"User {user_id} is not a listener")
 
+        dj = self._dj
+        if dj is None:
+            raise RuntimeError("Station DJ is not initialized")
+
         # Record with DJ for learning
-        self._dj.record_feedback(user_id, track_id, interaction_type, rating)
+        dj.record_feedback(user_id, track_id, interaction_type, rating)
 
         logger.debug(f"Recorded {interaction_type} for user {user_id} on track {track_id}")
 

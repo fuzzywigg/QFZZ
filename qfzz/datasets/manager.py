@@ -3,7 +3,7 @@ Dataset management with quality scoring and validation.
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from .models import Dataset, DatasetLicense
 
@@ -15,7 +15,7 @@ class DatasetManager:
     Manages music datasets with quality scoring and license validation.
     """
 
-    def __init__(self, allowed_licenses: Optional[list[str]] = None):
+    def __init__(self, allowed_licenses: list[str] | None = None):
         """
         Initialize Dataset Manager.
 
@@ -70,7 +70,7 @@ class DatasetManager:
         logger.warning(f"Dataset {dataset_id} not found")
         return False
 
-    def get_dataset(self, dataset_id: str) -> Optional[Dataset]:
+    def get_dataset(self, dataset_id: str) -> Dataset | None:
         """
         Get a dataset by ID.
 
@@ -82,7 +82,7 @@ class DatasetManager:
         """
         return self._datasets.get(dataset_id)
 
-    def list_datasets(self, min_quality: Optional[float] = None) -> list[Dataset]:
+    def list_datasets(self, min_quality: float | None = None) -> list[Dataset]:
         """
         List all datasets, optionally filtered by minimum quality.
 

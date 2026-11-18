@@ -6,7 +6,7 @@ import logging
 import os
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from .audio_tools import generate_tone
 from .server import StreamingServer
@@ -39,7 +39,7 @@ class MusicPlayer:
             port: Streaming port
         """
         self._state = PlayerState.STOPPED
-        self._current_track: Optional[dict[str, Any]] = None
+        self._current_track: dict[str, Any] | None = None
         self._playlist: list[dict[str, Any]] = []
         self._current_index = -1
         self._volume = 0.8
@@ -123,7 +123,7 @@ class MusicPlayer:
         """Update ledger stats on server."""
         self.server.set_ledger_stats(stats)
 
-    def play(self, track_index: Optional[int] = None) -> bool:
+    def play(self, track_index: int | None = None) -> bool:
         """
         Start playback.
 
@@ -275,7 +275,7 @@ class MusicPlayer:
         """Get current player state."""
         return self._state
 
-    def get_current_track(self) -> Optional[dict[str, Any]]:
+    def get_current_track(self) -> dict[str, Any] | None:
         """Get currently playing track."""
         return self._current_track
 
@@ -318,7 +318,7 @@ class MusicPlayer:
         return self._playback_history[-limit:]
 
     def _record_playback_event(
-        self, event_type: str, metadata: Optional[dict[str, Any]] = None
+        self, event_type: str, metadata: dict[str, Any] | None = None
     ) -> None:
         """
         Record a playback event.

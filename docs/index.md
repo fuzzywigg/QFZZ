@@ -235,7 +235,7 @@ QFZZ incorporates insights from:
 
 ### Contributing
 
-QFZZ is open source and welcomes contributions! See our [Contributing Guide](guides/contribution.md) for:
+QFZZ is open source and welcomes contributions! See our [Contributing Guide](contributing.md) for:
 
 - Code style guidelines
 - Development setup

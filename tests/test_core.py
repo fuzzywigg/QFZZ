@@ -1,34 +1,38 @@
 """Test suite for QFZZ core functionality"""
 
-
 from qfzz import QFZZStation, StationConfig
 
 
 def test_station_initialization():
     """Test basic station initialization"""
-    config = StationConfig(station_name="Test Station")
+    config = StationConfig(station_id="test-station", station_name="Test Station")
     station = QFZZStation(config)
     assert station.config.station_name == "Test Station"
-    assert not station.is_running
+    assert station.is_running() is False
 
 
 def test_station_start_stop():
     """Test station start and stop"""
-    station = QFZZStation()
+    config = StationConfig(station_id="test-station", station_name="Test Station")
+    station = QFZZStation(config)
     station.start()
-    assert station.is_running
+    assert station.is_running() is True
 
     station.stop()
-    assert not station.is_running
+    assert station.is_running() is False
 
 
 def test_station_status():
     """Test station status retrieval"""
-    config = StationConfig(edge_mode=True, blockchain_enabled=True)
+    config = StationConfig(
+        station_id="qfzz",
+        station_name="QFZZ",
+        enable_edge_optimization=True,
+        enable_blockchain=True,
+    )
     station = QFZZStation(config)
-    station.initialize()
 
-    status = station.get_status()
-    assert status["name"] == "QFZZ"
-    assert status["edge_mode"]
-    assert status["blockchain_enabled"]
+    status = station.get_station_stats()
+    assert status["station_name"] == "QFZZ"
+    assert status["edge_optimization_enabled"] is True
+    assert status["blockchain_enabled"] is True

@@ -301,10 +301,10 @@ Each phase is complete when:
 
 ## References
 
-- [Project Board Setup Guide](../.github/PROJECT_BOARD_SETUP.md)
-- [Architecture Documentation](../ARCHITECTURE.md)
-- [Feature Roadmap](../FEATURE_ROADMAP.md)
-- [Contributing Guide](../CONTRIBUTING.md) (if exists)
+- [Project Board Setup Guide](https://github.com/fuzzywigg/QFZZ/blob/development/.github/PROJECT_BOARD_SETUP.md)
+- [Architecture Documentation](architecture.md)
+- [Feature Roadmap](roadmap.md)
+- [Contributing Guide](contributing.md)
 
 ---
 
